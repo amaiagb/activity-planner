@@ -36,7 +36,7 @@ describe('authentication foundation', () => {
     await screen.findByRole('status')
     expect(supabaseMocks.signInWithOtp).toHaveBeenCalledWith({
       email: 'person@example.com',
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback`, shouldCreateUser: false },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback`},
     })
   })
 
