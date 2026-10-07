@@ -3,7 +3,7 @@ import { BottomNavigation } from '../components/BottomNavigation'
 
 export function AppShell() {
   const { pathname } = useLocation()
-  const isSetupRoute = pathname === '/login' || pathname === '/onboarding'
+  const isSetupRoute = pathname === '/login' || pathname === '/onboarding' || pathname === '/auth/callback'
 
   return (
     <div className="app-shell">

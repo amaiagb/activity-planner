@@ -23,6 +23,15 @@ export default defineConfig({
       }],
     },
   })],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('/node_modules/@supabase/')) return 'supabase'
+        },
+      },
+    },
+  },
   test: {
     environment: 'jsdom',
     setupFiles: './tests/setup.ts',
