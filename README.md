@@ -75,6 +75,10 @@ See:
 - `PHASE-06-HISTORY-PROFILE.md`
 - `PHASE-07-POLISH-SECURITY-DEPLOY.md`
 
+Post-MVP roadmap (start only after Phase 07's Definition of Done):
+
+- `PHASE-08-EXERCISE-CATALOG.md`
+
 Implement one phase at a time.
 
 After each phase:
