@@ -119,6 +119,69 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .measurement-values dd { margin: 0; font-weight: 700; }
 .measurement-notes { margin: 14px 0 0; color: var(--color-muted); line-height: 1.5; white-space: pre-wrap; }
 
+.planner-page { max-width: 760px; }
+.planner-heading { align-items: flex-end; margin-bottom: 20px; }
+.planner-heading h1 { margin-bottom: 7px; }
+.planner-heading .page-intro { margin: 0; }
+.plan-card { padding: clamp(22px, 5vw, 34px); }
+.workout-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.workout-card-heading h2 { margin: 0; font-size: clamp(1.4rem, 5vw, 2rem); letter-spacing: -0.04em; }
+.duration-pill { flex: 0 0 auto; border-radius: 999px; background: color-mix(in srgb, var(--color-accent) 36%, var(--color-surface)); padding: 8px 12px; font-weight: 750; }
+.workout-preview-list { display: grid; gap: 12px; margin: 26px 0; padding-left: 28px; line-height: 1.4; }
+.workout-preview-list li { padding-left: 4px; }
+.empty-state-card { display: grid; justify-items: start; gap: 10px; padding: clamp(24px, 6vw, 42px); }
+.empty-state-card h2, .empty-state-card p { margin: 0; }
+.empty-state-card p { max-width: 48ch; color: var(--color-muted); line-height: 1.55; }
+.rest-icon { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 15px; background: color-mix(in srgb, var(--color-accent) 36%, var(--color-surface)); font-size: 1.4rem; }
+.planner-action { margin-top: 12px; }
+.week-list { display: grid; gap: 12px; margin-top: 22px; }
+.week-day-card { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 18px 20px; }
+.week-day-card.is-completed { border-width: 2px; border-color: #789344; }
+.week-day-date { display: grid; gap: 4px; }
+.week-day-date span { font-weight: 750; }
+.week-day-date time, .week-day-detail p { color: var(--color-muted); font-size: 0.86rem; }
+.week-day-detail h2 { margin: 5px 0; font-size: 1rem; }
+.week-day-detail p { margin: 5px 0 0; line-height: 1.45; }
+.day-status { display: inline-flex; border: 1px solid var(--color-border); border-radius: 999px; padding: 4px 9px; font-size: 0.72rem; font-weight: 750; }
+.status-completed { border-color: #789344; background: color-mix(in srgb, #a9c478 22%, var(--color-surface)); }
+.status-skipped { background: color-mix(in srgb, #e9bc78 18%, var(--color-surface)); }
+.status-planned { background: color-mix(in srgb, var(--color-accent) 25%, var(--color-surface)); }
+.week-day-actions { justify-content: flex-end; }
+.week-day-actions .button { min-height: 42px; padding: 8px 12px; }
+.dialog-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; background: rgb(8 18 14 / 54%); padding: 20px; }
+.confirm-dialog { width: min(100%, 440px); padding: 26px; }
+.confirm-dialog h2 { margin-top: 0; }
+.confirm-dialog p { color: var(--color-muted); line-height: 1.55; }
+.workout-start-card { display: grid; justify-items: start; gap: 12px; }
+.workout-start-card p { margin: 0; color: var(--color-muted); line-height: 1.55; }
+.progress-copy { color: var(--color-muted); }
+.execution-list { display: grid; gap: 12px; margin: 20px 0; padding: 0; list-style: none; }
+.exercise-execution-card { padding: 20px; }
+.exercise-finished { border-color: color-mix(in srgb, #789344 45%, var(--color-border)); }
+.exercise-execution-heading { display: flex; align-items: center; gap: 12px; }
+.exercise-number { display: grid; width: 36px; height: 36px; flex: 0 0 36px; place-items: center; border-radius: 12px; background: color-mix(in srgb, var(--color-accent) 33%, var(--color-surface)); font-weight: 800; }
+.exercise-execution-heading h2 { margin: 0; font-size: 1.05rem; }
+.exercise-execution-heading p { margin: 5px 0 0; color: var(--color-muted); font-size: 0.88rem; }
+.exercise-state { margin-left: auto; border-radius: 999px; background: color-mix(in srgb, #a9c478 22%, var(--color-surface)); padding: 5px 9px; font-size: 0.75rem; font-weight: 750; }
+.exercise-rest, .exercise-equipment { margin: 12px 0 0 48px; color: var(--color-muted); font-size: 0.85rem; }
+.exercise-instructions { margin: 14px 0 0 48px; line-height: 1.55; }
+.exercise-instructions summary { cursor: pointer; font-weight: 700; }
+.exercise-instructions p { color: var(--color-muted); }
+.exercise-actions { margin: 17px 0 0 48px; }
+.completion-form { display: grid; gap: 11px; }
+.completion-form h2, .completion-form p { margin: 0; }
+.completion-form p { color: var(--color-muted); }
+.completion-form .field-label:not(:first-child) { margin-top: 4px; }
+.completion-form textarea { width: 100%; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); padding: 11px 13px; color: var(--color-ink); }
+
+@media (max-width: 680px) {
+  .week-day-card { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .week-day-date { grid-template-columns: 1fr auto; align-items: center; }
+  .week-day-actions { justify-content: flex-start; }
+  .planner-heading { align-items: flex-start; flex-direction: column; }
+  .planner-heading .button { width: 100%; }
+}
+
 @media (min-width: 700px) {
   .main-content { padding-top: 56px; }
   .bottom-navigation { right: 50%; bottom: 24px; left: auto; width: min(520px, calc(100% - 48px)); transform: translateX(50%); border: 1px solid var(--color-border); border-radius: 20px; box-shadow: var(--shadow-card); }
