@@ -89,6 +89,22 @@ describe('authentication foundation', () => {
     expect(screen.queryByRole('heading', { name: 'History' })).not.toBeInTheDocument()
   })
 
+  it('redirects unauthenticated users away from the exercise catalogue', async () => {
+    window.history.pushState({}, '', '/exercises')
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Exercises' })).not.toBeInTheDocument()
+  })
+
+  it('redirects unauthenticated users away from exercise tutorials', async () => {
+    window.history.pushState({}, '', '/exercises/exercise-id')
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Exercises' })).not.toBeInTheDocument()
+  })
+
   it('requires authentication before profile onboarding', async () => {
     window.history.pushState({}, '', '/onboarding')
     render(<App />)

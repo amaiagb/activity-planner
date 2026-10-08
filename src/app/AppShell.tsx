@@ -4,10 +4,11 @@ import { BottomNavigation } from '../components/BottomNavigation'
 export function AppShell() {
   const { pathname } = useLocation()
   const isSetupRoute = pathname === '/login' || pathname === '/onboarding'
+  const isExerciseDetail = /^\/exercises\/[^/]+/.test(pathname)
 
   return (
     <div className="app-shell">
-      <header className="topbar">
+      <header className="topbar" inert={isExerciseDetail || undefined} aria-hidden={isExerciseDetail || undefined}>
         <Link className="brand" to="/today" aria-label="Personal Fitness Planner home">
           <span className="brand-mark" aria-hidden="true">+</span>
           <span>Fitness Planner</span>
@@ -17,7 +18,7 @@ export function AppShell() {
       <main id="main-content" className="main-content" tabIndex={-1}>
         <Outlet />
       </main>
-      {!isSetupRoute && <BottomNavigation />}
+      {!isSetupRoute && <BottomNavigation inert={isExerciseDetail} />}
     </div>
   )
 }

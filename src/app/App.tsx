@@ -8,6 +8,7 @@ import { OnboardingPage } from '../features/onboarding/OnboardingPage'
 import { ProfilePage } from '../features/profile/ProfilePage'
 import { TodayPage, WeekPage, WorkoutPage } from '../features/planner/PlannerPages'
 import { HistoryPage } from '../features/history/HistoryPage'
+import { ExerciseDetailPage, ExercisesPage } from '../features/exercises/ExercisePages'
 
 export function App() {
   return (
@@ -23,6 +24,10 @@ export function App() {
             <Route path="/week" element={<RequireAuthenticated><WeekPage /></RequireAuthenticated>} />
             <Route path="/workout/:id" element={<RequireAuthenticated><WorkoutPage /></RequireAuthenticated>} />
             <Route path="/history" element={<RequireAuthenticated><HistoryPage /></RequireAuthenticated>} />
+            <Route path="/exercises" element={<RequireAuthenticated><ExercisesPage /></RequireAuthenticated>}>
+              <Route index element={null} />
+              <Route path=":exerciseId" element={<ExerciseDetailPage />} />
+            </Route>
             <Route path="*" element={<RequireAuthenticated><PlaceholderPage title="Page not found" description="The page you requested does not exist." /></RequireAuthenticated>} />
           </Route>
         </Routes>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import type { PlannedWorkout, WeeklyPlan } from '../../planner'
 import { useAuth } from '../auth/useAuth'
 import {
@@ -68,7 +68,7 @@ function PageStatus({ loading, error }: { loading: boolean; error: string | null
   return null
 }
 
-function TodayWorkout({ workout, guides, onStart }: { workout: PlannedWorkout; guides: Record<string, ExerciseGuide>; onStart: () => void }) {
+function TodayWorkout({ workout, guides, databaseExerciseIds, onStart, returnTo }: { workout: PlannedWorkout; guides: Record<string, ExerciseGuide>; databaseExerciseIds: Record<string, string>; onStart: () => void; returnTo: string }) {
   return (
     <article className="card plan-card">
       <div className="workout-card-heading">
@@ -76,7 +76,7 @@ function TodayWorkout({ workout, guides, onStart }: { workout: PlannedWorkout; g
         <span className="duration-pill">{workout.durationMinutes} min</span>
       </div>
       <ol className="workout-preview-list">
-        {workout.exercises.map((exercise, index) => <li key={`${exercise.id}-${index}`}>{guides[exercise.slug]?.name ?? exercise.name}</li>)}
+        {workout.exercises.map((exercise, index) => <li key={`${exercise.id}-${index}`}>{guides[exercise.slug]?.name ?? exercise.name}{databaseExerciseIds?.[exercise.slug] && <> · <Link to={`/exercises/${databaseExerciseIds[exercise.slug]}`} state={{ returnTo }}>Tutorial</Link></>}</li>)}
       </ol>
       <button className="button button-primary" type="button" onClick={onStart}>Start workout</button>
     </article>
@@ -86,6 +86,7 @@ function TodayWorkout({ workout, guides, onStart }: { workout: PlannedWorkout; g
 export function TodayPage() {
   const { session, state, setState, loading, error, setError, busy, setBusy } = usePlannerState()
   const navigate = useNavigate()
+  const location = useLocation()
   const today = localDate()
   const workout = state?.plan.workouts.find((item) => item.date === today)
   const unscheduled = state?.plan.unscheduledSessions.find((item) => item.date === today)
@@ -109,7 +110,7 @@ export function TodayPage() {
       <p className="eyebrow">YOUR DAILY PLAN</p>
       <div className="section-heading-row planner-heading"><div><h1 id="today-title">Today</h1><p className="page-intro">{readableDate(today)}</p></div><Link className="text-button" to="/week">View week</Link></div>
       {workout ? <>
-        <TodayWorkout workout={workout} guides={state!.context.exercises} onStart={start} />
+        <TodayWorkout workout={workout} guides={state!.context.exercises} databaseExerciseIds={state!.context.databaseExerciseIds} onStart={start} returnTo={location.pathname} />
         {workout.status === 'planned' && <button className="button button-secondary planner-action" type="button" disabled={busy} onClick={() => void changeWorkout()}>{busy ? 'Finding another workout…' : "Change today's workout"}</button>}
       </> : <article className="card empty-state-card"><span className="rest-icon" aria-hidden="true">↟</span><h2>{unscheduled ? 'No workout could be planned' : 'Rest day'}</h2><p>{unscheduled?.message ?? 'There is no workout scheduled for today. Your next planned session is in your week.'}</p><Link className="button button-secondary" to="/week">Open your week</Link></article>}
     </section>
@@ -188,6 +189,7 @@ type ActiveSession = { id: string; status: 'in_progress' | 'completed' | 'skippe
 
 export function WorkoutPage() {
   const { id } = useParams()
+  const location = useLocation()
   const { session, state, loading, error, setError, refresh } = usePlannerState()
   const [active, setActive] = useState<ActiveSession | null>(null)
   const [starting, setStarting] = useState(false)
@@ -252,7 +254,7 @@ export function WorkoutPage() {
             const guide = guides[exercise.slug]
             const finished = row?.status === 'done' || row?.status === 'skipped'
             return <li className={`card exercise-execution-card ${finished ? 'exercise-finished' : ''}`} key={`${exercise.id}-${index}`}>
-              <div className="exercise-execution-heading"><span className="exercise-number">{index + 1}</span><div><h2>{guide?.name ?? exercise.name}</h2><p>{prescription(exercise.prescribedSets, exercise.prescribedReps, exercise.prescribedDurationSeconds)}</p></div>{row?.status === 'done' ? <span className="exercise-state">Done</span> : row?.status === 'skipped' ? <span className="exercise-state">Skipped</span> : null}</div>
+              <div className="exercise-execution-heading"><span className="exercise-number">{index + 1}</span><div><h2>{guide?.name ?? exercise.name}</h2><p>{prescription(exercise.prescribedSets, exercise.prescribedReps, exercise.prescribedDurationSeconds)}</p>{state.context.databaseExerciseIds?.[exercise.slug] && <Link to={`/exercises/${state.context.databaseExerciseIds[exercise.slug]}`} state={{ returnTo: location.pathname }}>Exercise tutorial</Link>}</div>{row?.status === 'done' ? <span className="exercise-state">Done</span> : row?.status === 'skipped' ? <span className="exercise-state">Skipped</span> : null}</div>
               {exercise.restSeconds > 0 && <p className="exercise-rest">Rest {exercise.restSeconds} sec</p>}
               {guide?.equipment.length ? <p className="exercise-equipment">Equipment: {guide.equipment.map((group) => group.join(' or ')).join(' · ')}</p> : null}
               {guide?.instructions && <details className="exercise-instructions"><summary>How to do it</summary><p>{guide.instructions}</p></details>}
