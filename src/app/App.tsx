@@ -19,7 +19,7 @@ export function App() {
             <Route index element={<Navigate to="/today" replace />} />
             <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
             <Route path="/onboarding" element={<RequireAuthenticated onboardingOnly><OnboardingPage /></RequireAuthenticated>} />
-            <Route path="/auth/callback" element={<RequireAuthenticated><AuthCallbackPage /></RequireAuthenticated>} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
             <Route path="/profile" element={<RequireAuthenticated><ProfilePage /></RequireAuthenticated>} />
             <Route path="/today" element={<RequireAuthenticated><TodayPage /></RequireAuthenticated>} />
             <Route path="/week" element={<RequireAuthenticated><WeekPage /></RequireAuthenticated>} />
