@@ -6,7 +6,7 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [react(), tailwindcss(), VitePWA({
     registerType: 'autoUpdate',
-    includeAssets: ['icons/fitness.svg'],
+    includeAssets: ['icons/fitness.svg', 'icons/apple-touch-icon.png'],
     manifest: {
       name: 'Personal Fitness Planner',
       short_name: 'Fitness Planner',
@@ -20,6 +20,11 @@ export default defineConfig({
         sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'any maskable',
+      }, {
+        src: '/icons/apple-touch-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+        purpose: 'any',
       }],
     },
   })],

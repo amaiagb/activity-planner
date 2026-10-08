@@ -20,6 +20,12 @@ export type PlannerContext = {
 }
 
 type JsonRecord = Record<string, unknown>
+type DatabaseExercise = {
+  id: string; slug: string; name: string; instructions: string | null; is_outdoor: boolean
+  exercise_equipment: Array<{ requirement_group: number; equipment: { slug: string; name: string } | null }>
+}
+
+let exerciseCatalogueRequest: Promise<DatabaseExercise[]> | null = null
 
 function client() {
   if (!supabase) throw new Error('Supabase is not configured.')
@@ -34,6 +40,23 @@ function mondayOf(date = new Date()): string {
   const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate())
   monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7))
   return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`
+}
+
+function loadExerciseCatalogue(db: ReturnType<typeof client>) {
+  if (!exerciseCatalogueRequest) {
+    exerciseCatalogueRequest = Promise.resolve(db.from('exercises')
+      .select('id,slug,name,instructions,is_outdoor,exercise_equipment(requirement_group,equipment:equipment(slug,name))')
+      .eq('is_active', true)
+      .then(({ data, error }) => {
+        if (error) throw new Error(error.message)
+        return (data ?? []) as unknown as DatabaseExercise[]
+      }))
+      .catch((cause: unknown) => {
+        exerciseCatalogueRequest = null
+        throw cause
+      })
+  }
+  return exerciseCatalogueRequest
 }
 
 function mapHistory(rows: JsonRecord[]): WorkoutHistory[] {
@@ -57,25 +80,21 @@ function mapHistory(rows: JsonRecord[]): WorkoutHistory[] {
 
 export async function loadPlannerContext(userId: string): Promise<PlannerContext> {
   const db = client()
-  const [profile, availability, preferences, equipmentResult, exclusions, exerciseResult, historyResult] = await Promise.all([
+  const [profile, availability, preferences, equipmentResult, exclusions, historyResult, databaseExercises] = await Promise.all([
     db.from('profiles').select('fitness_level').eq('user_id', userId).maybeSingle(),
     db.from('availability').select('monday,tuesday,wednesday,thursday,friday,saturday,sunday,default_duration_minutes').eq('user_id', userId).maybeSingle(),
     db.from('preferences').select('likes_strength,likes_cardio,likes_walking,likes_hiit,likes_mobility,can_go_outside,outside_is_weather_dependent').eq('user_id', userId).maybeSingle(),
     db.from('user_equipment').select('equipment:equipment(slug,name)').eq('user_id', userId),
     db.from('excluded_exercises').select('exercise:exercises(slug)').eq('user_id', userId),
-    db.from('exercises').select('id,slug,name,instructions,is_outdoor,exercise_equipment(requirement_group,equipment:equipment(slug,name))').eq('is_active', true),
     db.from('workout_sessions').select('status,planned_workout:planned_workouts(workout_date,template_slug,category,intensity,muscle_groups,movement_patterns,exercises)').eq('user_id', userId).in('status', ['completed', 'skipped']).order('started_at', { ascending: false }),
+    loadExerciseCatalogue(db),
   ])
-  for (const result of [profile, availability, preferences, equipmentResult, exclusions, exerciseResult, historyResult]) throwOnError(result)
+  for (const result of [profile, availability, preferences, equipmentResult, exclusions, historyResult]) throwOnError(result)
 
   const availableEquipment = (equipmentResult.data ?? []).flatMap((item) => {
     const equipment = item.equipment as unknown as { slug: string; name: string } | null
     return equipment?.slug ? [equipment] : []
   })
-  const databaseExercises = (exerciseResult.data ?? []) as unknown as Array<{
-    id: string; slug: string; name: string; instructions: string | null; is_outdoor: boolean
-    exercise_equipment: Array<{ requirement_group: number; equipment: { slug: string; name: string } | null }>
-  }>
   const dbExerciseIds: Record<string, string> = {}
   const guides: Record<string, ExerciseGuide> = {}
   for (const exercise of databaseExercises) {

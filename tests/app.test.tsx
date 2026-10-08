@@ -48,6 +48,14 @@ describe('authentication foundation', () => {
     expect(screen.queryByRole('heading', { name: 'Profile' })).not.toBeInTheDocument()
   })
 
+  it('redirects unauthenticated users away from protected history data', async () => {
+    window.history.pushState({}, '', '/history')
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'History' })).not.toBeInTheDocument()
+  })
+
   it('requires authentication before profile onboarding', async () => {
     window.history.pushState({}, '', '/onboarding')
     render(<App />)
