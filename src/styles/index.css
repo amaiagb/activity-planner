@@ -119,6 +119,28 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .measurement-values dd { margin: 0; font-weight: 700; }
 .measurement-notes { margin: 14px 0 0; color: var(--color-muted); line-height: 1.5; white-space: pre-wrap; }
 
+.history-page { max-width: 760px; }
+.history-summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.history-summary-card { display: grid; align-content: start; gap: 9px; padding: 22px; }
+.history-summary-card h2, .history-summary-card p { margin: 0; }
+.history-summary-card h2 { font-size: 1.15rem; letter-spacing: -0.03em; }
+.history-summary-card p:not(.eyebrow), .history-summary-card span { color: var(--color-muted); line-height: 1.45; }
+.streak-summary { grid-column: 1 / -1; }
+.history-recent-section { margin-top: 34px; }
+.history-recent-section > h2 { margin: 0 0 14px; font-size: 1.45rem; letter-spacing: -0.035em; }
+.history-list { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.history-record { padding: 20px; }
+.history-record-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.history-record-heading h3 { margin: 0 0 5px; font-size: 1rem; }
+.history-record-heading time, .history-record > p { color: var(--color-muted); font-size: 0.88rem; }
+.history-record-heading > span { flex: 0 0 auto; font-weight: 750; }
+.history-record > p { margin: 12px 0 0; }
+.account-deletion-section { margin-top: 38px; border: 1px solid color-mix(in srgb, #a23b32 35%, var(--color-border)); border-radius: 18px; padding: 22px; }
+.account-deletion-section h2 { margin: 0; font-size: 1.15rem; }
+.account-deletion-section p { color: var(--color-muted); line-height: 1.55; }
+.button-danger { background: #a23b32; color: #fff; }
+.button-danger:focus-visible { outline-color: #a23b32; }
+
 .planner-page { max-width: 760px; }
 .planner-heading { align-items: flex-end; margin-bottom: 20px; }
 .planner-heading h1 { margin-bottom: 7px; }
@@ -180,6 +202,8 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
   .week-day-actions { justify-content: flex-start; }
   .planner-heading { align-items: flex-start; flex-direction: column; }
   .planner-heading .button { width: 100%; }
+  .history-summary-grid { grid-template-columns: 1fr; }
+  .streak-summary { grid-column: auto; }
 }
 
 @media (min-width: 700px) {

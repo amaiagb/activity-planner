@@ -8,6 +8,7 @@ import { PublicOnly, RequireAuthenticated } from '../features/auth/RouteGuards'
 import { OnboardingPage } from '../features/onboarding/OnboardingPage'
 import { ProfilePage } from '../features/profile/ProfilePage'
 import { TodayPage, WeekPage, WorkoutPage } from '../features/planner/PlannerPages'
+import { HistoryPage } from '../features/history/HistoryPage'
 
 export function App() {
   return (
@@ -23,7 +24,7 @@ export function App() {
             <Route path="/today" element={<RequireAuthenticated><TodayPage /></RequireAuthenticated>} />
             <Route path="/week" element={<RequireAuthenticated><WeekPage /></RequireAuthenticated>} />
             <Route path="/workout/:id" element={<RequireAuthenticated><WorkoutPage /></RequireAuthenticated>} />
-            <Route path="/history" element={<RequireAuthenticated><PlaceholderPage title="History" description="Your completed activity will appear here." /></RequireAuthenticated>} />
+            <Route path="/history" element={<RequireAuthenticated><HistoryPage /></RequireAuthenticated>} />
             <Route path="*" element={<RequireAuthenticated><PlaceholderPage title="Page not found" description="The page you requested does not exist." /></RequireAuthenticated>} />
           </Route>
         </Routes>

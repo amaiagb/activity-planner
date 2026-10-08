@@ -117,3 +117,12 @@ export async function deleteMeasurement(userId: string, id: string) {
   const { error } = await getClient().from('body_measurements').delete().eq('id', id).eq('user_id', userId)
   if (error) throw new Error(error.message)
 }
+
+export async function deleteAccount() {
+  const client = getClient()
+  const { data, error } = await client.functions.invoke('delete-account', { method: 'POST' })
+  if (error) throw new Error(error.message)
+  if (data?.deleted !== true) throw new Error('The server did not confirm account deletion.')
+  const { error: signOutError } = await client.auth.signOut({ scope: 'local' })
+  if (signOutError) throw new Error(signOutError.message)
+}

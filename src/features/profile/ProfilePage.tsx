@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { loadProfileData, saveProfileData } from '../../lib/profileData'
+import { deleteAccount, loadProfileData, saveProfileData } from '../../lib/profileData'
 import { emptyProfileForm, toProfileForm } from '../../types/profile'
 import type { ProfileData, ProfileFormValues } from '../../types/profile'
 import { useAuth } from '../auth/useAuth'
@@ -13,6 +13,7 @@ export function ProfilePage() {
   const [values, setValues] = useState<ProfileFormValues>(emptyProfileForm)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [deletingAccount, setDeletingAccount] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -63,6 +64,20 @@ export function ProfilePage() {
     if (signOutError) setError(signOutError.message)
   }
 
+  async function removeAccount() {
+    if (!window.confirm('Permanently delete your account and all of your profile, measurement, plan, and workout data? This cannot be undone.')) return
+    setError(null)
+    setNotice(null)
+    setDeletingAccount(true)
+    try {
+      await deleteAccount()
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Could not delete your account.')
+    } finally {
+      setDeletingAccount(false)
+    }
+  }
+
   if (loading) return <section className="page-content"><p role="status">Loading your profile…</p></section>
   if (!data || !session) return <section className="page-content"><p className="form-error" role="alert">{error ?? 'Profile data is unavailable.'}</p></section>
 
@@ -80,6 +95,11 @@ export function ProfilePage() {
         <button className="button button-primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save profile'}</button>
       </form>
       <MeasurementManager userId={session.user.id} measurements={data.measurements} onChanged={refresh} />
+      <section className="account-deletion-section" aria-labelledby="delete-account-title">
+        <h2 id="delete-account-title">Delete account and data</h2>
+        <p>This permanently removes your account and its saved profile, measurements, plans, and workout history.</p>
+        <button className="button button-danger" type="button" disabled={deletingAccount} onClick={() => void removeAccount()}>{deletingAccount ? 'Deleting account…' : 'Delete account permanently'}</button>
+      </section>
     </section>
   )
 }
