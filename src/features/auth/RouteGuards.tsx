@@ -33,7 +33,7 @@ export function RequireAuthenticated({ children, onboardingOnly = false }: { chi
 
 export function PublicOnly({ children }: { children: ReactNode }) {
   const { status } = useAuth()
-  if (status === 'loading') return <AuthMessage title="Loading your account" message="Checking your sign-in link…" />
+  if (status === 'loading') return <AuthMessage title="Loading your account" message="Checking your account…" />
   if (status === 'onboarding') return <Navigate to="/onboarding" replace />
   if (status === 'authenticated') return <Navigate to="/today" replace />
   return children

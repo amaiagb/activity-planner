@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from '../src/app/App'
 
 const supabaseMocks = vi.hoisted(() => ({
-  signInWithOtp: vi.fn(),
+  signInWithPassword: vi.fn(),
+  signUp: vi.fn(),
   onAuthStateChange: vi.fn(),
   getSession: vi.fn(),
 }))
@@ -20,10 +21,11 @@ describe('authentication foundation', () => {
     vi.clearAllMocks()
     supabaseMocks.onAuthStateChange.mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } })
     supabaseMocks.getSession.mockResolvedValue({ data: { session: null }, error: null })
-    supabaseMocks.signInWithOtp.mockResolvedValue({ error: null })
+    supabaseMocks.signInWithPassword.mockResolvedValue({ error: null })
+    supabaseMocks.signUp.mockResolvedValue({ data: { session: { user: { id: 'new-user' } } }, error: null })
   })
 
-  it('sends a magic link without offering account creation', async () => {
+  it('signs in with email and password', async () => {
     window.history.pushState({}, '', '/login')
     render(<App />)
 
@@ -31,13 +33,44 @@ describe('authentication foundation', () => {
     const email = screen.getByRole('textbox', { name: 'Email address' })
     expect(email).toHaveAttribute('type', 'email')
     fireEvent.change(email, { target: { value: 'person@example.com' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Send login link' }))
+    const password = screen.getByLabelText('Password')
+    expect(password).toHaveAttribute('type', 'password')
+    fireEvent.change(password, { target: { value: 'safe-password' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
 
-    await screen.findByRole('status')
-    expect(supabaseMocks.signInWithOtp).toHaveBeenCalledWith({
+    await vi.waitFor(() => expect(supabaseMocks.signInWithPassword).toHaveBeenCalledWith({
       email: 'person@example.com',
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback`},
-    })
+      password: 'safe-password',
+    }))
+  })
+
+  it('creates an account and explains when email confirmation is required', async () => {
+    supabaseMocks.signUp.mockResolvedValue({ data: { session: null }, error: null })
+    window.history.pushState({}, '', '/login')
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Create an account' }))
+    expect(await screen.findByRole('heading', { name: 'Create your account' })).toBeInTheDocument()
+    fireEvent.change(screen.getByRole('textbox', { name: 'Email address' }), { target: { value: 'new@example.com' } })
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'safe-password' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
+
+    expect(await screen.findByRole('status')).toHaveTextContent('confirm your address')
+    expect(supabaseMocks.signUp).toHaveBeenCalledWith({ email: 'new@example.com', password: 'safe-password' })
+  })
+
+  it('shows authentication errors clearly', async () => {
+    supabaseMocks.signInWithPassword.mockResolvedValue({ error: { message: 'Invalid login credentials' } })
+    window.history.pushState({}, '', '/login')
+    render(<App />)
+
+    expect(await screen.findByRole('heading', { name: 'Welcome back' })).toBeInTheDocument()
+    fireEvent.change(screen.getByRole('textbox', { name: 'Email address' }), { target: { value: 'person@example.com' } })
+    fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'wrong-password' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Invalid login credentials')
   })
 
   it('redirects unauthenticated users away from protected profile data', async () => {

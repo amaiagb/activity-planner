@@ -2,7 +2,6 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppShell } from './AppShell'
 import { PlaceholderPage } from './PlaceholderPage'
 import { AuthProvider } from '../features/auth/AuthProvider'
-import { AuthCallbackPage } from '../features/auth/AuthCallbackPage'
 import { LoginPage } from '../features/auth/LoginPage'
 import { PublicOnly, RequireAuthenticated } from '../features/auth/RouteGuards'
 import { OnboardingPage } from '../features/onboarding/OnboardingPage'
@@ -19,7 +18,6 @@ export function App() {
             <Route index element={<Navigate to="/today" replace />} />
             <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
             <Route path="/onboarding" element={<RequireAuthenticated onboardingOnly><OnboardingPage /></RequireAuthenticated>} />
-            <Route path="/auth/callback" element={<AuthCallbackPage />} />
             <Route path="/profile" element={<RequireAuthenticated><ProfilePage /></RequireAuthenticated>} />
             <Route path="/today" element={<RequireAuthenticated><TodayPage /></RequireAuthenticated>} />
             <Route path="/week" element={<RequireAuthenticated><WeekPage /></RequireAuthenticated>} />
