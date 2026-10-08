@@ -55,6 +55,7 @@ delete from public.exercises where slug = 'bodyweight_squat';
 select throws_ok(
   $$insert into public.exercises (slug, name, category) values ('phase07-unauthorized-exercise', 'Unauthorized exercise', 'test')$$,
   '42501',
+  'new row violates row-level security policy for table "exercises"',
   'Authenticated users cannot insert catalogue exercises'
 );
 
