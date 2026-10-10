@@ -6,6 +6,7 @@ import { useAuth } from '../auth/useAuth'
 import {
   completeWorkout,
   createTodayWorkout,
+  abandonWorkoutSession,
   currentWeekStart,
   getOrCreateWeeklyPlan,
   loadActiveSession,
@@ -230,6 +231,7 @@ export function WorkoutPage() {
   const { t, language } = useI18n()
   const { id } = useParams()
   const location = useLocation()
+  const navigate = useNavigate()
   const { session, state, loading, error, setError, refresh } = usePlannerState()
   const [active, setActive] = useState<ActiveSession | null>(null)
   const [starting, setStarting] = useState(false)
@@ -274,11 +276,24 @@ export function WorkoutPage() {
     finally { setFinishing(false) }
   }
 
+  async function endAsSkipped() {
+    if (!session || !active || !workout) return
+    if (!window.confirm(t('End this session without completing an exercise?'))) return
+    setFinishing(true); setError(null)
+    try {
+      await abandonWorkoutSession(session.user.id, active.id, workout)
+      await refresh()
+      navigate('/today')
+    } catch { setError('Could not save this session as skipped.') }
+    finally { setFinishing(false) }
+  }
+
   if (loading || error) return <PageStatus loading={loading} error={error ? t(error) : null} t={t} />
   if (!workout || !state) return <section className="page-content"><h1>{t('Workout unavailable')}</h1><p>{t('This workout is not part of your current weekly plan.')}</p><Link to="/week">{t('Return to your week')}</Link></section>
   const alreadyComplete = active?.status === 'completed' || workout.status === 'completed'
-  const doneCount = active?.exercise_sessions.filter((item) => item.status !== 'planned').length ?? 0
-  const allExercisesHandled = Boolean(active?.exercise_sessions.length) && doneCount === active?.exercise_sessions.length
+  const doneCount = active?.exercise_sessions.filter((item) => item.status === 'done').length ?? 0
+  const handledCount = active?.exercise_sessions.filter((item) => item.status !== 'planned').length ?? 0
+  const allExercisesHandled = Boolean(active?.exercise_sessions.length) && handledCount === active?.exercise_sessions.length
   const guides = state.context.exercises
 
   if (alreadyComplete) return <section className="page-content planner-page" aria-labelledby="completion-title"><p className="eyebrow">{t('SESSION SAVED')}</p><h1 id="completion-title">{t('Workout complete')}</h1><article className="card form-card"><h2>{t(workout.name)}</h2><p>{t('Planned duration:')} {workout.durationMinutes} {t('min')}</p>{active?.actual_duration_minutes !== null && active?.actual_duration_minutes !== undefined && <p>{t('Actual duration:')} {active.actual_duration_minutes} {t('min')}</p>}{active?.perceived_exertion && <p>{t('Effort:')} {active.perceived_exertion} / 5</p>}{active?.note && <p>{active.note}</p>}<Link className="button button-primary" to="/week">{t('Back to your week')}</Link></article></section>
@@ -287,7 +302,7 @@ export function WorkoutPage() {
     <section className="page-content planner-page" aria-labelledby="workout-title">
       <p className="eyebrow">{readableDate(workout.date, language)}</p><h1 id="workout-title">{t(workout.name)}</h1>
       {!active ? <article className="card form-card workout-start-card"><p>{workout.durationMinutes} {t('min')} · {t(titleCase(workout.category))} · {t(workout.isOutdoor ? 'Outdoor' : 'Indoor')}</p><p>{workout.exercises.length} {t('movements. You can mark each one done or skip it; no logging is required.')}</p><button className="button button-primary" type="button" disabled={starting || workout.status !== 'planned'} onClick={() => void start()}>{starting ? t('Starting…') : t('Start workout')}</button></article> : <>
-        {active.status === 'in_progress' && <p className="progress-copy" role="status">{doneCount} {t('of')} {active.exercise_sessions.length} {t('exercises done or skipped')}</p>}
+        {active.status === 'in_progress' && <p className="progress-copy" role="status">{handledCount} {t('of')} {active.exercise_sessions.length} {t('exercises done or skipped')}</p>}
         <ol className="execution-list">
           {workout.exercises.map((exercise, index) => {
             const row = active.exercise_sessions.find((item) => item.position === index + 1)
@@ -299,11 +314,12 @@ export function WorkoutPage() {
               {exercise.restSeconds > 0 && <p className="exercise-rest">{t('Rest')} {exercise.restSeconds} {t('sec')}</p>}
               {guide?.equipment.length ? <p className="exercise-equipment">{t('Equipment:')} {guide.equipment.map((group) => group.join(` ${t('or')} `)).join(' · ')}</p> : null}
               {(exerciseCopy?.instructions ?? guide?.instructions) && <details className="exercise-instructions"><summary>{t('How to do it')}</summary><p>{exerciseCopy?.instructions ?? guide?.instructions}</p></details>}
-              {active.status === 'in_progress' && row && !finished && <div className="button-row exercise-actions"><button className="button button-primary" type="button" onClick={() => void markExercise(row.id, 'done')}>{t('Done')}</button><button className="button button-secondary" type="button" onClick={() => void markExercise(row.id, 'skipped')}>{t('Skip')}</button></div>}
+              {active.status === 'in_progress' && row && (!finished || row.status === 'skipped') && <div className="button-row exercise-actions">{row.status === 'skipped' ? <button className="button button-primary" type="button" onClick={() => void markExercise(row.id, 'done')}>{t('Mark as done')}</button> : <><button className="button button-primary" type="button" onClick={() => void markExercise(row.id, 'done')}>{t('Done')}</button><button className="button button-secondary" type="button" onClick={() => void markExercise(row.id, 'skipped')}>{t('Skip')}</button></>}</div>}
             </li>
           })}
         </ol>
-        {active.status === 'in_progress' && allExercisesHandled && <article className="card form-card completion-form"><h2>{t('Finish session')}</h2><p>{t('Planned duration:')} {workout.durationMinutes} min</p><label className="field-label" htmlFor="perceived-exertion">{t('Perceived exertion')} <span className="optional-note">{t('(optional, 1–5)')}</span></label><select id="perceived-exertion" value={rpe} onChange={(event) => setRpe(event.target.value)}><option value="">{t('Skip')}</option>{[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value}</option>)}</select><label className="field-label" htmlFor="session-note">{t('Note')} <span className="optional-note">{t('(optional)')}</span></label><textarea id="session-note" rows={3} maxLength={2000} value={note} onChange={(event) => setNote(event.target.value)} /><button className="button button-primary" type="button" disabled={finishing} onClick={() => void finish()}>{finishing ? t('Saving session…') : t('Complete workout')}</button></article>}
+        {active.status === 'in_progress' && allExercisesHandled && doneCount === 0 && <article className="card form-card completion-form"><h2>{t('No exercise completed')}</h2><p>{t('Mark at least one exercise as done to complete a training activity.')}</p><button className="button button-secondary" type="button" disabled={finishing} onClick={() => void endAsSkipped()}>{t('End session as skipped')}</button></article>}
+        {active.status === 'in_progress' && allExercisesHandled && doneCount > 0 && <article className="card form-card completion-form"><h2>{t('Finish session')}</h2><p>{t('Planned duration:')} {workout.durationMinutes} min</p><label className="field-label" htmlFor="perceived-exertion">{t('Perceived exertion')} <span className="optional-note">{t('(optional, 1–5)')}</span></label><select id="perceived-exertion" value={rpe} onChange={(event) => setRpe(event.target.value)}><option value="">{t('Skip')}</option>{[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value}</option>)}</select><label className="field-label" htmlFor="session-note">{t('Note')} <span className="optional-note">{t('(optional)')}</span></label><textarea id="session-note" rows={3} maxLength={2000} value={note} onChange={(event) => setNote(event.target.value)} /><button className="button button-primary" type="button" disabled={finishing} onClick={() => void finish()}>{finishing ? t('Saving session…') : t('Complete workout')}</button></article>}
       </>}
     </section>
   )

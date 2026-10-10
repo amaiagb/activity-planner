@@ -3,6 +3,7 @@ import type { TodayWorkoutRequest } from '../../planner'
 import { exerciseBySlug } from '../../planner/catalogue'
 import type { PlannerInput, PlannedWorkout, WeeklyPlan, WorkoutHistory } from '../../planner'
 import { supabase } from '../../lib/supabase'
+import { getOrInitializeUserTimeZone, localDateInTimeZone } from '../../lib/userTimeZone'
 import type { FitnessLevel, WeekDayKey } from '../../types/profile'
 
 export type ExerciseGuide = {
@@ -292,14 +293,31 @@ export async function setExerciseStatus(userId: string, exerciseSessionId: strin
 
 export async function completeWorkout(userId: string, sessionId: string, workout: PlannedWorkout, values: { actualDurationMinutes: number; perceivedExertion: number | null; note: string }) {
   const db = client()
+  const doneExercise = await db.from('exercise_sessions').select('id').eq('user_id', userId).eq('workout_session_id', sessionId).eq('status', 'done').limit(1).maybeSingle()
+  throwOnError(doneExercise)
+  if (!doneExercise.data) throw new Error('Complete at least one exercise before finishing your workout.')
+  const completionTimezone = await getOrInitializeUserTimeZone(userId)
   const finishedAt = new Date().toISOString()
+  const completedLocalDate = localDateInTimeZone(new Date(finishedAt), completionTimezone)
   const completedWorkout = { ...workout, status: 'completed' as const }
   const [session, updatedWorkout] = await Promise.all([
-    db.from('workout_sessions').update({ status: 'completed', completed_at: finishedAt, actual_duration_minutes: values.actualDurationMinutes, perceived_exertion: values.perceivedExertion, note: values.note.trim() || null }).eq('user_id', userId).eq('id', sessionId),
+    db.from('workout_sessions').update({ status: 'completed', completed_at: finishedAt, completed_local_date: completedLocalDate, completion_timezone: completionTimezone, actual_duration_minutes: values.actualDurationMinutes, perceived_exertion: values.perceivedExertion, note: values.note.trim() || null }).eq('user_id', userId).eq('id', sessionId).eq('status', 'in_progress'),
     db.from('planned_workouts').update({ status: 'completed', workout_json: completedWorkout }).eq('user_id', userId).eq('id', workout.id),
   ])
   throwOnError(session)
   throwOnError(updatedWorkout)
+}
+
+export async function abandonWorkoutSession(userId: string, sessionId: string, workout: PlannedWorkout) {
+  const db = client()
+  const skippedAt = new Date().toISOString()
+  const skippedWorkout = { ...workout, status: 'skipped' as const }
+  const [session, plannedWorkout] = await Promise.all([
+    db.from('workout_sessions').update({ status: 'skipped', completed_at: skippedAt }).eq('user_id', userId).eq('id', sessionId).eq('status', 'in_progress'),
+    db.from('planned_workouts').update({ status: 'skipped', workout_json: skippedWorkout }).eq('user_id', userId).eq('id', workout.id).eq('status', 'planned'),
+  ])
+  throwOnError(session)
+  throwOnError(plannedWorkout)
 }
 
 export async function skipPlannedWorkout(userId: string, workout: PlannedWorkout) {
