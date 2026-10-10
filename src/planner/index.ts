@@ -267,8 +267,8 @@ function contextForDate(history: WorkoutHistory[], planned: PlannedWorkout[], da
   return { recentWorkouts: recent(relevant, date), previousWorkout: ordered.find((item) => dayDifference(item.date, date) === 1) }
 }
 
-function candidateWorkouts(date: string, input: PlannerInput): PlannedWorkout[] {
-  const baseCandidates = workoutTemplates.map((template) => buildWorkout(template, date)).filter((workout) => isCandidateValid(workout, input))
+function candidateWorkouts(date: string, input: PlannerInput, checkDuration = true): PlannedWorkout[] {
+  const baseCandidates = workoutTemplates.map((template) => buildWorkout(template, date)).filter((workout) => isCandidateValid(workout, input, checkDuration))
   // Keep combinations in the scoring pool even when a single template also fits.
   const components = workoutTemplates.filter((template) => isCandidateValid(buildWorkout(template, date), input, false))
   const combinations: PlannedWorkout[] = []
@@ -277,7 +277,7 @@ function candidateWorkouts(date: string, input: PlannerInput): PlannedWorkout[] 
       const first = components[firstIndex]!
       const second = components[secondIndex]!
       const durationMinutes = estimateWorkoutDurationMinutes(first) + estimateWorkoutDurationMinutes(second)
-      if (first.category === second.category || !dateFitsRequestedDuration(durationMinutes, input.availability.durationMinutes)) continue
+      if (first.category === second.category || (checkDuration && !dateFitsRequestedDuration(durationMinutes, input.availability.durationMinutes))) continue
       const difficultyOrder = { beginner: 0, intermediate: 1, advanced: 2 } as const
       const intensityOrder = { low: 0, moderate: 1, high: 2 } as const
       const template: WorkoutTemplate = {
@@ -290,10 +290,56 @@ function candidateWorkouts(date: string, input: PlannerInput): PlannedWorkout[] 
         blocks: [...first.blocks, ...second.blocks],
       }
       const workout = buildWorkout(template, date)
-      if (isCandidateValid(workout, input)) combinations.push(workout)
+      if (isCandidateValid(workout, input, checkDuration)) combinations.push(workout)
     }
   }
   return [...baseCandidates, ...combinations]
+}
+
+export type TodayWorkoutRequest = {
+  durationMinutes: number
+  outdoor: boolean
+  muscleGroup?: string
+  equipment?: string[]
+}
+
+/** Generate a one-day session from explicit limits without changing the user's weekly availability. */
+export function generateTodayWorkout(date: string, input: PlannerInput, request: TodayWorkoutRequest, options: PlannerOptions = {}): PlannedWorkout | null {
+  if (!weekdayForDate(date) || request.durationMinutes < 5 || request.durationMinutes > 240) return null
+  if (request.outdoor) {
+    const exercise = exerciseBySlug.get('walk_easy')
+    if (!exercise || !exercise.active || input.excludedExerciseIds.includes(exercise.id)) return null
+    return {
+      id: `${date}:manual_easy_walk_${request.durationMinutes}`, date,
+      templateSlug: `manual_easy_walk_${request.durationMinutes}`, name: 'Easy walk', category: 'walking',
+      durationMinutes: request.durationMinutes,
+      exercises: [{ id: exercise.id, slug: exercise.slug, name: exercise.name, prescribedSets: null, prescribedReps: null, prescribedDurationSeconds: request.durationMinutes * 60, restSeconds: 0 }],
+      status: 'planned', isOutdoor: true, intensity: 'low', movementPatterns: [exercise.movementPattern], muscleGroups: [...exercise.muscleGroups],
+    }
+  }
+
+  const selectedEquipment = request.equipment ?? []
+  if (selectedEquipment.some((slug) => !input.equipment.includes(slug))) return null
+  const dayInput: PlannerInput = {
+    ...input,
+    availability: { ...input.availability, durationMinutes: request.durationMinutes },
+    equipment: selectedEquipment.length ? [...new Set([...input.equipment, ...selectedEquipment])] : input.equipment,
+    preferences: { ...input.preferences, canGoOutside: false },
+  }
+  const context = contextForDate(input.history, [], date)
+  const random = randomSource(options.seed)
+  const candidates = candidateWorkouts(date, dayInput, false).filter((candidate) => {
+    if (candidate.isOutdoor || candidate.durationMinutes > request.durationMinutes) return false
+    if (request.muscleGroup && !candidate.muscleGroups.includes(request.muscleGroup)) return false
+    if (selectedEquipment.length && !candidate.exercises.some((item) => {
+      const definition = exerciseById.get(item.id)
+      return definition?.equipmentGroups.some((group) => group.some((slug) => selectedEquipment.includes(slug)))
+    })) return false
+    return true
+  })
+  const ranked = candidates.map((candidate) => ({ candidate, rank: scoreWorkoutCandidate(candidate, dayInput, context) + random() * 1.5 }))
+  ranked.sort((a, b) => b.rank - a.rank)
+  return ranked[0]?.candidate ?? null
 }
 
 function chooseWorkout(date: string, input: PlannerInput, context: CandidateScoreContext, random: RandomSource, differentFrom?: string): PlannedWorkout | null {

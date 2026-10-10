@@ -257,6 +257,12 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .confirm-dialog { width: min(100%, 440px); padding: 26px; }
 .confirm-dialog h2 { margin-top: 0; }
 .confirm-dialog p { color: var(--color-muted); line-height: 1.55; }
+.today-workout-dialog { width: min(100%, 520px); max-height: min(88vh, 760px); overflow: auto; display: grid; gap: 14px; padding: 26px; }
+.today-workout-dialog h2, .today-workout-dialog p { margin: 0; }
+.today-workout-dialog fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.today-workout-dialog legend { margin-bottom: 10px; font-weight: 750; }
+.today-workout-dialog select { width: 100%; }
+.today-equipment-options { display: grid; gap: 9px; }
 .workout-start-card { display: grid; justify-items: start; gap: 12px; }
 .workout-start-card p { margin: 0; color: var(--color-muted); line-height: 1.55; }
 .progress-copy { color: var(--color-muted); }

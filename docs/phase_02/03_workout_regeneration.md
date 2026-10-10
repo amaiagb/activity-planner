@@ -1,55 +1,51 @@
-# Grupo C — Cambiar el entrenamiento de hoy
+# Grupo C — Crear o cambiar el entrenamiento de hoy
 
-> Leer `00_PHASE2_OVERVIEW.md`. La función base ya existe: Today y Week pueden regenerar un día con `regenerateWorkout` y el servicio persiste el plan actualizado. La CTA de Today ya funciona en un toque.
+> Estado: implementado en Today sobre `weekly_plans`, `planned_workouts` y `workout_sessions`. La sustitución no crea una entidad de entrenamiento paralela; el resultado usa el flujo estándar de inicio, seguimiento, finalización e historial.
 
 ## Objetivo
 
-Permitir adaptar la sesión planificada de hoy sin romper las restricciones permanentes del perfil ni afectar otras fechas.
+Desde Today, permitir adaptar el entrenamiento del día, tanto si existe una sesión planificada como si es un día de descanso o el generador no pudo programar una sesión. El cambio sustituye únicamente el entrenamiento planificado para hoy. El resto de la semana y las preferencias permanentes del perfil se mantienen.
 
-## Capacidades y datos disponibles
+## Flujo funcional
 
-El generador trabaja con plantillas de entrenamiento y sus bloques; usa disponibilidad, duración habitual, equipamiento, preferencias, acceso exterior, ejercicios excluidos, nivel e historial reciente. Los ejercicios contienen categoría, dificultad, impacto, duración/repeticiones por defecto, `is_outdoor`, músculos y requisitos de equipamiento agrupados (las opciones dentro de un grupo representan alternativas). No existe duración estimada validada por ejercicio ni clasificación binaria interior/exterior: `is_outdoor=false` no prueba que un ejercicio sea exclusivamente interior.
+1. La persona pulsa **Cambiar entrenamiento de hoy** o, si no existe sesión, **Crear un entrenamiento para hoy**.
+2. La primera pregunta es si puede entrenar al aire libre hoy.
+3. Si responde sí, se propone **Easy walk / Caminata ligera**, se solicita el tiempo disponible y se ocultan los selectores de músculos y equipamiento. La duración se aplica directamente a la prescripción temporal del ejercicio `walk_easy`.
+4. Si responde no, se solicita el tiempo disponible y se ofrecen como filtros opcionales un grupo muscular y equipamiento del perfil. No se muestra ni selecciona equipamiento que no esté guardado en el perfil.
+5. La app genera y guarda un plan para la fecha actual. Si no hay candidato que respete todas las condiciones, conserva el plan actual y muestra el motivo.
+6. La sesión creada se inicia y registra con las pantallas existentes. Se pueden completar u omitir ejercicios, finalizar la sesión y consultar el resultado en el historial.
 
-La API pura actual es `regenerateWorkout(date, currentPlan, history, input, options)`. Solo reemplaza sesiones `planned`, mantiene las completadas y respeta las exclusiones; la regeneración no recibe filtros de duración/equipamiento/zona por sesión. `regenerateDay` persiste el resultado. El esquema no guarda el entrenamiento original tras reemplazarlo ni marca el origen manual; las sesiones activas/completadas están relacionadas con el `planned_workout`.
+La elección exterior es específica de esta solicitud. No cambia `can_go_outside` ni otros datos del perfil. La exclusión permanente de ejercicios sigue aplicándose también a la caminata; si `walk_easy` está excluido, se informa de que la caminata no está disponible y no se crea un entrenamiento.
 
-## Entrega incremental
+## Reglas del generador
 
-### C1. Interfaz
+- Solo se aceptan fechas dentro de la semana actual y duraciones disponibles entre 5 y 240 minutos en incrementos de 5; la interfaz ofrece esos valores para admitir los tiempos configurables en el perfil.
+- Para solicitudes interiores, el límite de tiempo es estricto: la duración estimada de la sesión no puede superar el tiempo indicado. No se ofrece un filtro exterior/inferior ambiguo basado en `is_outdoor=false`; al responder no, se descartan sesiones que incluyan ejercicios marcados como exteriores.
+- Los ejercicios deben estar activos, cumplir los requisitos OR de equipamiento y no estar excluidos por el perfil. El equipamiento elegido es adicionalmente una preferencia que el resultado debe utilizar; las demás restricciones de equipamiento disponible siguen vigentes.
+- El grupo muscular seleccionado es obligatorio para la sesión resultante: al menos un grupo muscular de la propuesta debe coincidir exactamente con el grupo elegido. No es una priorización silenciosa.
+- La ruta exterior no depende de `can_go_outside` del perfil, ya que la respuesta de hoy es consentimiento explícito. Mantiene las exclusiones permanentes y usa el ejercicio individual de caminata ligera con duración exacta.
+- No se altera la disponibilidad semanal ni la duración habitual del perfil. Al crear en un día de descanso aumenta `requested_sessions`; al cubrir un día ya registrado como no programado se elimina esa incidencia sin contarla dos veces.
+- No se modifica una sesión completada, omitida o con una sesión asociada (en curso, completada u omitida). El servicio vuelve a consultar sesiones asociadas antes de guardar. En caso de no poder generar o persistir, la acción muestra un error y conserva el estado presentado.
+- El registro original de un entrenamiento planificado reemplazado no se mantiene como historial. La sesión original aún no había empezado y el modelo actual no guarda snapshots de sustitución. No se ofrece deshacer.
 
-Mantener la CTA secundaria actual. La configuración en bottom sheet es una mejora opcional, no una dependencia para preservar el cambio en un toque. Si se implementa, todos los filtros parten del perfil y solo afectan a esa sesión. Ofrecer únicamente filtros que el generador pueda aplicar de forma demostrable.
+## Persistencia y arquitectura
 
-### C2. Filtros viables con el catálogo actual
+El generador puro `generateTodayWorkout` aplica los parámetros puntuales a las plantillas/catalogo existentes. La acción `createTodayWorkout` actualiza el `WeeklyPlan` de la semana mediante el servicio de datos actual. `saveWeeklyPlan` conserva el identificador del día cuando sustituye una fila planificada y crea la fila del día cuando no existía. No se requiere migración ni endpoint HTTP.
 
-- Duración: elegir entre valores que el conjunto de plantillas pueda aproximar; filtrar por `workout_templates.default_duration_minutes` con tolerancia documentada. No estimar una duración a partir de series/repeticiones si el generador selecciona plantillas completas.
-- Equipamiento: reutilizar las reglas de grupos alternativos del planificador y el equipamiento disponible en el perfil. Una elección puntual puede reducir el conjunto temporalmente, pero «sin equipamiento» debe mapear al equipo bodyweight según el modelo existente.
-- Exterior: permitir exterior solo si el perfil lo autoriza. No ofrecer una opción que fuerce interior/exterior hasta que la semántica de plantillas/ejercicios sea suficiente para garantizarla.
-- Zona muscular: podría derivarse de `exercise_muscles`, pero las plantillas pueden contener varios grupos. Añadir solo cuando se defina si significa incluir, priorizar o excluir músculos y se pueda validar el resultado.
+La protección contra sesiones asociadas usa una consulta de comprobación previa, coherente con el resto de operaciones del planificador. La aplicación actual no ofrece una transacción que serialice simultáneamente el inicio y la sustitución desde clientes concurrentes; si se habilitan múltiples sesiones de usuario o concurrencia significativa, convendrá trasladar ambas operaciones a RPC transaccionales.
 
-Nunca relajar exclusiones, disponibilidad de equipo o seguridad en un fallback silencioso. Si no hay candidato válido, conservar la sesión actual y explicar que no hay alternativa.
+Todos los controles, estados y errores añadidos están traducidos mediante el catálogo ES/EN y respetan los estilos de superficie y controles existentes en ambos temas.
 
-### C3. Sustitución y persistencia
+## Criterios de aceptación
 
-Primero extender la entrada pura del planificador con restricciones opcionales por fecha; mantener compatibilidad para los consumidores de semana completa y añadir pruebas deterministas. Garantizar que solo cambia la fecha solicitada y que las fechas bloqueadas/completadas/en curso no se reemplazan.
-
-Antes de ofrecer «Deshacer», diseñar persistencia que sobreviva a recarga: por ejemplo, una tabla aditiva de cambios de workout con snapshot original, nuevo `planned_workout`, usuario, fecha y estado; con RLS y política de retención. No depender solo del estado de React o de `workout_json`, ni sobrescribir una sesión con historial asociado. Una alternativa es limitar «Deshacer» a la misma sesión del navegador y documentar esa limitación, si producto acepta ese alcance.
-
-No crear un endpoint HTTP propuesto: el cliente actual usa Supabase JS y la función pura. Usar Edge Function solo si aparece una necesidad de autorización/transacción que no se resuelva con RLS y el modelo actual.
-
-## Aceptación
-
-- El cambio solo reemplaza el planificado de la fecha elegida; otras fechas y sesiones protegidas quedan intactas.
-- Se mantienen filtros permanentes del perfil, en especial exclusiones.
-- No se muestran filtros que no puedan cumplirse a partir de la BD actual.
-- Falla sin cambios destructivos cuando no hay alternativa válida.
-- Si se añade restauración, sobrevive a recarga y no borra información de sesiones existentes.
-- Todo control y estado nuevo está traducido y funciona con ambos temas.
+- Today permite cambiar la sesión planificada de hoy y crear una desde un descanso o una incidencia no programada.
+- La pregunta exterior aparece primero. Un sí ofrece Caminata ligera con duración elegida y no muestra músculos/equipamiento.
+- Un no genera una sesión interior dentro del tiempo máximo y aplica los filtros musculares/equipamiento seleccionados junto a las restricciones del perfil.
+- Solo cambia la fecha actual; no se modifica disponibilidad ni preferencias persistentes.
+- No se reemplazan sesiones iniciadas, completadas u omitidas. Si no hay opción válida, se conserva el plan sin borrado previo.
+- La sesión usa el flujo habitual de seguimiento y se refleja en el historial tras completarla.
+- La interfaz y los mensajes están disponibles en español e inglés.
 
 ## Fuera de alcance
 
-Generación con IA, presets, aprendizaje por valoración y entrenamiento extra tras completar el día. No añadir campos `outdoor_friendly` o `duration_estimate` hasta que un caso de producto y el catálogo seed los respalden.
-
-## Pendientes
-
-- Definir si el bottom sheet añade valor frente al botón de regeneración de un toque.
-- Elegir alcance de «Deshacer» y su modelo persistente antes de modificar la base de datos.
-- Confirmar si el filtro muscular se prioriza o se exige estrictamente.
+Deshacer tras recargar, guardar snapshots de planes reemplazados, cambiar entrenamientos de otros días desde el asistente, generar con IA, filtrar por grupos del catálogo o por ejercicios individuales, ampliar metadatos del catálogo y cambiar las preferencias del perfil desde esta acción.

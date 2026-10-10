@@ -1,4 +1,5 @@
-import { generateWeeklyPlan, regenerateWorkout } from '../../planner'
+import { generateTodayWorkout, generateWeeklyPlan, regenerateWorkout } from '../../planner'
+import type { TodayWorkoutRequest } from '../../planner'
 import { exerciseBySlug } from '../../planner/catalogue'
 import type { PlannerInput, PlannedWorkout, WeeklyPlan, WorkoutHistory } from '../../planner'
 import { supabase } from '../../lib/supabase'
@@ -229,6 +230,27 @@ export async function regenerateDay(userId: string, context: PlannerContext, pla
   const next = regenerateWorkout(date, plan, context.input.history, { ...context.input, weekStart: plan.weekStart })
   if (next === plan) return plan
   return saveWeeklyPlan(userId, next, true)
+}
+
+export async function createTodayWorkout(userId: string, context: PlannerContext, plan: WeeklyPlan, date: string, request: TodayWorkoutRequest): Promise<WeeklyPlan> {
+  const current = plan.workouts.find((workout) => workout.date === date)
+  if (current && current.status !== 'planned') throw new Error('This workout can no longer be changed.')
+  const db = client()
+  if (current) {
+    const sessions = await db.from('workout_sessions').select('id,status').eq('user_id', userId).eq('planned_workout_id', current.id)
+    throwOnError(sessions)
+    if ((sessions.data ?? []).length) throw new Error('This workout already has a session.')
+  }
+  const workout = generateTodayWorkout(date, context.input, request)
+  if (!workout) throw new Error(request.outdoor ? 'Easy walk is unavailable.' : 'No workout matches these choices.')
+  const wasUnscheduled = plan.unscheduledSessions.some((item) => item.date === date)
+  const next: WeeklyPlan = {
+    ...plan,
+    requestedSessions: plan.requestedSessions + (!current && !wasUnscheduled ? 1 : 0),
+    workouts: [...plan.workouts.filter((item) => item.date !== date), workout].sort((a, b) => a.date.localeCompare(b.date)),
+    unscheduledSessions: plan.unscheduledSessions.filter((item) => item.date !== date),
+  }
+  return saveWeeklyPlan(userId, next)
 }
 
 export async function regenerateWeek(userId: string, context: PlannerContext, plan: WeeklyPlan): Promise<WeeklyPlan> {

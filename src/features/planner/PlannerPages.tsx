@@ -5,6 +5,7 @@ import type { UnscheduledReason } from '../../planner/types'
 import { useAuth } from '../auth/useAuth'
 import {
   completeWorkout,
+  createTodayWorkout,
   currentWeekStart,
   getOrCreateWeeklyPlan,
   loadActiveSession,
@@ -18,6 +19,8 @@ import {
 import type { ExerciseGuide, PlannerContext } from './plannerData'
 import { useI18n } from '../../lib/i18n'
 import { localizeExerciseCopy } from '../../lib/catalogueTranslations'
+import { localizeEquipmentName } from '../../lib/catalogueTranslations'
+import { exercises as catalogueExercises } from '../../planner/catalogue'
 
 type PlannerState = { context: PlannerContext; plan: WeeklyPlan }
 
@@ -89,23 +92,43 @@ function TodayWorkout({ workout, guides, databaseExerciseIds, onStart, returnTo 
 
 export function TodayPage() {
   const { t, language } = useI18n()
-  const { session, state, setState, loading, error, setError, busy, setBusy } = usePlannerState()
+  const { session, state, setState, loading, error, busy, setBusy } = usePlannerState()
   const navigate = useNavigate()
   const location = useLocation()
   const today = localDate()
   const workout = state?.plan.workouts.find((item) => item.date === today)
   const unscheduled = state?.plan.unscheduledSessions.find((item) => item.date === today)
+  const [showChangeDialog, setShowChangeDialog] = useState(false)
+  const [outdoorChoice, setOutdoorChoice] = useState<boolean | null>(null)
+  const [duration, setDuration] = useState('30')
+  const [muscleGroup, setMuscleGroup] = useState('')
+  const [equipment, setEquipment] = useState<string[]>([])
+  const [dialogError, setDialogError] = useState<string | null>(null)
   const start = () => { if (workout) navigate(`/workout/${workout.id}`) }
 
-  async function changeWorkout() {
-    if (!session || !state || !workout) return
+  function openChangeDialog() {
+    setOutdoorChoice(null)
+    setDuration(String(state?.context.input.availability.durationMinutes ?? 30))
+    setMuscleGroup('')
+    setEquipment([])
+    setDialogError(null)
+    setShowChangeDialog(true)
+  }
+
+  async function createWorkout() {
+    if (!session || !state || outdoorChoice === null) return
     setBusy(true)
-    setError(null)
+    setDialogError(null)
     try {
-      const plan = await regenerateDay(session.user.id, state.context, state.plan, today)
+      const plan = await createTodayWorkout(session.user.id, state.context, state.plan, today, {
+        durationMinutes: Number(duration), outdoor: outdoorChoice,
+        ...(outdoorChoice || !muscleGroup ? {} : { muscleGroup }),
+        ...(outdoorChoice || !equipment.length ? {} : { equipment }),
+      })
       setState({ ...state, plan })
-    } catch {
-      setError('Could not change today’s workout.')
+      setShowChangeDialog(false)
+    } catch (cause) {
+      setDialogError(cause instanceof Error ? cause.message : 'Could not create today’s workout.')
     } finally { setBusy(false) }
   }
 
@@ -116,8 +139,18 @@ export function TodayPage() {
       <div className="section-heading-row planner-heading"><div><h1 id="today-title">{t('Today')}</h1><p className="page-intro">{readableDate(today, language)}</p></div><Link className="text-button" to="/week">{t('View week')}</Link></div>
       {workout ? <>
         <TodayWorkout workout={workout} guides={state!.context.exercises} databaseExerciseIds={state!.context.databaseExerciseIds} onStart={start} returnTo={location.pathname} />
-        {workout.status === 'planned' && <button className="button button-secondary planner-action" type="button" disabled={busy} onClick={() => void changeWorkout()}>{busy ? t('Finding another workout…') : t("Change today's workout")}</button>}
-      </> : <article className="card empty-state-card"><span className="rest-icon" aria-hidden="true">↟</span><h2>{t(unscheduled ? 'No workout could be planned' : 'Rest day')}</h2><p>{unscheduled ? describeUnscheduled(unscheduled.reasons, t) : t('No workout is scheduled for today. Your next planned session is in your week.')}</p><Link className="button button-secondary" to="/week">{t('Open your week')}</Link></article>}
+        {workout.status === 'planned' && <button className="button button-secondary planner-action" type="button" disabled={busy} onClick={openChangeDialog}>{t("Change today's workout")}</button>}
+      </> : <article className="card empty-state-card"><span className="rest-icon" aria-hidden="true">↟</span><h2>{t(unscheduled ? 'No workout could be planned' : 'Rest day')}</h2><p>{unscheduled ? describeUnscheduled(unscheduled.reasons, t) : t('No workout is scheduled for today. Your next planned session is in your week.')}</p><div className="button-row"><button className="button button-primary" type="button" onClick={openChangeDialog}>{t('Create a workout for today')}</button><Link className="button button-secondary" to="/week">{t('Open your week')}</Link></div></article>}
+      {showChangeDialog && <div className="dialog-backdrop" role="presentation"><section className="card today-workout-dialog" role="dialog" aria-modal="true" aria-labelledby="today-config-title"><h2 id="today-config-title">{t('Create a workout for today')}</h2>{outdoorChoice === null ? <fieldset><legend>{t('Can you exercise outdoors today?')}</legend><div className="button-row"><button className="button button-secondary" type="button" onClick={() => setOutdoorChoice(true)}>{t('Yes, outdoors')}</button><button className="button button-secondary" type="button" onClick={() => setOutdoorChoice(false)}>{t('No, indoors')}</button></div></fieldset> : <>
+        {outdoorChoice && <p>{t('We’ll suggest an easy walk. Muscle and equipment choices are not needed.')}</p>}
+        <label className="field-label" htmlFor="today-duration">{t('Available time')}</label><select id="today-duration" value={duration} onChange={(event) => setDuration(event.target.value)}>{Array.from({ length: 48 }, (_, index) => (index + 1) * 5).map((value) => <option key={value} value={value}>{value} {t('min')}</option>)}</select>
+        {!outdoorChoice && <>
+          <label className="field-label" htmlFor="today-muscle">{t('Muscle group')} <span className="optional-note">{t('(optional)')}</span></label><select id="today-muscle" value={muscleGroup} onChange={(event) => setMuscleGroup(event.target.value)}><option value="">{t('Any muscle group')}</option>{[...new Set(catalogueExercises.flatMap((item) => item.muscleGroups))].sort().map((muscle) => <option key={muscle} value={muscle}>{t(titleCase(muscle))}</option>)}</select>
+          <fieldset className="today-equipment-options"><legend>{t('Equipment')} <span className="optional-note">{t('(optional)')}</span></legend>{state?.context.input.equipment.length ? state.context.input.equipment.map((slug, index) => <label className="checkbox-row" key={slug}><input type="checkbox" checked={equipment.includes(slug)} onChange={(event) => setEquipment((current) => event.target.checked ? [...current, slug] : current.filter((item) => item !== slug))} />{localizeEquipmentName(slug, state.context.equipmentLabels[index] ?? titleCase(slug), language)}</label>) : <p>{t('No equipment is saved in your profile; bodyweight workouts are still available.')}</p>}</fieldset>
+        </>}
+        {dialogError && <p className="form-error" role="alert">{t(dialogError)}</p>}
+        <div className="button-row"><button className="button button-primary" type="button" disabled={busy} onClick={() => void createWorkout()}>{busy ? t('Creating workout…') : t('Create workout')}</button><button className="button button-secondary" type="button" disabled={busy} onClick={() => setShowChangeDialog(false)}>{t('Cancel')}</button></div>
+      </>}</section></div>}
     </section>
   )
 }
