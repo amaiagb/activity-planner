@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { createBrowserRouter, createRoutesFromElements, Navigate, Route, RouterProvider } from 'react-router-dom'
+import { useMemo } from 'react'
 import { AppShell } from './AppShell'
 import { PlaceholderPage } from './PlaceholderPage'
 import { AuthProvider } from '../features/auth/AuthProvider'
@@ -15,13 +16,19 @@ export function App() {
   return (
     <AuthProvider>
       <I18nProvider>
-      <BrowserRouter>
-        <Routes>
+        <AppRoutes />
+      </I18nProvider>
+    </AuthProvider>
+  )
+}
+
+function AppRoutes() {
+  const router = useMemo(() => createBrowserRouter(createRoutesFromElements(
           <Route element={<AppShell />}>
             <Route index element={<Navigate to="/today" replace />} />
             <Route path="/login" element={<PublicOnly><LoginPage /></PublicOnly>} />
             <Route path="/onboarding" element={<RequireAuthenticated onboardingOnly><OnboardingPage /></RequireAuthenticated>} />
-            <Route path="/profile" element={<RequireAuthenticated><ProfilePage /></RequireAuthenticated>} />
+            <Route path="/profile/:section?" element={<RequireAuthenticated><ProfilePage /></RequireAuthenticated>} />
             <Route path="/today" element={<RequireAuthenticated><TodayPage /></RequireAuthenticated>} />
             <Route path="/week" element={<RequireAuthenticated><WeekPage /></RequireAuthenticated>} />
             <Route path="/workout/:id" element={<RequireAuthenticated><WorkoutPage /></RequireAuthenticated>} />
@@ -32,9 +39,6 @@ export function App() {
             </Route>
             <Route path="*" element={<RequireAuthenticated><PlaceholderPage title="Page not found" description="The page you requested does not exist." /></RequireAuthenticated>} />
           </Route>
-        </Routes>
-      </BrowserRouter>
-      </I18nProvider>
-    </AuthProvider>
-  )
+  )), [])
+  return <RouterProvider router={router} />
 }

@@ -4,6 +4,8 @@ import { filterExercises, displayTerm, groupExercisesByLetter, instructionSteps 
 import { loadExerciseCatalogue, loadExerciseDetail } from './exerciseData'
 import type { CatalogueExercise, ExerciseMedia } from './exerciseData'
 import { useI18n } from '../../lib/i18n'
+import { loadExcludedExerciseIds, setExerciseExcluded } from '../../lib/profileData'
+import { useAuth } from '../auth/useAuth'
 
 function PlaceholderMedia({ name, size }: { name: string; size: 'thumbnail' | 'detail' }) {
   const { t } = useI18n()
@@ -135,6 +137,7 @@ function TutorialMedia({ exercise, media }: { exercise: CatalogueExercise; media
 
 export function ExerciseDetailPage() {
   const { t, language } = useI18n()
+  const { session } = useAuth()
   const { exerciseId = '' } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -142,6 +145,9 @@ export function ExerciseDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
+  const [excludedExerciseIds, setExcludedExerciseIds] = useState<string[] | null>(null)
+  const [savingExclusion, setSavingExclusion] = useState(false)
+  const [exclusionError, setExclusionError] = useState(false)
   const backButton = useRef<HTMLButtonElement>(null)
   const returnTo = (location.state as { returnTo?: string } | null)?.returnTo
 
@@ -162,6 +168,30 @@ export function ExerciseDetailPage() {
 
   useEffect(() => { backButton.current?.focus() }, [exerciseId])
 
+  useEffect(() => {
+    let active = true
+    setExcludedExerciseIds(null)
+    setExclusionError(false)
+    if (!session) return () => { active = false }
+    void loadExcludedExerciseIds(session.user.id).then((ids) => { if (active) setExcludedExerciseIds(ids) }).catch(() => { if (active) setExclusionError(true) })
+    return () => { active = false }
+  }, [exerciseId, session])
+
+  async function toggleExerciseExclusion() {
+    if (!session || !exercise || excludedExerciseIds === null) return
+    const excluded = !excludedExerciseIds.includes(exercise.id)
+    setSavingExclusion(true)
+    setExclusionError(false)
+    try {
+      await setExerciseExcluded(session.user.id, exercise.id, excluded)
+      setExcludedExerciseIds((current) => current === null ? current : excluded ? [...current, exercise.id] : current.filter((id) => id !== exercise.id))
+    } catch {
+      setExclusionError(true)
+    } finally {
+      setSavingExclusion(false)
+    }
+  }
+
   return <>
     <header className="exercise-detail-header"><button ref={backButton} className="button button-secondary" type="button" aria-label={t(returnTo ? 'Back to workout' : 'Back to exercises')} onClick={closeDetail}>← <span>{t(returnTo ? 'Back to workout' : 'Exercises')}</span></button>{exercise && <p className="eyebrow">{t(displayTerm(exercise.category))}</p>}</header>
     {loading ? <p role="status">{t('Loading exercise…')}</p> : error ? <div><p className="form-error" role="alert">{t('Could not load this exercise.')}</p><button className="button button-secondary" type="button" onClick={() => setRetryCount((value) => value + 1)}>{t('Try again')}</button></div> : !exercise ? <section><h1>{t('Exercise unavailable')}</h1><p>{t('This exercise is inactive or no longer exists.')}</p></section> : <article className="exercise-detail-content">
@@ -174,6 +204,19 @@ export function ExerciseDetailPage() {
         {exercise.equipment.length > 0 && <div><h2>{t('Equipment')}</h2><p>{equipmentSummary(exercise.equipment, t)}</p></div>}
         <div><h2>{t('Movement details')}</h2><p>{[exercise.movement_pattern && t(displayTerm(exercise.movement_pattern)), exercise.difficulty && `${t(displayTerm(exercise.difficulty))} ${t('level')}`, exercise.impact_level && `${t(displayTerm(exercise.impact_level))} ${t('impact')}`, t(exercise.is_outdoor ? 'Outdoor' : 'Indoor')].filter(Boolean).join(' · ')}</p></div>
       </section>
+      {session && <section className="exercise-exclusion-control" aria-label={t('Plan inclusion')}>
+        <h2>{t('Your plan')}</h2>
+        {excludedExerciseIds === null && !exclusionError && <p role="status">{t('Loading exclusion preference…')}</p>}
+        {exclusionError && excludedExerciseIds === null && <p className="form-error" role="alert">{t('Could not update exercise exclusions.')}</p>}
+        {excludedExerciseIds !== null && <>
+          <p className="field-help">{t('This preference applies when you create future plans.')}</p>
+          <button className={excludedExerciseIds.includes(exercise.id) ? 'button button-secondary' : 'button button-primary'} type="button" disabled={savingExclusion} onClick={() => void toggleExerciseExclusion()}>
+            {savingExclusion ? t('Saving…') : t(excludedExerciseIds.includes(exercise.id) ? 'Include in plans' : 'Exclude from plans')}
+          </button>
+          {exclusionError && <p className="form-error" role="alert">{t('Could not update exercise exclusions.')}</p>}
+          {!exclusionError && <p className="form-notice" role="status">{t(excludedExerciseIds.includes(exercise.id) ? 'This exercise is excluded from future plans.' : 'This exercise is available for future plans.')}</p>}
+        </>}
+      </section>}
       {exercise.media.map((media) => <section className="exercise-media-attribution" key={media.id}><p>{media.description ?? media.alt_text}</p><p>{t('Source:')} {media.source_url ? <a href={media.source_url} target="_blank" rel="noreferrer">{media.source_name}</a> : media.source_name} · {t('License:')} {media.license_url ? <a href={media.license_url} target="_blank" rel="noreferrer">{media.license_name}</a> : media.license_name}</p>{media.transcript && <details><summary>{t('Video transcript')}</summary><p>{media.transcript}</p></details>}</section>)}
     </article>}
   </>

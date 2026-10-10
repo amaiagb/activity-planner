@@ -34,16 +34,21 @@ export async function loadProfileData(userId: string): Promise<ProfileData> {
   }
 }
 
-export async function saveProfileData(userId: string, values: ProfileFormValues) {
+export async function savePersonalData(userId: string, values: ProfileFormValues) {
+  const client = getClient()
+  const { error } = await client.from('profiles').upsert({
+    user_id: userId,
+    display_name: values.displayName.trim() || null,
+    primary_goal: values.primaryGoal || null,
+    secondary_goal: values.secondaryGoal || null,
+    fitness_level: values.fitnessLevel || null,
+  }, { onConflict: 'user_id' })
+  if (error) throw new Error(error.message)
+}
+
+export async function saveTrainingData(userId: string, values: ProfileFormValues) {
   const client = getClient()
   const writes = await Promise.all([
-    client.from('profiles').upsert({
-      user_id: userId,
-      display_name: values.displayName.trim() || null,
-      primary_goal: values.primaryGoal || null,
-      secondary_goal: values.secondaryGoal || null,
-      fitness_level: values.fitnessLevel || null,
-    }, { onConflict: 'user_id' }),
     client.from('availability').upsert({
       user_id: userId,
       ...values.days,
@@ -63,23 +68,40 @@ export async function saveProfileData(userId: string, values: ProfileFormValues)
   const failedWrite = writes.find((result) => result.error)
   if (failedWrite?.error) throw new Error(failedWrite.error.message)
 
-  const [equipmentDelete, exclusionsDelete] = await Promise.all([
-    client.from('user_equipment').delete().eq('user_id', userId),
-    client.from('excluded_exercises').delete().eq('user_id', userId),
-  ])
+  const equipmentDelete = await client.from('user_equipment').delete().eq('user_id', userId)
   if (equipmentDelete.error) throw new Error(equipmentDelete.error.message)
-  if (exclusionsDelete.error) throw new Error(exclusionsDelete.error.message)
 
-  const relationWrites = await Promise.all([
-    values.equipmentIds.length
-      ? client.from('user_equipment').insert(values.equipmentIds.map((equipment_id) => ({ user_id: userId, equipment_id })))
-      : Promise.resolve({ error: null }),
-    values.excludedExerciseIds.length
-      ? client.from('excluded_exercises').insert(values.excludedExerciseIds.map((exercise_id) => ({ user_id: userId, exercise_id })))
-      : Promise.resolve({ error: null }),
-  ])
-  const failedRelation = relationWrites.find((result) => result.error)
-  if (failedRelation?.error) throw new Error(failedRelation.error.message)
+  if (values.equipmentIds.length) {
+    const { error: relationError } = await client.from('user_equipment').insert(values.equipmentIds.map((equipment_id) => ({ user_id: userId, equipment_id })))
+    if (relationError) throw new Error(relationError.message)
+  }
+}
+
+export async function saveExcludedExerciseIds(userId: string, exerciseIds: string[]) {
+  const client = getClient()
+  const { error: deleteError } = await client.from('excluded_exercises').delete().eq('user_id', userId)
+  if (deleteError) throw new Error(deleteError.message)
+  if (!exerciseIds.length) return
+  const { error } = await client.from('excluded_exercises').insert(exerciseIds.map((exercise_id) => ({ user_id: userId, exercise_id })))
+  if (error) throw new Error(error.message)
+}
+
+export async function loadExcludedExerciseIds(userId: string): Promise<string[]> {
+  const { data, error } = await getClient().from('excluded_exercises').select('exercise_id').eq('user_id', userId)
+  if (error) throw new Error(error.message)
+  return (data ?? []).map((row) => row.exercise_id as string)
+}
+
+export async function setExerciseExcluded(userId: string, exerciseId: string, excluded: boolean) {
+  const client = getClient()
+  const result = excluded
+    ? await client.from('excluded_exercises').upsert({ user_id: userId, exercise_id: exerciseId })
+    : await client.from('excluded_exercises').delete().eq('user_id', userId).eq('exercise_id', exerciseId)
+  if (result.error) throw new Error(result.error.message)
+}
+
+export async function saveProfileData(userId: string, values: ProfileFormValues) {
+  await Promise.all([savePersonalData(userId, values), saveTrainingData(userId, values), saveExcludedExerciseIds(userId, values.excludedExerciseIds)])
 }
 
 export type MeasurementInput = {

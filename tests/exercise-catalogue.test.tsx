@@ -1,12 +1,15 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { ExerciseDetailPage, ExercisesPage } from '../src/features/exercises/ExercisePages'
 import { filterExercises, groupExercisesByLetter, instructionSteps } from '../src/features/exercises/exerciseCatalogueLogic'
 import type { CatalogueExercise } from '../src/features/exercises/exerciseData'
 
 const exerciseDataMocks = vi.hoisted(() => ({ loadExerciseCatalogue: vi.fn(), loadExerciseDetail: vi.fn() }))
+const exclusionMocks = vi.hoisted(() => ({ loadExcludedExerciseIds: vi.fn(), setExerciseExcluded: vi.fn(), session: { user: { id: 'user-1' } } }))
 vi.mock('../src/features/exercises/exerciseData', () => exerciseDataMocks)
+vi.mock('../src/lib/profileData', () => exclusionMocks)
+vi.mock('../src/features/auth/useAuth', () => ({ useAuth: () => ({ session: exclusionMocks.session }) }))
 
 const exercises: CatalogueExercise[] = [
   { id: 'squat', slug: 'bodyweight_squat', name: 'Bodyweight squat', description: 'A leg strength move.', instructions: 'Stand tall. Sit your hips back, then stand.', category: 'legs', movement_pattern: 'squat', difficulty: 'beginner', impact_level: 'low', is_outdoor: false, muscles: ['glutes', 'quadriceps'], equipment: [{ group: 1, slug: 'bodyweight', name: 'Bodyweight' }], media: [] },
@@ -19,6 +22,10 @@ function renderCatalogue() {
 }
 
 afterEach(cleanup)
+beforeEach(() => {
+  exclusionMocks.loadExcludedExerciseIds.mockResolvedValue([])
+  exclusionMocks.setExerciseExcluded.mockResolvedValue(undefined)
+})
 
 describe('exercise catalogue', () => {
   afterEach(() => vi.clearAllMocks())
@@ -84,6 +91,19 @@ describe('exercise catalogue', () => {
     expect(await screen.findByRole('img', { name: 'Illustration not yet available for Dumbbell press' })).toBeInTheDocument()
     expect(screen.getByText('Hold the weights.')).toBeInTheDocument()
     expect(screen.getByText('Dumbbells and Bench')).toBeInTheDocument()
+  })
+
+  it('lets the user exclude an exercise from future plans in its detail page', async () => {
+    exerciseDataMocks.loadExerciseCatalogue.mockResolvedValue(exercises)
+    exerciseDataMocks.loadExerciseDetail.mockResolvedValue(exercises[0])
+    renderCatalogue()
+
+    fireEvent.click(await screen.findByRole('link', { name: 'View Bodyweight squat' }))
+    expect(await screen.findByRole('button', { name: 'Exclude from plans' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Exclude from plans' }))
+    await waitFor(() => expect(exclusionMocks.setExerciseExcluded).toHaveBeenCalledWith('user-1', 'squat', true))
+    expect(await screen.findByRole('button', { name: 'Include in plans' })).toBeInTheDocument()
+    expect(screen.getByText('This exercise is excluded from future plans.')).toBeInTheDocument()
   })
 })
 
