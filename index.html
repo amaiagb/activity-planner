@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="system">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -13,6 +13,14 @@
     <title>Personal Fitness Planner</title>
   </head>
   <body>
+    <script>
+      try {
+        const language = localStorage.getItem('activity-planner.language')
+        const theme = localStorage.getItem('activity-planner.theme')
+        document.documentElement.lang = language === 'en' || language === 'es' ? language : (navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en')
+        if (theme === 'light' || theme === 'dark' || theme === 'system') document.documentElement.dataset.theme = theme
+      } catch { /* Storage can be unavailable in private browsing. */ }
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

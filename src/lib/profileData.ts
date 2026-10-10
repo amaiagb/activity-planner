@@ -14,8 +14,8 @@ export async function loadProfileData(userId: string): Promise<ProfileData> {
     client.from('preferences').select('user_id, likes_strength, likes_cardio, likes_walking, likes_hiit, likes_mobility, can_go_outside, outside_is_weather_dependent').eq('user_id', userId).maybeSingle(),
     client.from('user_equipment').select('equipment_id').eq('user_id', userId),
     client.from('excluded_exercises').select('exercise_id').eq('user_id', userId),
-    client.from('equipment').select('id, name, category').order('name'),
-    client.from('exercises').select('id, name, category').eq('is_active', true).order('name'),
+    client.from('equipment').select('id, slug, name, category').order('name'),
+    client.from('exercises').select('id, slug, name, category').eq('is_active', true).order('name'),
     client.from('body_measurements').select('*').eq('user_id', userId).order('measured_at', { ascending: false }),
   ])
 

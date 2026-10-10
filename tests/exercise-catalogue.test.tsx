@@ -83,7 +83,7 @@ describe('exercise catalogue', () => {
 
     expect(await screen.findByRole('img', { name: 'Illustration not yet available for Dumbbell press' })).toBeInTheDocument()
     expect(screen.getByText('Hold the weights.')).toBeInTheDocument()
-    expect(screen.getByText('Dumbbells + Bench')).toBeInTheDocument()
+    expect(screen.getByText('Dumbbells and Bench')).toBeInTheDocument()
   })
 })
 

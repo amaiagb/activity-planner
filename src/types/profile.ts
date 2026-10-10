@@ -76,8 +76,8 @@ export type ProfileData = {
   preferences: PreferencesRecord | null
   equipmentIds: string[]
   excludedExerciseIds: string[]
-  equipment: { id: string; name: string; category: string }[]
-  exercises: { id: string; name: string; category: string }[]
+  equipment: { id: string; slug: string; name: string; category: string }[]
+  exercises: { id: string; slug: string; name: string; category: string }[]
   measurements: MeasurementRecord[]
 }
 

@@ -3,12 +3,14 @@ import { Link, Outlet, useLocation, useNavigate, useParams } from 'react-router-
 import { filterExercises, displayTerm, groupExercisesByLetter, instructionSteps } from './exerciseCatalogueLogic'
 import { loadExerciseCatalogue, loadExerciseDetail } from './exerciseData'
 import type { CatalogueExercise, ExerciseMedia } from './exerciseData'
+import { useI18n } from '../../lib/i18n'
 
 function PlaceholderMedia({ name, size }: { name: string; size: 'thumbnail' | 'detail' }) {
+  const { t } = useI18n()
   return (
-    <div className={`exercise-placeholder exercise-placeholder-${size}`} role="img" aria-label={`Illustration not yet available for ${name}`}>
+    <div className={`exercise-placeholder exercise-placeholder-${size}`} role="img" aria-label={`${t('Illustration not yet available for ')}${name}`}>
       <span aria-hidden="true">{name.trim().charAt(0).toLocaleUpperCase()}</span>
-      {size === 'detail' && <small>Illustration coming soon</small>}
+      {size === 'detail' && <small>{t('Illustration coming soon')}</small>}
     </div>
   )
 }
@@ -20,17 +22,18 @@ function ExerciseThumbnail({ exercise }: { exercise: CatalogueExercise }) {
   return <img className="exercise-thumbnail" src={image.thumbnail_url ?? undefined} alt={image.alt_text} loading="lazy" width="72" height="72" onError={() => setFailed(true)} />
 }
 
-function equipmentSummary(items: CatalogueExercise['equipment']) {
+function equipmentSummary(items: CatalogueExercise['equipment'], t: (value: string) => string) {
   const groups = new Map<number, string[]>()
   for (const item of items) groups.set(item.group, [...(groups.get(item.group) ?? []), item.name])
-  return [...groups.values()].map((group) => group.join(' or ')).join(' + ')
+  return [...groups.values()].map((group) => group.join(` ${t('or')} `)).join(` ${t('and')} `)
 }
 
 function ExerciseRow({ exercise, onOpen }: { exercise: CatalogueExercise; onOpen: (element: HTMLAnchorElement) => void }) {
-  const bodyPart = exercise.muscles.length ? exercise.muscles.map(displayTerm).join(', ') : displayTerm(exercise.category)
-  const equipment = equipmentSummary(exercise.equipment)
+  const { t } = useI18n()
+  const bodyPart = exercise.muscles.length ? exercise.muscles.map((part) => t(displayTerm(part))).join(', ') : t(displayTerm(exercise.category))
+  const equipment = equipmentSummary(exercise.equipment, t)
   return (
-    <Link className="exercise-row" to={`/exercises/${exercise.id}`} aria-label={`View ${exercise.name}`} onClick={(event) => onOpen(event.currentTarget)}>
+    <Link className="exercise-row" to={`/exercises/${exercise.id}`} aria-label={`${t('View ')}${exercise.name}`} onClick={(event) => onOpen(event.currentTarget)}>
       <ExerciseThumbnail exercise={exercise} />
       <span className="exercise-row-copy"><strong>{exercise.name}</strong><span>{bodyPart}{equipment ? ` · ${equipment}` : ''}</span></span>
       <span className="exercise-row-arrow" aria-hidden="true">›</span>
@@ -43,6 +46,7 @@ function jumpToLetter(letter: string) {
 }
 
 export function ExercisesPage() {
+  const { t, language } = useI18n()
   const navigate = useNavigate()
   const location = useLocation()
   const returnTo = (location.state as { returnTo?: string } | null)?.returnTo
@@ -58,10 +62,10 @@ export function ExercisesPage() {
   const reload = useCallback(async () => {
     setLoading(true)
     setError(null)
-    try { setExercises(await loadExerciseCatalogue()) }
+    try { setExercises(await loadExerciseCatalogue(language)) }
     catch (cause) { setError(cause instanceof Error ? cause.message : 'Could not load the exercise catalogue.') }
     finally { setLoading(false) }
-  }, [])
+  }, [language])
 
   useEffect(() => { void reload() }, [reload])
   useEffect(() => { if (!detailRoute) lastOpenedRow.current?.focus() }, [detailRoute])
@@ -82,21 +86,21 @@ export function ExercisesPage() {
     <>
       <div className="exercise-catalogue-content" inert={detailRoute ? true : undefined} aria-hidden={detailRoute}>
         <section className="page-content exercise-catalogue" aria-labelledby="exercises-title">
-          <p className="eyebrow">MOVEMENT LIBRARY</p>
-          <h1 id="exercises-title">Exercises</h1>
-          <label className="field-label" htmlFor="exercise-search">Search exercises</label>
-          <input id="exercise-search" className="exercise-search" type="search" placeholder="Name, muscle, equipment…" value={search} onChange={(event) => setSearch(event.target.value)} />
+          <p className="eyebrow">{t('MOVEMENT LIBRARY')}</p>
+          <h1 id="exercises-title">{t('Exercises')}</h1>
+          <label className="field-label" htmlFor="exercise-search">{t('Search exercises')}</label>
+          <input id="exercise-search" className="exercise-search" type="search" placeholder={t('Name, muscle, equipment…')} value={search} onChange={(event) => setSearch(event.target.value)} />
           <div className="exercise-filters">
-            <label><span className="sr-only">Filter by body part</span><select aria-label="Filter by body part" value={bodyPart} onChange={(event) => setBodyPart(event.target.value)}><option value="">Any body part</option>{bodyParts.map((part) => <option key={part} value={part}>{displayTerm(part)}</option>)}</select></label>
-            <label><span className="sr-only">Filter by equipment</span><select aria-label="Filter by equipment" value={equipment} onChange={(event) => setEquipment(event.target.value)}><option value="">Any equipment</option>{equipmentOptions.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></label>
+            <label><span className="sr-only">{t('Filter by body part')}</span><select aria-label={t('Filter by body part')} value={bodyPart} onChange={(event) => setBodyPart(event.target.value)}><option value="">{t('Any body part')}</option>{bodyParts.map((part) => <option key={part} value={part}>{t(displayTerm(part))}</option>)}</select></label>
+            <label><span className="sr-only">{t('Filter by equipment')}</span><select aria-label={t('Filter by equipment')} value={equipment} onChange={(event) => setEquipment(event.target.value)}><option value="">{t('Any equipment')}</option>{equipmentOptions.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></label>
           </div>
-          {hasFilters && <button className="text-button exercise-clear-filters" type="button" onClick={clearFilters}>Clear search and filters</button>}
-          {loading ? <p className="exercise-state-message" role="status">Loading exercises…</p> : error ? <div className="exercise-state-message"><p className="form-error" role="alert">{error}</p><button className="button button-secondary" type="button" onClick={() => void reload()}>Try again</button></div> : groups.length === 0 ? <div className="card exercise-empty"><h2>{hasFilters ? 'No exercises found' : 'No active exercises'}</h2><p>{hasFilters ? 'No exercises match these filters.' : 'The exercise catalogue is empty.'}</p>{hasFilters && <button className="button button-secondary" type="button" onClick={clearFilters}>Clear filters</button>}</div> : <>
-            <p className="exercise-result-count" role="status">{groups.reduce((total, [, entries]) => total + entries.length, 0)} exercises</p>
+          {hasFilters && <button className="text-button exercise-clear-filters" type="button" onClick={clearFilters}>{t('Clear search and filters')}</button>}
+          {loading ? <p className="exercise-state-message" role="status">{t('Loading exercises…')}</p> : error ? <div className="exercise-state-message"><p className="form-error" role="alert">{t('Could not load the exercise catalogue.')}</p><button className="button button-secondary" type="button" onClick={() => void reload()}>{t('Try again')}</button></div> : groups.length === 0 ? <div className="card exercise-empty"><h2>{t(hasFilters ? 'No exercises found' : 'No active exercises')}</h2><p>{t(hasFilters ? 'No exercises match these filters.' : 'The exercise catalogue is empty.')}</p>{hasFilters && <button className="button button-secondary" type="button" onClick={clearFilters}>{t('Clear filters')}</button>}</div> : <>
+            <p className="exercise-result-count" role="status">{groups.reduce((total, [, entries]) => total + entries.length, 0)} {t('exercises')}</p>
             <div className="exercise-groups">
               {groups.map(([letter, entries]) => <section className="exercise-group" key={letter} id={`exercise-group-${letter}`} aria-labelledby={`exercise-letter-${letter}`}><h2 id={`exercise-letter-${letter}`} tabIndex={-1}>{letter}</h2><ul>{entries.map((exercise) => <li key={exercise.id}><ExerciseRow exercise={exercise} onOpen={(element) => { lastOpenedRow.current = element }} /></li>)}</ul></section>)}
             </div>
-            <nav className="exercise-index" aria-label="Jump to exercise name letter">{letters.map((letter) => <button key={letter} type="button" aria-label={`Jump to ${letter}`} aria-controls={`exercise-group-${letter}`} onClick={() => jumpToLetter(letter)}>{letter}</button>)}</nav>
+            <nav className="exercise-index" aria-label={t('Jump to exercise name letter')}>{letters.map((letter) => <button key={letter} type="button" aria-label={`${t('Jump to ')}${letter}`} aria-controls={`exercise-group-${letter}`} onClick={() => jumpToLetter(letter)}>{letter}</button>)}</nav>
           </>}
         </section>
       </div>
@@ -112,23 +116,25 @@ export function ExercisesPage() {
           if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
           else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
         }
-      }}><section className="exercise-detail-dialog" role="dialog" aria-modal="true" aria-label="Exercise tutorial"><Outlet /></section></div>}
+      }}><section className="exercise-detail-dialog" role="dialog" aria-modal="true" aria-label={t('Exercise tutorial')}><Outlet /></section></div>}
     </>
   )
 }
 
 function TutorialMedia({ exercise, media }: { exercise: CatalogueExercise; media: ExerciseMedia[] }) {
+  const { t } = useI18n()
   const [failed, setFailed] = useState<string[]>([])
   const visual = media.find((item) => item.media_url && !failed.includes(item.id))
   if (!visual) return <PlaceholderMedia name={exercise.name} size="detail" />
   if (visual.media_kind === 'video' || visual.media_kind === 'animation') {
     const videoType = visual.storage_path.toLocaleLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4'
-    return <div className="exercise-tutorial-video"><video controls playsInline preload="metadata" poster={visual.thumbnail_url ?? undefined} aria-label={visual.alt_text} onError={() => setFailed((current) => [...current, visual.id])}><source src={visual.media_url ?? undefined} type={videoType} />{visual.captions_url && <track kind="captions" src={visual.captions_url} srcLang="en" label="English captions" default />}Your browser cannot play this instructional video.</video>{visual.caption && <p>{visual.caption}</p>}</div>
+    return <div className="exercise-tutorial-video"><video controls playsInline preload="metadata" poster={visual.thumbnail_url ?? undefined} aria-label={visual.alt_text} onError={() => setFailed((current) => [...current, visual.id])}><source src={visual.media_url ?? undefined} type={videoType} />{visual.captions_url && <track kind="captions" src={visual.captions_url} srcLang="en" label={t('English captions')} default />}{t('Your browser cannot play this instructional video.')}</video>{visual.caption && <p>{visual.caption}</p>}</div>
   }
   return <img className="exercise-detail-image" src={visual.media_url ?? undefined} alt={visual.alt_text} onError={() => setFailed((current) => [...current, visual.id])} />
 }
 
 export function ExerciseDetailPage() {
+  const { t, language } = useI18n()
   const { exerciseId = '' } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
@@ -148,27 +154,27 @@ export function ExerciseDetailPage() {
     setLoading(true)
     setError(null)
     setExercise(null)
-    void loadExerciseDetail(exerciseId).then((result) => { if (active) setExercise(result) }).catch((cause: unknown) => {
+    void loadExerciseDetail(exerciseId, language).then((result) => { if (active) setExercise(result) }).catch((cause: unknown) => {
       if (active) setError(cause instanceof Error ? cause.message : 'Could not load this exercise.')
     }).finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [exerciseId, retryCount])
+  }, [exerciseId, retryCount, language])
 
   useEffect(() => { backButton.current?.focus() }, [exerciseId])
 
   return <>
-    <header className="exercise-detail-header"><button ref={backButton} className="button button-secondary" type="button" aria-label={returnTo ? 'Back to workout' : 'Back to exercises'} onClick={closeDetail}>← <span>{returnTo ? 'Back to workout' : 'Exercises'}</span></button>{exercise && <p className="eyebrow">{displayTerm(exercise.category)}</p>}</header>
-    {loading ? <p role="status">Loading exercise…</p> : error ? <div><p className="form-error" role="alert">{error}</p><button className="button button-secondary" type="button" onClick={() => setRetryCount((value) => value + 1)}>Try again</button></div> : !exercise ? <section><h1>Exercise unavailable</h1><p>This exercise is inactive or no longer exists.</p></section> : <article className="exercise-detail-content">
+    <header className="exercise-detail-header"><button ref={backButton} className="button button-secondary" type="button" aria-label={t(returnTo ? 'Back to workout' : 'Back to exercises')} onClick={closeDetail}>← <span>{t(returnTo ? 'Back to workout' : 'Exercises')}</span></button>{exercise && <p className="eyebrow">{t(displayTerm(exercise.category))}</p>}</header>
+    {loading ? <p role="status">{t('Loading exercise…')}</p> : error ? <div><p className="form-error" role="alert">{t('Could not load this exercise.')}</p><button className="button button-secondary" type="button" onClick={() => setRetryCount((value) => value + 1)}>{t('Try again')}</button></div> : !exercise ? <section><h1>{t('Exercise unavailable')}</h1><p>{t('This exercise is inactive or no longer exists.')}</p></section> : <article className="exercise-detail-content">
       <h1>{exercise.name}</h1>
       <div className="exercise-hero-media"><TutorialMedia key={exercise.id} exercise={exercise} media={exercise.media} /></div>
       {exercise.description && <p className="exercise-description">{exercise.description}</p>}
-      <section className="exercise-instructions-section" aria-labelledby="exercise-instructions-title"><h2 id="exercise-instructions-title">Instructions</h2>{instructionSteps(exercise.instructions).length ? <ol>{instructionSteps(exercise.instructions).map((step, index) => <li key={`${index}-${step}`}>{step}</li>)}</ol> : <p>Written instructions are not available yet.</p>}</section>
-      <section className="exercise-detail-facts" aria-label="Exercise details">
-        {exercise.muscles.length > 0 && <div><h2>Muscles worked</h2><p>{exercise.muscles.map(displayTerm).join(', ')}</p></div>}
-        {exercise.equipment.length > 0 && <div><h2>Equipment</h2><p>{equipmentSummary(exercise.equipment)}</p></div>}
-        <div><h2>Movement details</h2><p>{[exercise.movement_pattern && displayTerm(exercise.movement_pattern), exercise.difficulty && `${displayTerm(exercise.difficulty)} level`, exercise.impact_level && `${displayTerm(exercise.impact_level)} impact`, exercise.is_outdoor ? 'Outdoor' : 'Indoor'].filter(Boolean).join(' · ')}</p></div>
+      <section className="exercise-instructions-section" aria-labelledby="exercise-instructions-title"><h2 id="exercise-instructions-title">{t('Instructions')}</h2>{instructionSteps(exercise.instructions).length ? <ol>{instructionSteps(exercise.instructions).map((step, index) => <li key={`${index}-${step}`}>{step}</li>)}</ol> : <p>{t('Written instructions are not available yet.')}</p>}</section>
+      <section className="exercise-detail-facts" aria-label={t('Exercise details')}>
+        {exercise.muscles.length > 0 && <div><h2>{t('Muscles worked')}</h2><p>{exercise.muscles.map((muscle) => t(displayTerm(muscle))).join(', ')}</p></div>}
+        {exercise.equipment.length > 0 && <div><h2>{t('Equipment')}</h2><p>{equipmentSummary(exercise.equipment, t)}</p></div>}
+        <div><h2>{t('Movement details')}</h2><p>{[exercise.movement_pattern && t(displayTerm(exercise.movement_pattern)), exercise.difficulty && `${t(displayTerm(exercise.difficulty))} ${t('level')}`, exercise.impact_level && `${t(displayTerm(exercise.impact_level))} ${t('impact')}`, t(exercise.is_outdoor ? 'Outdoor' : 'Indoor')].filter(Boolean).join(' · ')}</p></div>
       </section>
-      {exercise.media.map((media) => <section className="exercise-media-attribution" key={media.id}><p>{media.description ?? media.alt_text}</p><p>Source: {media.source_url ? <a href={media.source_url} target="_blank" rel="noreferrer">{media.source_name}</a> : media.source_name} · License: {media.license_url ? <a href={media.license_url} target="_blank" rel="noreferrer">{media.license_name}</a> : media.license_name}</p>{media.transcript && <details><summary>Video transcript</summary><p>{media.transcript}</p></details>}</section>)}
+      {exercise.media.map((media) => <section className="exercise-media-attribution" key={media.id}><p>{media.description ?? media.alt_text}</p><p>{t('Source:')} {media.source_url ? <a href={media.source_url} target="_blank" rel="noreferrer">{media.source_name}</a> : media.source_name} · {t('License:')} {media.license_url ? <a href={media.license_url} target="_blank" rel="noreferrer">{media.license_name}</a> : media.license_name}</p>{media.transcript && <details><summary>{t('Video transcript')}</summary><p>{media.transcript}</p></details>}</section>)}
     </article>}
   </>
 }

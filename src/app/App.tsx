@@ -9,10 +9,12 @@ import { ProfilePage } from '../features/profile/ProfilePage'
 import { TodayPage, WeekPage, WorkoutPage } from '../features/planner/PlannerPages'
 import { HistoryPage } from '../features/history/HistoryPage'
 import { ExerciseDetailPage, ExercisesPage } from '../features/exercises/ExercisePages'
+import { I18nProvider } from '../lib/i18n'
 
 export function App() {
   return (
     <AuthProvider>
+      <I18nProvider>
       <BrowserRouter>
         <Routes>
           <Route element={<AppShell />}>
@@ -32,6 +34,7 @@ export function App() {
           </Route>
         </Routes>
       </BrowserRouter>
+      </I18nProvider>
     </AuthProvider>
   )
 }

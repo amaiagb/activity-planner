@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useI18n } from '../lib/i18n'
 
 const navigationItems = [
   { to: '/today', label: 'Today', icon: '◷' },
@@ -9,12 +10,13 @@ const navigationItems = [
 ]
 
 export function BottomNavigation({ inert = false }: { inert?: boolean }) {
+  const { t } = useI18n()
   return (
-    <nav className="bottom-navigation" aria-label="Main navigation" inert={inert || undefined} aria-hidden={inert || undefined}>
+    <nav className="bottom-navigation" aria-label={t('Main navigation')} inert={inert || undefined} aria-hidden={inert || undefined}>
       {navigationItems.map(({ to, label, icon }) => (
         <NavLink key={to} to={to} className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
           <span className="nav-icon" aria-hidden="true">{icon}</span>
-          <span>{label}</span>
+          <span>{t(label)}</span>
         </NavLink>
       ))}
     </nav>

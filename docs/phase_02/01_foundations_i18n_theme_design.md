@@ -1,32 +1,32 @@
 # Grupo A — Fundaciones: i18n, tema y sistema visual
 
-> Leer `00_PHASE2_OVERVIEW.md`. La app ya tiene CSS propio con variables de color, componentes basados en clases y tema automático por `prefers-color-scheme`; no hay librería de UI ni i18n.
+> Leer `00_PHASE2_OVERVIEW.md`. La app usa CSS propio con variables de color y componentes basados en clases; Grupo A está en implementación parcial y los puntos marcados abajo reflejan el código actual.
 
 ## A1. Internacionalización es/en
 
 ### Estado actual y decisión
 
-La interfaz está escrita en inglés, también los datos visibles de ejercicios, equipamiento y plantillas. No hay `language` en el esquema del perfil ni caché de idioma. Mantener inglés como idioma inicial para usuarios existentes. Detectar idioma del navegador solo para usuarios nuevos; admitir castellano e inglés y usar inglés como fallback. El cambio no debe depender de recargar la página.
+La base funcional ya incluye inglés/español para la interfaz y el catálogo sembrado. Inglés sigue siendo el idioma de los perfiles existentes (`language = 'en'`); para perfiles nuevos se detecta el idioma del navegador cuando todavía no hay preferencia local o remota. El cambio de idioma se aplica sin recargar la página.
 
-Elegir una librería compatible con React y Vite (recomendación: `i18next` + `react-i18next`) antes de añadirla; justificar el peso y configurar detección/fallback. Persistir la elección del usuario autenticado en perfil mediante migración aditiva y cachear la última selección localmente para evitar destellos. Definir qué ocurre en modo anónimo/login y ante caché local obsoleta.
+Decisión de implementación: conservar el contexto React propio (`src/lib/i18n.tsx`) en vez de añadir `i18next`. La app solo admite dos idiomas y el proveedor necesita resolver junto con el idioma una preferencia de tema; mantener el catálogo pequeño evita otra dependencia y centraliza caché, carga remota y fallback. El inglés es el fallback determinista. Para usuarios nuevos se detecta el idioma del navegador; la preferencia local se aplica al arrancar y la del perfil autenticado la sustituye cuando se carga. Sin sesión, los cambios se mantienen en memoria y caché local. Un fallo remoto no revierte el cambio local y se comunica desde Perfil.
 
 ### Entregas
 
-1. Migración aditiva para idioma opcional en `profiles`; validar valor y conservar `en` para filas existentes. La persistencia local no sustituye al valor remoto.
-2. Extraer los textos de la aplicación por pantallas; traducir también errores, estados vacíos, formularios, navegación, accesibilidad y confirmaciones. Añadir las claves nuevas en ambos idiomas en la misma entrega.
-3. Traducir contenido de catálogo en un incremento separado. Actualmente `exercises.name/description/instructions`, `equipment.name` y `workout_templates.name/description` son campos únicos en inglés. Añadir tabla de traducciones por entidad/idioma o columnas localizadas solo tras elegir y documentar el modelo, claves estables, fallback y forma de mantener seeds. No duplicar filas de ejercicios ni traducir slugs/categorías persistidos.
-4. Formatear fechas con `Intl` y el locale seleccionado. Unidades actuales de mediciones son métricas (`weight_kg`, medidas en cm); no añadir conversión kg/lb sin alcance separado.
-5. Añadir comprobación automatizada de claves de recursos y cobertura de render de pantallas críticas.
+1. **Implementado:** migración aditiva `20261009100000_user_display_preferences.sql` para `language` y `theme` en `profiles`, con valores permitidos y defaults `en`/`system`; las columnas existentes se conservan y las filas anteriores reciben esos defaults. Las políticas RLS existentes de perfil limitan la escritura al propietario. La migración está en el repositorio, pendiente de aplicarse en cada entorno.
+2. **Implementado:** traducciones de las pantallas activas, navegación, formularios, errores genéricos, estados, accesibilidad, confirmaciones y plantillas de entrenamiento. El proveedor no devuelve claves inexistentes: avisa en desarrollo y muestra el inglés como fallback. No se exponen detalles técnicos de errores remotos en la interfaz.
+3. **Implementado:** traducciones españolas de nombre, descripción e instrucciones de los 47 ejercicios semilla en `src/lib/catalogueTranslations.ts`, indexadas por slug estable. Equipamiento y datos descriptivos de movimiento se localizan en la capa de presentación. No se duplican filas ni se alteran IDs, slugs, categorías almacenadas, relaciones o reglas del planificador. El contenido multimedia cargado desde el catálogo conserva atribución y transcript de origen; las etiquetas, alt text y captions generados por la app se localizan.
+4. **Implementado:** fechas con `Intl` y locale activo. Se mantienen las unidades métricas actuales (`weight_kg`, medidas en cm); no se añade conversión kg/lb.
+5. **Implementado:** prueba que comprueba las claves literales usadas por `t()` y que compara el mapa de traducciones con los slugs del seed. Hay pruebas de cambio de idioma/tema, caché local y persistencia remota fallida. No hay un entorno E2E visual configurado.
 
 ### Aceptación
 
-El usuario puede cambiar entre es/en sin recarga; la preferencia autenticada sobrevive a otras sesiones y la caché local permite aplicar el idioma temprano. Catálogo y UI usan traducción con fallback determinista. Las traducciones no cambian identificadores de dominio ni las reglas del planificador.
+El usuario puede cambiar entre es/en sin recarga; la preferencia autenticada se guarda en perfil y la caché local permite aplicar idioma y tema temprano. Catálogo y UI usan traducción con fallback determinista. Las traducciones no cambian identificadores de dominio ni las reglas del planificador. La verificación del despliegue de la migración por entorno sigue siendo operativa y manual.
 
 ## A2. Tema
 
-El tema actual es automático mediante media query, sin opción manual ni persistencia. Mantener ese comportamiento como opción «Sistema» y añadir «Claro» y «Oscuro». Añadir preferencia `theme` opcional al perfil en migración aditiva, caché local y aplicación temprana mediante atributo/clase en `html`. Definir resolución de conflictos entre remoto y caché (remoto prevalece tras cargar perfil).
+**Implementado:** «Sistema», «Claro» y «Oscuro» se guardan en la misma migración aditiva, en caché local y en `html[data-theme]`. En Sistema, CSS sigue `prefers-color-scheme`; la opción explícita prevalece sobre la media query. La preferencia local aparece de inmediato y la remota prevalece tras cargar el perfil.
 
-Auditar colores CSS existentes (incluidos botones, estados, bordes y foco) para migrarlos a tokens; no reemplazar el CSS completo ni introducir un framework visual. Revisar contraste AA de pantallas y gráficos/iconos existentes en ambos temas. Probar el cambio del sistema cuando la opción seleccionada sea «Sistema» y `prefers-reduced-motion`.
+**Implementado parcialmente:** se ampliaron los tokens existentes para texto, superficies, fondo, bordes, foco, colores semánticos, radios, espaciado, sombra y movimiento, y se aplican en los temas claro/oscuro. Se conservan las clases y componentes existentes. Queda pendiente una auditoría formal WCAG AA y una revisión manual de todos los estados en ambos temas; el CSS de Sistema reacciona a cambios de `prefers-color-scheme`.
 
 ## A3. Sistema visual
 

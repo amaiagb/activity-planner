@@ -1,4 +1,6 @@
 import { supabase } from '../../lib/supabase'
+import { localizeExercise } from '../../lib/catalogueTranslations'
+import type { Language } from '../../lib/i18n'
 
 export type ExerciseMedia = {
   id: string
@@ -100,7 +102,7 @@ function mapExercise(row: ExerciseRow, media: ExerciseMedia[]): CatalogueExercis
   }
 }
 
-export async function loadExerciseCatalogue(): Promise<CatalogueExercise[]> {
+export async function loadExerciseCatalogue(language: Language = 'en'): Promise<CatalogueExercise[]> {
   const { data, error } = await getClient().from('exercises').select(exerciseSelection).eq('is_active', true).order('name')
   if (error) throw new Error(error.message)
   const rows = (data ?? []) as unknown as ExerciseRow[]
@@ -111,10 +113,10 @@ export async function loadExerciseCatalogue(): Promise<CatalogueExercise[]> {
     if (!row) continue
     mediaById.set(row.id, [...(mediaById.get(row.id) ?? []), item])
   }
-  return rows.map((row) => mapExercise(row, mediaById.get(row.id) ?? []))
+  return rows.map((row) => localizeExercise(mapExercise(row, mediaById.get(row.id) ?? []), language))
 }
 
-export async function loadExerciseDetail(id: string): Promise<CatalogueExercise | null> {
+export async function loadExerciseDetail(id: string, language: Language = 'en'): Promise<CatalogueExercise | null> {
   const { data, error } = await getClient().from('exercises').select(exerciseDetailSelection).eq('id', id).eq('is_active', true).maybeSingle()
   if (error) throw new Error(error.message)
   if (!data) return null
@@ -126,5 +128,5 @@ export async function loadExerciseDetail(id: string): Promise<CatalogueExercise 
     media_url: urls.get(item.storage_path) ?? null,
     captions_url: item.captions_path ? urls.get(item.captions_path) ?? null : null,
   }))
-  return mapExercise(row, signedDetailMedia)
+  return localizeExercise(mapExercise(row, signedDetailMedia), language)
 }

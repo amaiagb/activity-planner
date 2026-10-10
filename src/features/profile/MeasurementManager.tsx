@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { deleteMeasurement, saveMeasurement } from '../../lib/profileData'
+import { useI18n } from '../../lib/i18n'
 import { measurementFields } from '../../types/profile'
 import type { MeasurementInput } from '../../lib/profileData'
 import type { MeasurementKey, MeasurementRecord } from '../../types/profile'
@@ -27,6 +28,7 @@ function fromRecord(record: MeasurementRecord): MeasurementInput {
 }
 
 export function MeasurementManager({ userId, measurements, onChanged }: Props) {
+  const { t } = useI18n()
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<MeasurementInput | null>(null)
   const [saving, setSaving] = useState(false)
@@ -54,21 +56,21 @@ export function MeasurementManager({ userId, measurements, onChanged }: Props) {
       setForm(null)
       setEditingId(null)
       await onChanged()
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not save this measurement.')
+    } catch {
+      setError(t('Could not save this measurement.'))
     } finally {
       setSaving(false)
     }
   }
 
   async function remove(id: string) {
-    if (!window.confirm('Delete this measurement record?')) return
+    if (!window.confirm(t('Delete this measurement record?'))) return
     setError(null)
     try {
       await deleteMeasurement(userId, id)
       await onChanged()
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Could not delete this measurement.')
+    } catch {
+      setError(t('Could not delete this measurement.'))
     }
   }
 
@@ -76,35 +78,35 @@ export function MeasurementManager({ userId, measurements, onChanged }: Props) {
     <section className="measurement-section" aria-labelledby="measurements-title">
       <div className="section-heading-row">
         <div>
-          <h2 id="measurements-title">Measurement history</h2>
-          <p className="field-help">Each entry is saved by date. New measurements do not replace older entries.</p>
+          <h2 id="measurements-title">{t('Measurement history')}</h2>
+          <p className="field-help">{t('Each entry is saved by date. New measurements do not replace older entries.')}</p>
         </div>
-        {!form && <button className="button button-secondary" type="button" onClick={startNew}>Add measurement</button>}
+        {!form && <button className="button button-secondary" type="button" onClick={startNew}>{t('Add measurement')}</button>}
       </div>
       {error && <p className="form-error" role="alert">{error}</p>}
       {form && (
         <form className="card form-card measurement-form" onSubmit={submit}>
-          <h3>{editingId ? 'Edit measurement' : 'New measurement'}</h3>
-          <label className="field-label" htmlFor="measured-at">Date</label>
+          <h3>{editingId ? t('Edit measurement') : t('New measurement')}</h3>
+          <label className="field-label" htmlFor="measured-at">{t('Date')}</label>
           <input id="measured-at" type="date" required value={form.measured_at} onChange={(event) => setForm({ ...form, measured_at: event.target.value })} />
           <div className="field-grid measurement-grid">
             {measurementFields.map(({ key, label, unit }) => (
               <div key={key}>
-                <label className="field-label" htmlFor={`measure-${key}`}>{label} <span className="optional-note">({unit})</span></label>
+                <label className="field-label" htmlFor={`measure-${key}`}>{t(label)} <span className="optional-note">({unit})</span></label>
                 <input id={`measure-${key}`} type="number" min="0.01" step="0.01" value={form.values[key]} onChange={(event) => setForm({ ...form, values: { ...form.values, [key]: event.target.value } })} />
               </div>
             ))}
           </div>
-          <label className="field-label" htmlFor="measurement-notes">Notes <span className="optional-note">(optional)</span></label>
+          <label className="field-label" htmlFor="measurement-notes">{t('Notes')} <span className="optional-note">{t('(optional)')}</span></label>
           <textarea id="measurement-notes" maxLength={500} rows={3} value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
           <div className="button-row">
-            <button className="button button-primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save measurement'}</button>
-            <button className="button button-quiet" type="button" onClick={() => setForm(null)}>Cancel</button>
+            <button className="button button-primary" type="submit" disabled={saving}>{saving ? t('Saving…') : t('Save measurement')}</button>
+            <button className="button button-quiet" type="button" onClick={() => setForm(null)}>{t('Cancel')}</button>
           </div>
         </form>
       )}
       {measurements.length === 0 ? (
-        <p className="empty-state">No measurements saved yet. Adding them is optional.</p>
+        <p className="empty-state">{t('No measurements saved yet. Adding them is optional.')}</p>
       ) : (
         <ul className="measurement-list">
           {measurements.map((record) => (
@@ -112,8 +114,8 @@ export function MeasurementManager({ userId, measurements, onChanged }: Props) {
               <div className="measurement-record-heading">
                 <h3><time dateTime={record.measured_at}>{new Date(`${record.measured_at}T12:00:00`).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</time></h3>
                 <div className="button-row compact-actions">
-                  <button className="text-button" type="button" onClick={() => startEdit(record)}>Edit</button>
-                  <button className="text-button danger-text" type="button" onClick={() => void remove(record.id)}>Delete</button>
+                  <button className="text-button" type="button" onClick={() => startEdit(record)}>{t('Edit')}</button>
+                  <button className="text-button danger-text" type="button" onClick={() => void remove(record.id)}>{t('Delete')}</button>
                 </div>
               </div>
               <dl className="measurement-values">
