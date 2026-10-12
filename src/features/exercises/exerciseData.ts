@@ -113,7 +113,8 @@ const repDbEquipmentNames: Record<string, string> = {
 }
 
 function repDbImageUrl(path: string) {
-  return `/${path.split('/').map(encodeURIComponent).join('/')}`
+  const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`
+  return `${base}${path.split('/').map(encodeURIComponent).join('/')}`
 }
 
 function mapRepDbExercise(row: RepDbExercise, language: Language): CatalogueExercise {
@@ -192,7 +193,7 @@ export async function loadExerciseDetail(id: string, language: Language = 'en'):
     captions_url: item.captions_path ? urls.get(item.captions_path) ?? null : null,
   }))
   const databaseExercise = localizeExercise(mapExercise(row, signedDetailMedia), language)
-  const repDbRow = repDbCatalogue.exercises.find((item) => item.id === databaseExercise.slug)
+  const repDbRow = repDbCatalogue.exercises.find((item) => item.id === databaseExercise.slug || item.id === databaseExercise.slug.replaceAll('_', '-'))
   return repDbRow
     ? { ...databaseExercise, ...mapRepDbExercise(repDbRow, language), id: databaseExercise.id, slug: databaseExercise.slug }
     : databaseExercise
