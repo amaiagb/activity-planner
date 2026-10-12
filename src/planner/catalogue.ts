@@ -12,6 +12,9 @@ export type ExerciseDefinition = {
   isOutdoor: boolean
   active: boolean
   intensity: ExerciseIntensity
+  defaultSets: number
+  defaultReps: string
+  defaultDurationSeconds: number
 }
 
 export type TemplateBlock = {
@@ -33,7 +36,7 @@ export type WorkoutTemplate = {
   blocks: TemplateBlock[]
 }
 
-const exerciseRows: Array<Omit<ExerciseDefinition, 'id' | 'active'>> = [
+const exerciseRows: Array<Omit<ExerciseDefinition, 'id' | 'active' | 'defaultSets' | 'defaultReps' | 'defaultDurationSeconds'>> = [
   { slug: 'bodyweight_squat', name: 'Bodyweight squat', category: 'legs', movementPattern: 'squat', muscleGroups: ['quadriceps', 'glutes'], equipmentGroups: [['bodyweight']], isOutdoor: false, intensity: 'moderate' },
   { slug: 'goblet_squat', name: 'Goblet squat', category: 'legs', movementPattern: 'squat', muscleGroups: ['quadriceps', 'glutes'], equipmentGroups: [['dumbbells', 'kettlebell']], isOutdoor: false, intensity: 'moderate' },
   { slug: 'split_squat', name: 'Split squat', category: 'legs', movementPattern: 'single_leg_squat', muscleGroups: ['quadriceps', 'glutes'], equipmentGroups: [['bodyweight', 'dumbbells']], isOutdoor: false, intensity: 'moderate' },
@@ -87,6 +90,9 @@ export const exercises: ExerciseDefinition[] = exerciseRows.map((exercise, index
   ...exercise,
   id: `20000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
   active: true,
+  defaultSets: 3,
+  defaultReps: '8–12',
+  defaultDurationSeconds: 30,
 }))
 
 export const exerciseBySlug = new Map(exercises.map((exercise) => [exercise.slug, exercise]))

@@ -1,4 +1,4 @@
-import { estimateWorkoutDurationMinutes, exerciseById, exerciseBySlug, hasRequiredEquipment, workoutTemplates } from './catalogue'
+import { estimateWorkoutDurationMinutes, exerciseById, exerciseBySlug, exercises, hasRequiredEquipment, workoutTemplates } from './catalogue'
 import type { ExerciseDefinition, WorkoutTemplate } from './catalogue'
 import { weekdays } from './types'
 import type {
@@ -97,8 +97,38 @@ function plannedExercises(template: WorkoutTemplate): PlannedExercise[] {
   return template.blocks.map((item) => {
     const exercise = exerciseBySlug.get(item.slug)
     if (!exercise) throw new Error(`Unknown catalogue exercise: ${item.slug}`)
-    return { id: exercise.id, slug: exercise.slug, name: exercise.name, prescribedSets: item.prescribedSets, prescribedReps: item.prescribedReps, prescribedDurationSeconds: item.prescribedDurationSeconds, restSeconds: item.restSeconds }
+    return {
+      id: exercise.id, slug: exercise.slug, name: exercise.name,
+      prescribedSets: item.prescribedSets ?? (item.prescribedDurationSeconds === null ? exercise.defaultSets : null),
+      prescribedReps: item.prescribedReps ?? (item.prescribedDurationSeconds === null ? exercise.defaultReps : null),
+      prescribedDurationSeconds: item.prescribedDurationSeconds ?? (item.prescribedSets === null && item.prescribedReps === null ? exercise.defaultDurationSeconds : null),
+      restSeconds: item.restSeconds,
+    }
   })
+}
+
+function minimalWorkout(date: string, input: PlannerInput, durationMinutes: number, muscleGroup?: string): PlannedWorkout | null {
+  const excluded = new Set(input.excludedExerciseIds)
+  const exercise = exercises.find((candidate) => candidate.active
+    && !candidate.isOutdoor
+    && !excluded.has(candidate.id)
+    && (!muscleGroup || candidate.muscleGroups.includes(muscleGroup))
+    && hasRequiredEquipment(candidate, input.equipment))
+  if (!exercise) return null
+  const timed = exercise.defaultDurationSeconds > 0
+  const secondsPerSet = Math.max(exercise.defaultDurationSeconds, Math.floor((durationMinutes * 60) / exercise.defaultSets))
+  return {
+    id: `${date}:minimal_${exercise.slug}_${durationMinutes}`,
+    date, templateSlug: `minimal_${exercise.slug}_${durationMinutes}`, name: `${exercise.name} · ${durationMinutes} min`,
+    category: 'strength', durationMinutes, exercises: [{
+      id: exercise.id, slug: exercise.slug, name: exercise.name,
+      prescribedSets: exercise.defaultSets,
+      prescribedReps: exercise.defaultReps,
+      prescribedDurationSeconds: timed ? secondsPerSet : null,
+      restSeconds: 0,
+    }], status: 'planned', isOutdoor: false, intensity: exercise.intensity,
+    movementPatterns: [exercise.movementPattern], muscleGroups: [...exercise.muscleGroups],
+  }
 }
 
 function buildWorkout(template: WorkoutTemplate, date: string): PlannedWorkout {
@@ -339,14 +369,14 @@ export function generateTodayWorkout(date: string, input: PlannerInput, request:
   })
   const ranked = candidates.map((candidate) => ({ candidate, rank: scoreWorkoutCandidate(candidate, dayInput, context) + random() * 1.5 }))
   ranked.sort((a, b) => b.rank - a.rank)
-  return ranked[0]?.candidate ?? null
+  return ranked[0]?.candidate ?? minimalWorkout(date, dayInput, request.durationMinutes, request.muscleGroup)
 }
 
 function chooseWorkout(date: string, input: PlannerInput, context: CandidateScoreContext, random: RandomSource, differentFrom?: string): PlannedWorkout | null {
   const candidates = candidateWorkouts(date, input)
   const different = differentFrom ? candidates.filter((candidate) => candidate.templateSlug !== differentFrom) : candidates
   const pool = different.length ? different : candidates
-  if (!pool.length) return null
+  if (!pool.length) return input.availability.durationMinutes <= 15 ? minimalWorkout(date, input, input.availability.durationMinutes) : null
   const ranked = pool.map((candidate) => ({ candidate, rank: scoreWorkoutCandidate(candidate, input, context) + random() * 1.5 }))
   ranked.sort((a, b) => b.rank - a.rank)
   return ranked[0]?.candidate ?? null
