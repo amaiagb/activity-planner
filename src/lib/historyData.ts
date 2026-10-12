@@ -36,6 +36,7 @@ export type WorkoutSummary = {
 }
 
 export type WorkoutHistoryData = {
+  activityDetails: Array<{ date: string; name: string; durationMinutes: number; manual?: boolean }>
   recentWorkouts: Array<{
     id: string
     name: string
@@ -172,6 +173,17 @@ export function summarizeWorkoutHistory(
   const monthStart = startOfMonth(today)
   const monthEnd = startOfNextMonth(today)
   return {
+    activityDetails: [...sessions.flatMap((session) => {
+      const workout = session.planned_workout
+      const date = session.completed_local_date ?? session.completed_at?.slice(0, 10) ?? workout?.workout_date
+      if (!workout || !date || !isActivityCredit(session)) return []
+      return [{ date, name: workout.name, durationMinutes: session.actual_duration_minutes ?? session.planned_duration_minutes }]
+    }), ...manualActivities.map((activity) => ({
+      date: activity.activity_date,
+      name: activity.activity_type === 'training' ? 'Training' : activity.activity_type === 'walking' ? 'Walking' : 'Padel',
+      durationMinutes: activity.duration_minutes,
+      manual: true,
+    }))],
     recentWorkouts: [...sessions.flatMap((session) => {
       const workout = session.planned_workout
       if (!workout) return []
