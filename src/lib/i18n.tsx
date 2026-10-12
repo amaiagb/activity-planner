@@ -35,7 +35,7 @@ const translations: Record<string, string> = Object.assign({}, {
   'Training activity calendar': 'Calendario de actividad de entrenamiento', 'Calendar legend': 'Leyenda del calendario',
   'Completed activity': 'Actividad completada', 'No completed activity': 'Sin actividad completada', 'No data yet': 'Aún sin datos',
   'Register activity': 'Registrar actividad', 'Activity type': 'Tipo de actividad', 'Duration (minutes)': 'Duración (minutos)',
-  'Your streak': 'Tu racha', 'KEEP MOVING': 'SIGUE EN MOVIMIENTO', 'days in a row': 'días seguidos', 'active days': 'días activos', 'Close': 'Cerrar',
+  'Your streak': 'Tu racha', 'KEEP MOVING': 'SIGUE EN MOVIMIENTO', 'days in a row': 'días seguidos', 'active days': 'días activos', 'Close': 'Cerrar', 'Tips': 'Consejos',
   'Exercises (optional)': 'Ejercicios (opcional)', 'You can leave this blank.': 'Puedes dejarlo en blanco.',
   'Save activity': 'Guardar actividad', 'Could not save activity.': 'No se pudo guardar la actividad.',
   'Manually recorded': 'Registrada manualmente', 'Padel': 'Pádel',

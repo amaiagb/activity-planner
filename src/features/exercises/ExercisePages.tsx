@@ -21,6 +21,7 @@ function ExerciseThumbnail({ exercise }: { exercise: CatalogueExercise }) {
   const [failed, setFailed] = useState(false)
   const image = exercise.media.find((item) => item.thumbnail_url)
   if (!image || failed) return <PlaceholderMedia name={exercise.name} size="thumbnail" />
+  if (exercise.catalogueSource === 'repdb' && exercise.media.length > 1) return <span className="exercise-motion-thumbnail" aria-label={exercise.name}>{exercise.media.map((item, index) => <img key={item.id} className={`exercise-thumbnail motion-frame motion-frame-${index}`} src={item.thumbnail_url ?? undefined} alt="" loading="lazy" width="72" height="72" onError={() => setFailed(true)} />)}</span>
   return <img className="exercise-thumbnail" src={image.thumbnail_url ?? undefined} alt={image.alt_text} loading="lazy" width="72" height="72" onError={() => setFailed(true)} />
 }
 
@@ -104,6 +105,7 @@ export function ExercisesPage() {
             </div>
             <nav className="exercise-index" aria-label={t('Jump to exercise name letter')}>{letters.map((letter) => <button key={letter} type="button" aria-label={`${t('Jump to ')}${letter}`} aria-controls={`exercise-group-${letter}`} onClick={() => jumpToLetter(letter)}>{letter}</button>)}</nav>
           </>}
+          <p className="repdb-attribution">Exercise data by <a href="https://repdb.co" target="_blank" rel="noreferrer">RepDB (repdb.co)</a></p>
         </section>
       </div>
       {detailRoute && <div className="exercise-detail-overlay" onKeyDownCapture={(event) => {
@@ -128,6 +130,11 @@ function TutorialMedia({ exercise, media }: { exercise: CatalogueExercise; media
   const [failed, setFailed] = useState<string[]>([])
   const visual = media.find((item) => item.media_url && !failed.includes(item.id))
   if (!visual) return <PlaceholderMedia name={exercise.name} size="detail" />
+  if (exercise.catalogueSource === 'repdb' && media.length > 1) {
+    const available = media.filter((item) => item.media_url && !failed.includes(item.id))
+    if (!available.length) return <PlaceholderMedia name={exercise.name} size="detail" />
+    return <div className="exercise-motion-detail">{available.map((item, index) => <img key={item.id} className={`motion-frame motion-frame-${index}`} src={item.media_url ?? undefined} alt={item.alt_text} onError={() => setFailed((current) => [...current, item.id])} />)}</div>
+  }
   if (visual.media_kind === 'video' || visual.media_kind === 'animation') {
     const videoType = visual.storage_path.toLocaleLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4'
     return <div className="exercise-tutorial-video"><video controls playsInline preload="metadata" poster={visual.thumbnail_url ?? undefined} aria-label={visual.alt_text} onError={() => setFailed((current) => [...current, visual.id])}><source src={visual.media_url ?? undefined} type={videoType} />{visual.captions_url && <track kind="captions" src={visual.captions_url} srcLang="en" label={t('English captions')} default />}{t('Your browser cannot play this instructional video.')}</video>{visual.caption && <p>{visual.caption}</p>}</div>
@@ -198,6 +205,7 @@ export function ExerciseDetailPage() {
       <h1>{exercise.name}</h1>
       <div className="exercise-hero-media"><TutorialMedia key={exercise.id} exercise={exercise} media={exercise.media} /></div>
       {exercise.description && <p className="exercise-description">{exercise.description}</p>}
+      {exercise.catalogueSource === 'repdb' && exercise.sourceData?.tips_es?.length ? <aside className="exercise-tips"><h2>{t('Tips')}</h2><ul>{(language === 'es' ? exercise.sourceData.tips_es : exercise.sourceData.tips_en).map((tip, index) => <li key={`${index}-${tip}`}>{tip}</li>)}</ul></aside> : null}
       <section className="exercise-instructions-section" aria-labelledby="exercise-instructions-title"><h2 id="exercise-instructions-title">{t('Instructions')}</h2>{instructionSteps(exercise.instructions).length ? <ol>{instructionSteps(exercise.instructions).map((step, index) => <li key={`${index}-${step}`}>{step}</li>)}</ol> : <p>{t('Written instructions are not available yet.')}</p>}</section>
       <section className="exercise-detail-facts" aria-label={t('Exercise details')}>
         {exercise.muscles.length > 0 && <div><h2>{t('Muscles worked')}</h2><p>{exercise.muscles.map((muscle) => t(displayTerm(muscle))).join(', ')}</p></div>}

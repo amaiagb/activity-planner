@@ -347,6 +347,20 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .exercise-row-copy strong { overflow-wrap: anywhere; font-size: 0.98rem; }
 .exercise-row-copy > span { color: var(--color-muted); font-size: 0.79rem; line-height: 1.35; }
 .exercise-thumbnail, .exercise-placeholder-thumbnail { width: 72px; height: 72px; flex: 0 0 72px; border-radius: 15px; object-fit: cover; }
+.exercise-motion-thumbnail, .exercise-motion-detail { position: relative; display: block; overflow: hidden; }
+.exercise-motion-thumbnail { width: 72px; height: 72px; flex: 0 0 72px; border-radius: 15px; }
+.exercise-motion-thumbnail .exercise-thumbnail { position: absolute; inset: 0; opacity: 0; }
+.exercise-motion-thumbnail .motion-frame-0, .exercise-motion-detail .motion-frame-0 { animation: repdb-frame-a 4s ease-in-out infinite; }
+.exercise-motion-thumbnail .motion-frame-1, .exercise-motion-detail .motion-frame-1 { animation: repdb-frame-b 4s ease-in-out infinite; }
+.exercise-motion-detail { width: 100%; aspect-ratio: 4 / 3; max-height: 310px; border-radius: 22px; background: var(--color-surface); }
+.exercise-motion-detail .motion-frame { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; }
+@keyframes repdb-frame-a { 0%, 45% { opacity: 1; } 55%, 100% { opacity: 0; } }
+@keyframes repdb-frame-b { 0%, 45% { opacity: 0; } 55%, 100% { opacity: 1; } }
+.repdb-attribution { margin: 28px 0 0; color: var(--color-muted); font-size: .78rem; text-align: center; }
+.repdb-attribution a { color: inherit; }
+.exercise-tips { margin: 20px 0; border-radius: 18px; background: color-mix(in srgb, var(--color-accent) 16%, var(--color-surface)); padding: 16px 18px; }
+.exercise-tips h2 { margin: 0 0 8px; font-size: 1rem; }
+.exercise-tips ul { margin: 0; padding-left: 20px; color: var(--color-muted); }
 .exercise-placeholder { display: grid; place-content: center; justify-items: center; gap: 8px; border: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-accent) 13%, var(--color-surface)); color: var(--color-muted); text-align: center; }
 .exercise-placeholder-thumbnail { display: grid; place-items: center; font-size: 1.55rem; font-weight: 800; }
 .exercise-placeholder-detail { width: 100%; aspect-ratio: 4 / 3; max-height: 310px; border-radius: 22px; font-size: clamp(3rem, 15vw, 6rem); }

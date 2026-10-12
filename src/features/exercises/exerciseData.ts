@@ -1,6 +1,9 @@
 import { supabase } from '../../lib/supabase'
 import { localizeExercise } from '../../lib/catalogueTranslations'
 import type { Language } from '../../lib/i18n'
+import repDbCatalogue from '../../../repdb/exercises_cleaned.json'
+
+type RepDbExercise = (typeof repDbCatalogue.exercises)[number]
 
 export type ExerciseMedia = {
   id: string
@@ -36,6 +39,8 @@ export type CatalogueExercise = {
   muscles: string[]
   equipment: Array<{ group: number; slug: string; name: string }>
   media: ExerciseMedia[]
+  catalogueSource?: 'database' | 'repdb'
+  sourceData?: RepDbExercise
 }
 
 type ExerciseRow = Omit<CatalogueExercise, 'muscles' | 'equipment' | 'media'> & {
@@ -102,7 +107,59 @@ function mapExercise(row: ExerciseRow, media: ExerciseMedia[]): CatalogueExercis
   }
 }
 
+const repDbEquipmentNames: Record<string, string> = {
+  dumbbell: 'Dumbbell', kettlebell: 'Kettlebell', resistance_band: 'Resistance Band',
+  loop_band: 'Loop Band', stationary_bike: 'Stationary Bike', stability_ball: 'Stability Ball', no_equipment: 'No Equipment',
+}
+
+function repDbImageUrl(path: string) {
+  return `/${path.split('/').map(encodeURIComponent).join('/')}`
+}
+
+function mapRepDbExercise(row: RepDbExercise, language: Language): CatalogueExercise {
+  const name = language === 'es' ? row.name_es : row.name_en
+  const description = language === 'es' ? row.description_es : row.description_en
+  const instructions = language === 'es' ? row.instructions_es : row.instructions_en
+  const equipmentName = repDbEquipmentNames[row.equipment] ?? row.equipment
+  const variants = row.images.flat ? Object.entries(row.images.flat) : []
+  const media: ExerciseMedia[] = variants.map(([variant, path], index) => ({
+    id: `${row.id}-flat-${variant}`, media_kind: 'image', storage_path: path, thumbnail_path: null,
+    captions_path: null, alt_text: `${name} — ${variant}`, description: null, caption: null,
+    transcript: null, source_name: 'RepDB', source_url: 'https://repdb.co', license_name: 'RepDB Free Tier License',
+    license_url: null, position: index + 1, thumbnail_url: repDbImageUrl(path), media_url: repDbImageUrl(path),
+  }))
+  return {
+    id: `repdb:${row.id}`, slug: row.id, name, description, instructions: instructions.join(' '),
+    category: row.category, movement_pattern: row.mechanic, difficulty: row.difficulty,
+    impact_level: null, is_outdoor: false,
+    muscles: [...new Set([...(row.primary_muscles ?? []), ...(row.secondary_muscles ?? [])])].sort(),
+    equipment: [{ group: 1, slug: row.equipment, name: equipmentName }], media,
+    catalogueSource: 'repdb', sourceData: row,
+  }
+}
+
+function exerciseNameKey(name: string) {
+  return name.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+}
+
+function mergeCatalogues(databaseExercises: CatalogueExercise[], repDbExercises: CatalogueExercise[]) {
+  const databaseBySlug = new Map(databaseExercises.map((exercise) => [exercise.slug.toLocaleLowerCase(), exercise]))
+  const databaseByName = new Map(databaseExercises.map((exercise) => [exerciseNameKey(exercise.name), exercise]))
+  const consumed = new Set<string>()
+  const merged = repDbExercises.flatMap((repDbExercise) => {
+    // This RepDB movement explicitly needs two kettlebells; the user's setup has one.
+    if (repDbExercise.slug === 'double-kettlebell-bicep-curl') return []
+    const match = databaseBySlug.get(repDbExercise.slug.toLocaleLowerCase()) ?? databaseByName.get(exerciseNameKey(repDbExercise.name))
+    if (!match) return [repDbExercise]
+    consumed.add(match.id)
+    return [{ ...match, ...repDbExercise, id: match.id, slug: match.slug, catalogueSource: 'repdb' as const }]
+  })
+  return [...merged, ...databaseExercises.filter((exercise) => !consumed.has(exercise.id))]
+}
+
 export async function loadExerciseCatalogue(language: Language = 'en'): Promise<CatalogueExercise[]> {
+  const repDbExercises = repDbCatalogue.exercises.map((row) => mapRepDbExercise(row, language))
+  if (!supabase) return repDbExercises.filter((exercise) => exercise.slug !== 'double-kettlebell-bicep-curl').sort((a, b) => a.name.localeCompare(b.name, language, { sensitivity: 'base' }))
   const { data, error } = await getClient().from('exercises').select(exerciseSelection).eq('is_active', true).order('name')
   if (error) throw new Error(error.message)
   const rows = (data ?? []) as unknown as ExerciseRow[]
@@ -113,10 +170,16 @@ export async function loadExerciseCatalogue(language: Language = 'en'): Promise<
     if (!row) continue
     mediaById.set(row.id, [...(mediaById.get(row.id) ?? []), item])
   }
-  return rows.map((row) => localizeExercise(mapExercise(row, mediaById.get(row.id) ?? []), language))
+  const databaseExercises = rows.map((row) => ({ ...localizeExercise(mapExercise(row, mediaById.get(row.id) ?? []), language), catalogueSource: 'database' as const }))
+  return mergeCatalogues(databaseExercises, repDbExercises).sort((a, b) => a.name.localeCompare(b.name, language, { sensitivity: 'base' }))
 }
 
 export async function loadExerciseDetail(id: string, language: Language = 'en'): Promise<CatalogueExercise | null> {
+  if (id.startsWith('repdb:')) {
+    const repDbRow = repDbCatalogue.exercises.find((row) => row.id === id.slice('repdb:'.length))
+    if (!repDbRow || repDbRow.id === 'double-kettlebell-bicep-curl') return null
+    return mapRepDbExercise(repDbRow, language)
+  }
   const { data, error } = await getClient().from('exercises').select(exerciseDetailSelection).eq('id', id).eq('is_active', true).maybeSingle()
   if (error) throw new Error(error.message)
   if (!data) return null
@@ -128,5 +191,9 @@ export async function loadExerciseDetail(id: string, language: Language = 'en'):
     media_url: urls.get(item.storage_path) ?? null,
     captions_url: item.captions_path ? urls.get(item.captions_path) ?? null : null,
   }))
-  return localizeExercise(mapExercise(row, signedDetailMedia), language)
+  const databaseExercise = localizeExercise(mapExercise(row, signedDetailMedia), language)
+  const repDbRow = repDbCatalogue.exercises.find((item) => item.id === databaseExercise.slug)
+  return repDbRow
+    ? { ...databaseExercise, ...mapRepDbExercise(repDbRow, language), id: databaseExercise.id, slug: databaseExercise.slug }
+    : databaseExercise
 }
