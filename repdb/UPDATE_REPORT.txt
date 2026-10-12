@@ -1,0 +1,30 @@
+INFORME DE ACTUALIZACIÓN DEL CATÁLOGO REPDB
+============================================
+
+Catálogo anterior: 290 ejercicios
+Ejercicios aprobados en exercises_review_ok.xlsx: 51
+Catálogo actualizado: 341 ejercicios
+IDs del Excel ausentes en la fuente original: 0
+Imágenes referenciadas: 568
+Imágenes únicas referenciadas: 568
+Rutas de imágenes ausentes en repdb-free.zip: 0
+
+EJERCICIOS POR EQUIPAMIENTO
+- dumbbell: 71
+- kettlebell: 43
+- loop_band: 14
+- no_equipment: 191
+- resistance_band: 14
+- stability_ball: 7
+- stationary_bike: 1
+
+CAMBIOS
+- Se añadieron los 51 ejercicios del Excel revisado, sin duplicados.
+- Se añadió el campo `equipment` para facilitar el filtro en la app.
+- Los 51 ejercicios nuevos llevan `reviewed_equipment: true`.
+- Se conservaron IDs, instrucciones, metadatos e imágenes de RepDB.
+- Todas las rutas de imagen de los 341 ejercicios existen en el ZIP recibido.
+
+NOTA
+El campo equipment de los 290 ejercicios originales se asignó usando las categorías del filtrado previo y heurísticas de nombre/instrucciones; los 51 nuevos usan exactamente la columna equipment del Excel revisado.
+Para el uso dentro de la app, conserva la atribución visible: Exercise data by RepDB (repdb.co). No redistribuyas el dataset como dataset independiente o API; revisa LICENSE.md.

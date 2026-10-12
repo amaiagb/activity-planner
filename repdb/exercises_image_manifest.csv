@@ -1,0 +1,342 @@
+﻿id,name_en,name_es,equipment,reviewed_equipment,start_image,peak_image,main_image
+archer-push-ups,Archer Push Ups,Push-Ups Arquero,no_equipment,False,images/flat/archer-push-ups-start.webp,images/flat/archer-push-ups-peak.webp,
+arnold-press,Arnold Press,Press Arnold,dumbbell,False,images/flat/arnold-press-start.webp,images/flat/arnold-press-peak.webp,
+ball-leg-curl,Stability Ball Leg Curl,Curl de Piernas con Pelota de Estabilidad,stability_ball,False,images/flat/ball-leg-curl-start.webp,images/flat/ball-leg-curl-peak.webp,
+ball-pike,Ball Pike,Pike con Pelota,stability_ball,False,images/flat/ball-pike-start.webp,images/flat/ball-pike-peak.webp,
+band-pull-apart,Band Pull Apart,Separación de Banda Elástica,resistance_band,False,images/flat/band-pull-apart-start.webp,images/flat/band-pull-apart-peak.webp,
+banded-adductor-stretch,Banded Adductor Stretch,Estiramiento de Aductores con Banda,resistance_band,False,,,images/flat/banded-adductor-stretch-main.webp
+banded-ankle-stretch,Banded Ankle Stretch,Estiramiento de Tobillo con Banda,resistance_band,False,,,images/flat/banded-ankle-stretch-main.webp
+banded-calf-stretch,Banded Calf Stretch,Estiramiento de Pantorrilla con Banda,resistance_band,False,,,images/flat/banded-calf-stretch-main.webp
+banded-chest-stretch,Banded Chest Stretch,Estiramiento de Pecho con Banda,resistance_band,False,,,images/flat/banded-chest-stretch-main.webp
+banded-clamshell,Banded Clamshell,Almeja con Banda,loop_band,False,images/flat/banded-clamshell-start.webp,images/flat/banded-clamshell-peak.webp,
+banded-figure-4-stretch,Banded Figure-4 Stretch,Estiramiento Figura 4 con Banda,resistance_band,False,,,images/flat/banded-figure-4-stretch-main.webp
+banded-fire-hydrant,Banded Fire Hydrant,Hidrante de Fuego con Banda,loop_band,False,images/flat/banded-fire-hydrant-start.webp,images/flat/banded-fire-hydrant-peak.webp,
+banded-glute-bridge,Banded Glute Bridge,Puente de Glúteos con Banda,loop_band,False,images/flat/banded-glute-bridge-start.webp,images/flat/banded-glute-bridge-peak.webp,
+banded-hamstring-stretch,Banded Hamstring Stretch,Estiramiento de Isquiotibiales con Banda,resistance_band,False,,,images/flat/banded-hamstring-stretch-main.webp
+banded-it-band-stretch,Banded IT-Band Stretch,Estiramiento de Banda Iliotibial con Banda,resistance_band,False,,,images/flat/banded-it-band-stretch-main.webp
+banded-kneeling-hip-thrust,Banded Kneeling Hip Thrust,Empuje de Cadera Arrodillado con Banda,loop_band,False,images/flat/banded-kneeling-hip-thrust-start.webp,images/flat/banded-kneeling-hip-thrust-peak.webp,
+banded-lat-stretch,Banded Lat Stretch,Estiramiento de Dorsales con Banda,resistance_band,False,,,images/flat/banded-lat-stretch-main.webp
+banded-lateral-walk,Banded Lateral Walk,Caminata Lateral con Banda,loop_band,False,images/flat/banded-lateral-walk-start.webp,images/flat/banded-lateral-walk-peak.webp,
+banded-rear-delt-stretch,Banded Rear Delt Stretch,Estiramiento de Deltoides Posterior con Banda,resistance_band,False,,,images/flat/banded-rear-delt-stretch-main.webp
+banded-shoulder-stretch,Banded Shoulder Stretch,Estiramiento de Hombros con Banda,resistance_band,False,,,images/flat/banded-shoulder-stretch-main.webp
+banded-squat,Banded Squat,Sentadilla con Banda,loop_band,False,images/flat/banded-squat-start.webp,images/flat/banded-squat-peak.webp,
+banded-standing-curl,Banded Standing Leg Curl,Curl de Pierna de Pie con Banda,resistance_band,False,images/flat/banded-standing-curl-start.webp,images/flat/banded-standing-curl-peak.webp,
+banded-standing-hip-abduction,Banded Standing Hip Abduction,Abducción de Cadera de Pie con Banda,loop_band,False,images/flat/banded-standing-hip-abduction-start.webp,images/flat/banded-standing-hip-abduction-peak.webp,
+banded-standing-hip-adduction,Banded Standing Hip Adduction,Aducción de Cadera de Pie con Banda,loop_band,False,images/flat/banded-standing-hip-adduction-start.webp,images/flat/banded-standing-hip-adduction-peak.webp,
+banded-sumo-walk,Banded Sumo Walk,Caminata Sumo con Banda,loop_band,False,images/flat/banded-sumo-walk-start.webp,images/flat/banded-sumo-walk-peak.webp,
+banded-terminal-knee-extension,Banded Terminal Knee Extension,Extensión Terminal de Rodilla con Banda,loop_band,False,images/flat/banded-terminal-knee-extension-start.webp,images/flat/banded-terminal-knee-extension-peak.webp,
+banded-triceps-stretch,Banded Triceps Stretch,Estiramiento de Tríceps con Banda,resistance_band,False,,,images/flat/banded-triceps-stretch-main.webp
+bear-crawl,Bear Crawl,Caminata del Oso,no_equipment,False,images/flat/bear-crawl-start.webp,images/flat/bear-crawl-peak.webp,
+bear-plank-hold,Bear Plank Hold,Plancha del Oso Isométrica,no_equipment,False,,,images/flat/bear-plank-hold-main.webp
+bent-over-db-row,Bent-Over Dumbbell Row,Remo con Mancuernas Inclinado,dumbbell,False,images/flat/bent-over-db-row-start.webp,images/flat/bent-over-db-row-peak.webp,
+bicep-curl,Dumbbell Bicep Curl,Curl de Bíceps con Mancuernas,dumbbell,False,images/flat/bicep-curl-start.webp,images/flat/bicep-curl-peak.webp,
+bicycle-crunch,Bicycle Crunch,Crunch de Bicicleta,no_equipment,False,images/flat/bicycle-crunch-start.webp,images/flat/bicycle-crunch-peak.webp,
+bird-dog,Bird-Dog,Bird-Dog,no_equipment,False,images/flat/bird-dog-start.webp,images/flat/bird-dog-peak.webp,
+bird-dog-hold,Bird Dog Hold,Bird-Dog Isométrico,no_equipment,False,,,images/flat/bird-dog-hold-main.webp
+boat-pose,Boat Pose,Postura del Barco,no_equipment,False,,,images/flat/boat-pose-main.webp
+bodyweight-calf-raise,Bodyweight Calf Raise,Elevación de Talones con Peso Corporal,no_equipment,False,images/flat/bodyweight-calf-raise-start.webp,images/flat/bodyweight-calf-raise-peak.webp,
+bodyweight-good-morning,Bodyweight Good Morning,Buenos Días con Peso Corporal,no_equipment,False,images/flat/bodyweight-good-morning-start.webp,images/flat/bodyweight-good-morning-peak.webp,
+bodyweight-lateral-raise,Bodyweight Lateral Raise,Elevación Lateral con Peso Corporal,no_equipment,False,images/flat/bodyweight-lateral-raise-start.webp,images/flat/bodyweight-lateral-raise-peak.webp,
+bodyweight-overhead-press,Bodyweight Overhead Press,Press por Encima de la Cabeza con Peso Corporal,no_equipment,False,images/flat/bodyweight-overhead-press-start.webp,images/flat/bodyweight-overhead-press-peak.webp,
+bodyweight-reverse-lunge,Bodyweight Reverse Lunge,Zancada Inversa con Peso Corporal,no_equipment,False,images/flat/bodyweight-reverse-lunge-start.webp,images/flat/bodyweight-reverse-lunge-peak.webp,
+bodyweight-squat,Bodyweight Squat,Sentadilla con Peso Corporal,no_equipment,False,images/flat/bodyweight-squat-start.webp,images/flat/bodyweight-squat-peak.webp,
+bow-pose,Bow Pose,Postura del Arco,no_equipment,False,,,images/flat/bow-pose-main.webp
+burpees,Burpees,Burpees,no_equipment,False,,,images/flat/burpees-main.webp
+butterfly-stretch,Butterfly Stretch,Estiramiento de Mariposa,no_equipment,False,,,images/flat/butterfly-stretch-main.webp
+cat-cow,Cat-Cow,Gato-Vaca,no_equipment,False,,,images/flat/cat-cow-main.webp
+cat-stretch,Cat Stretch,Estiramiento del Gato,no_equipment,False,,,images/flat/cat-stretch-main.webp
+chair-pose,Chair Pose,Postura de la Silla,no_equipment,False,,,images/flat/chair-pose-main.webp
+childs-pose,Child's Pose,Postura del Niño,no_equipment,False,,,images/flat/childs-pose-main.webp
+chin-tuck-hold,Chin Tuck Hold,Retracción de Mentón Sostenida,no_equipment,False,,,images/flat/chin-tuck-hold-main.webp
+clamshells,Clamshells,Almejas,no_equipment,False,images/flat/clamshells-start.webp,images/flat/clamshells-peak.webp,
+clamshells-hold,Clamshell Hold,Almejas Isométricas,no_equipment,False,,,images/flat/clamshells-hold-main.webp
+clap-push-ups,Clap Push-Ups,Flexiones con Palmada,no_equipment,False,images/flat/clap-push-ups-start.webp,images/flat/clap-push-ups-peak.webp,
+close-grip-push-ups,Close Grip Push Ups,Flexiones con Agarre Cerrado,no_equipment,False,images/flat/close-grip-push-ups-start.webp,images/flat/close-grip-push-ups-peak.webp,
+cobra-stretch,Cobra Stretch,Estiramiento de la Cobra,no_equipment,False,,,images/flat/cobra-stretch-main.webp
+cocoons,Cocoons,Cocoons,no_equipment,False,images/flat/cocoons-start.webp,images/flat/cocoons-peak.webp,
+cossack-squat,Cossack Squat,Sentadilla cosaca,no_equipment,False,images/flat/cossack-squat-start.webp,images/flat/cossack-squat-peak.webp,
+cow-face-pose,Cow Face Pose,Postura de la Cara de Vaca,no_equipment,False,,,images/flat/cow-face-pose-main.webp
+crab-dips,Crab Dips,Fondos de Cangrejo,no_equipment,False,images/flat/crab-dips-start.webp,images/flat/crab-dips-peak.webp,
+crescent-lunge,Crescent Lunge,Zancada Alta,no_equipment,False,,,images/flat/crescent-lunge-main.webp
+cross-body-crunch,Cross-Body Crunch,Crunch Cruzado,no_equipment,False,images/flat/cross-body-crunch-start.webp,images/flat/cross-body-crunch-peak.webp,
+cross-body-hammer-curl,Cross Body Hammer Curl,Curl Martillo Cruzado,dumbbell,False,images/flat/cross-body-hammer-curl-start.webp,images/flat/cross-body-hammer-curl-peak.webp,
+cross-body-shoulder-stretch,Cross-Body Shoulder Stretch,Estiramiento de Hombro Cruzado,no_equipment,False,,,images/flat/cross-body-shoulder-stretch-main.webp
+crow-pose,Crow Pose,Postura del Cuervo,no_equipment,False,,,images/flat/crow-pose-main.webp
+crunches,Crunches,Crunches,no_equipment,False,images/flat/crunches-start.webp,images/flat/crunches-peak.webp,
+dancer-pose,Dancer Pose,Postura del Bailarín,no_equipment,False,,,images/flat/dancer-pose-main.webp
+db-kickstand-deadlift,Dumbbell Kickstand Deadlift,Peso Muerto Kickstand con Mancuerna,dumbbell,False,images/flat/db-kickstand-deadlift-start.webp,images/flat/db-kickstand-deadlift-peak.webp,
+db-lunge,Dumbbell Lunge,Zancada con Mancuernas,dumbbell,False,images/flat/db-lunge-start.webp,images/flat/db-lunge-peak.webp,
+db-overhead-carry,Dumbbell Overhead Carry,Paseo con Mancuerna sobre la Cabeza,dumbbell,False,,,images/flat/db-overhead-carry-main.webp
+db-preacher-curl,Dumbbell Preacher Curl,Curl Predicador con Mancuernas,dumbbell,False,images/flat/db-preacher-curl-start.webp,images/flat/db-preacher-curl-peak.webp,
+db-reverse-curl,Dumbbell Reverse Curl,Curl Inverso con Mancuernas,dumbbell,False,images/flat/db-reverse-curl-start.webp,images/flat/db-reverse-curl-peak.webp,
+db-shrug,Dumbbell Shrug,Encogimiento de Hombros con Mancuernas,dumbbell,False,images/flat/db-shrug-start.webp,images/flat/db-shrug-peak.webp,
+db-somersault-squat,Dumbbell Somersault Squat,Sentadilla Somersault con Mancuerna,dumbbell,False,images/flat/db-somersault-squat-start.webp,images/flat/db-somersault-squat-peak.webp,
+db-squat,Dumbbell Squat,Sentadilla con Mancuernas,dumbbell,False,images/flat/db-squat-start.webp,images/flat/db-squat-peak.webp,
+db-sumo-squat,Dumbbell Sumo Squat,Sentadilla Sumo con Mancuernas,dumbbell,False,images/flat/db-sumo-squat-start.webp,images/flat/db-sumo-squat-peak.webp,
+db-svend-press,Dumbbell Svend Press,Press Svend con Mancuernas,dumbbell,False,images/flat/db-svend-press-start.webp,images/flat/db-svend-press-peak.webp,
+dead-bug,Dead Bug,Dead Bug,no_equipment,False,images/flat/dead-bug-start.webp,images/flat/dead-bug-peak.webp,
+dead-bug-hold,Dead Bug Hold,Dead Bug Isométrico,no_equipment,False,,,images/flat/dead-bug-hold-main.webp
+deep-squat-hold,Deep Squat Hold,Sentadilla Profunda Isométrica,no_equipment,False,,,images/flat/deep-squat-hold-main.webp
+diamond-push-ups,Diamond Push Ups,Flexiones en Diamante,no_equipment,False,images/flat/diamond-push-ups-start.webp,images/flat/diamond-push-ups-peak.webp,
+dolphin-pose,Dolphin Pose,Postura del Delfín,no_equipment,False,,,images/flat/dolphin-pose-main.webp
+doorway-chest-stretch,Doorway Chest Stretch,Estiramiento de Pecho en el Marco,no_equipment,False,,,images/flat/doorway-chest-stretch-main.webp
+double-db-kickstand-deadlift,Double Dumbbell Kickstand Deadlift,Peso Muerto Kickstand con Doble Mancuerna,dumbbell,False,images/flat/double-db-kickstand-deadlift-start.webp,images/flat/double-db-kickstand-deadlift-peak.webp,
+double-db-overhead-carry,Double Dumbbell Overhead Carry,Paseo con Dos Mancuernas sobre la Cabeza,dumbbell,False,,,images/flat/double-db-overhead-carry-main.webp
+downward-dog,Downward-Facing Dog,Perro Boca Abajo,no_equipment,False,,,images/flat/downward-dog-main.webp
+downward-dog-knee-tuck,Downward Dog Knee Tuck,Rodilla al Pecho en Perro Boca Abajo,no_equipment,False,images/flat/downward-dog-knee-tuck-start.webp,images/flat/downward-dog-knee-tuck-peak.webp,
+downward-dog-to-knee-drive,Downward Dog to Knee Drive,Rodilla al Codo desde Perro de Tres Patas,no_equipment,False,images/flat/downward-dog-to-knee-drive-start.webp,images/flat/downward-dog-to-knee-drive-peak.webp,
+downward-dog-to-low-lunge,Downward Dog to Low Lunge,Perro Boca Abajo a Zancada Baja,no_equipment,False,images/flat/downward-dog-to-low-lunge-start.webp,images/flat/downward-dog-to-low-lunge-peak.webp,
+downward-dog-to-plank,Downward Dog to Plank,Perro Boca Abajo a Plancha,no_equipment,False,images/flat/downward-dog-to-plank-start.webp,images/flat/downward-dog-to-plank-peak.webp,
+downward-dog-to-upward-dog,Downward Dog to Upward Dog,Perro Boca Abajo a Perro Boca Arriba,no_equipment,False,images/flat/downward-dog-to-upward-dog-start.webp,images/flat/downward-dog-to-upward-dog-peak.webp,
+dumbbell-calf-raise,Dumbbell Calf Raise,Elevación de Talones con Mancuernas,dumbbell,False,images/flat/dumbbell-calf-raise-start.webp,images/flat/dumbbell-calf-raise-peak.webp,
+dumbbell-clean-and-press,Dumbbell Clean and Press,Clean and Press con Mancuernas,dumbbell,False,images/flat/dumbbell-clean-and-press-start.webp,images/flat/dumbbell-clean-and-press-peak.webp,
+dumbbell-curl-and-press,Dumbbell Curl and Press,Curl y Press con Mancuernas,dumbbell,False,images/flat/dumbbell-curl-and-press-start.webp,images/flat/dumbbell-curl-and-press-peak.webp,
+dumbbell-deadlift,Dumbbell Deadlift,Peso Muerto con Mancuernas,dumbbell,False,images/flat/dumbbell-deadlift-start.webp,images/flat/dumbbell-deadlift-peak.webp,
+dumbbell-face-pull,Dumbbell Face Pull,Face Pull con Mancuernas,dumbbell,False,images/flat/dumbbell-face-pull-start.webp,images/flat/dumbbell-face-pull-peak.webp,
+dumbbell-farmers-walk,Dumbbell Farmer's Walk,Caminata del Granjero con Mancuernas,dumbbell,False,,,images/flat/dumbbell-farmers-walk-main.webp
+dumbbell-floor-press,Dumbbell Floor Press,Press de Suelo con Mancuernas,dumbbell,False,images/flat/dumbbell-floor-press-start.webp,images/flat/dumbbell-floor-press-peak.webp,
+dumbbell-front-raise,Dumbbell Front Raise,Elevación Frontal con Mancuernas,dumbbell,False,images/flat/dumbbell-front-raise-start.webp,images/flat/dumbbell-front-raise-peak.webp,
+dumbbell-front-squat,Dumbbell Front Squat,Sentadilla Frontal con Mancuernas,dumbbell,False,images/flat/dumbbell-front-squat-start.webp,images/flat/dumbbell-front-squat-peak.webp,
+dumbbell-pistol-squat,Dumbbell Pistol Squat,Sentadilla Pistola con Mancuerna,dumbbell,False,images/flat/dumbbell-pistol-squat-start.webp,images/flat/dumbbell-pistol-squat-peak.webp,
+dumbbell-push-press,Dumbbell Push Press,Press de Empuje con Mancuernas,dumbbell,False,images/flat/dumbbell-push-press-start.webp,images/flat/dumbbell-push-press-peak.webp,
+dumbbell-reverse-fly,Dumbbell Reverse Fly,Pájaro Invertido con Mancuernas,dumbbell,False,images/flat/dumbbell-reverse-fly-start.webp,images/flat/dumbbell-reverse-fly-peak.webp,
+dumbbell-romanian-deadlift,Dumbbell Romanian Deadlift,Peso Muerto Rumano con Mancuernas,dumbbell,False,images/flat/dumbbell-romanian-deadlift-start.webp,images/flat/dumbbell-romanian-deadlift-peak.webp,
+dumbbell-shoulder-press,Dumbbell Shoulder Press,Press de Hombros con Mancuernas,dumbbell,False,images/flat/dumbbell-shoulder-press-start.webp,images/flat/dumbbell-shoulder-press-peak.webp,
+dumbbell-side-bend,Dumbbell Side Bend,Flexión Lateral con Mancuerna,dumbbell,False,images/flat/dumbbell-side-bend-start.webp,images/flat/dumbbell-side-bend-peak.webp,
+dumbbell-snatch,Dumbbell Snatch,Snatch con Mancuerna,dumbbell,False,images/flat/dumbbell-snatch-start.webp,images/flat/dumbbell-snatch-peak.webp,
+dumbbell-split-squat,Dumbbell Split Squat,Sentadilla en Postura Dividida con Mancuernas,dumbbell,False,images/flat/dumbbell-split-squat-start.webp,images/flat/dumbbell-split-squat-peak.webp,
+dumbbell-tricep-extension,Dumbbell Tricep Extension,Extensión de Tríceps con Mancuerna,dumbbell,False,images/flat/dumbbell-tricep-extension-start.webp,images/flat/dumbbell-tricep-extension-peak.webp,
+dumbbell-upright-row,Dumbbell Upright Row,Remo al Mentón con Mancuernas,dumbbell,False,images/flat/dumbbell-upright-row-start.webp,images/flat/dumbbell-upright-row-peak.webp,
+dumbbell-windmill,Dumbbell Windmill,Molino con Mancuerna,dumbbell,False,images/flat/dumbbell-windmill-start.webp,images/flat/dumbbell-windmill-peak.webp,
+eagle-pose,Eagle Pose,Postura del Águila,no_equipment,False,,,images/flat/eagle-pose-main.webp
+easy-pose,Easy Pose,Postura Fácil,no_equipment,False,,,images/flat/easy-pose-main.webp
+extended-side-angle,Extended Side Angle Pose,Ángulo Lateral Extendido,no_equipment,False,,,images/flat/extended-side-angle-main.webp
+fire-hydrant,Fire Hydrant,Hidrante de Fuego,no_equipment,False,images/flat/fire-hydrant-start.webp,images/flat/fire-hydrant-peak.webp,
+fish-pose,Fish Pose,Postura del Pez,no_equipment,False,,,images/flat/fish-pose-main.webp
+floor-kettlebell-pullover,Floor Kettlebell Pullover,Pullover con Pesa Rusa en Suelo,kettlebell,False,images/flat/floor-kettlebell-pullover-start.webp,images/flat/floor-kettlebell-pullover-peak.webp,
+flutter-kicks,Flutter Kicks,Flutter Kicks,no_equipment,False,images/flat/flutter-kicks-start.webp,images/flat/flutter-kicks-peak.webp,
+garland-pose,Garland Pose,Postura de la Guirnalda,no_equipment,False,,,images/flat/garland-pose-main.webp
+glute-bridge,Glute Bridge,Puente de Glúteos,no_equipment,False,images/flat/glute-bridge-start.webp,images/flat/glute-bridge-peak.webp,
+glute-bridge-hold,Glute Bridge Hold,Puente de Glúteos Isométrico,no_equipment,False,,,images/flat/glute-bridge-hold-main.webp
+glute-kickback,Glute Kickback,Patada de Glúteo,no_equipment,False,images/flat/glute-kickback-start.webp,images/flat/glute-kickback-peak.webp,
+glute-kickback-hold,Glute Kickback Hold,Patada de Glúteo Isométrica,no_equipment,False,,,images/flat/glute-kickback-hold-main.webp
+goblet-squat,Goblet Squat,Sentadilla Goblet,kettlebell,False,images/flat/goblet-squat-start.webp,images/flat/goblet-squat-peak.webp,
+half-kneeling-hip-flexor-rock,Half-Kneeling Hip Flexor Rock,Balanceo de Flexor de Cadera en Media Rodilla,no_equipment,False,images/flat/half-kneeling-hip-flexor-rock-start.webp,images/flat/half-kneeling-hip-flexor-rock-peak.webp,
+half-moon-pose,Half Moon Pose,Postura de la Media Luna,no_equipment,False,,,images/flat/half-moon-pose-main.webp
+hammer-curl,Dumbbell Hammer Curl,Curl de Martillo con Mancuernas,dumbbell,False,images/flat/hammer-curl-start.webp,images/flat/hammer-curl-peak.webp,
+handstand-hold,Handstand Hold,Pino Isométrico,no_equipment,False,,,images/flat/handstand-hold-main.webp
+handstand-push-ups,Handstand Push Ups,Flexiones en Pino,no_equipment,False,images/flat/handstand-push-ups-start.webp,images/flat/handstand-push-ups-peak.webp,
+happy-baby,Happy Baby Pose,Postura del Bebé Feliz,no_equipment,False,,,images/flat/happy-baby-main.webp
+head-to-knee-pose,Head-to-Knee Pose,Postura de Cabeza a la Rodilla,no_equipment,False,,,images/flat/head-to-knee-pose-main.webp
+heel-flicks,Heel Flicks,Talones a los Glúteos,no_equipment,False,,,images/flat/heel-flicks-main.webp
+heel-to-toe-walk,Heel-to-Toe Walk,Marcha en Tándem,no_equipment,False,,,images/flat/heel-to-toe-walk-main.webp
+heel-touches,Heel Touches,Toques de Talón,no_equipment,False,images/flat/heel-touches-start.webp,images/flat/heel-touches-peak.webp,
+hero-pose,Hero Pose,Postura del Héroe,no_equipment,False,,,images/flat/hero-pose-main.webp
+high-knees,High Knees,Rodillas Altas,no_equipment,False,,,images/flat/high-knees-main.webp
+high-plank,High Plank,Plancha Alta,no_equipment,False,,,images/flat/high-plank-main.webp
+hollow-body-hold,Hollow Body Hold,Mantenimiento del Cuerpo Hueco,no_equipment,False,,,images/flat/hollow-body-hold-main.webp
+inchworm,Inchworm,Inchworm,no_equipment,False,images/flat/inchworm-start.webp,images/flat/inchworm-peak.webp,
+isometric-neck-side,Isometric Neck Lateral Flexion,Flexión Lateral Isométrica de Cuello,no_equipment,False,,,images/flat/isometric-neck-side-main.webp
+jackknife-sit-up,Jackknife Sit-Up,Abdominal navaja,no_equipment,False,images/flat/jackknife-sit-up-start.webp,images/flat/jackknife-sit-up-peak.webp,
+jump-squat,Jump Squat,Sentadilla con Salto,no_equipment,False,images/flat/jump-squat-start.webp,images/flat/jump-squat-peak.webp,
+jumping-jacks,Jumping Jacks,Saltos de Tijera,no_equipment,False,images/flat/jumping-jacks-start.webp,images/flat/jumping-jacks-peak.webp,
+kettlebell-close-grip-floor-press,Kettlebell Close-Grip Floor Press,Press de Suelo con Agarre Cerrado con Pesa Rusa,kettlebell,False,images/flat/kettlebell-close-grip-floor-press-start.webp,images/flat/kettlebell-close-grip-floor-press-peak.webp,
+kettlebell-deadlift,Kettlebell Deadlift,Peso muerto con pesa rusa,kettlebell,False,images/flat/kettlebell-deadlift-start.webp,images/flat/kettlebell-deadlift-peak.webp,
+kettlebell-goblet-lunge,Kettlebell Goblet Lunge,Zancada Goblet con Kettlebell,kettlebell,False,images/flat/kettlebell-goblet-lunge-start.webp,images/flat/kettlebell-goblet-lunge-peak.webp,
+kettlebell-halo,Kettlebell Halo,Halo con pesa rusa,kettlebell,False,images/flat/kettlebell-halo-start.webp,images/flat/kettlebell-halo-peak.webp,
+kettlebell-hammer-curl,Kettlebell Hammer Curl,Curl martillo con pesa rusa,kettlebell,False,images/flat/kettlebell-hammer-curl-start.webp,images/flat/kettlebell-hammer-curl-peak.webp,
+kettlebell-kickstand-deadlift,Kettlebell Kickstand Deadlift,Peso Muerto Kickstand con Kettlebell,kettlebell,False,images/flat/kettlebell-kickstand-deadlift-start.webp,images/flat/kettlebell-kickstand-deadlift-peak.webp,
+kettlebell-lunge-press,Kettlebell Lunge Press,Zancada con press de pesa rusa,kettlebell,False,images/flat/kettlebell-lunge-press-start.webp,images/flat/kettlebell-lunge-press-peak.webp,
+kettlebell-offset-reverse-lunge-and-press,Kettlebell Offset Reverse Lunge and Press,Zancada inversa con press desequilibrado de pesa rusa,kettlebell,False,images/flat/kettlebell-offset-reverse-lunge-and-press-start.webp,images/flat/kettlebell-offset-reverse-lunge-and-press-peak.webp,
+kettlebell-overhead-carry,Kettlebell Overhead Carry,Paseo con Kettlebell sobre la Cabeza,kettlebell,False,,,images/flat/kettlebell-overhead-carry-main.webp
+kettlebell-overhead-tricep-extension,Kettlebell Overhead Tricep Extension,Extensión de tríceps por encima de la cabeza con pesa rusa,kettlebell,False,images/flat/kettlebell-overhead-tricep-extension-start.webp,images/flat/kettlebell-overhead-tricep-extension-peak.webp,
+kettlebell-pistol-squat,Kettlebell Pistol Squat,Sentadilla pistola con pesa rusa,kettlebell,False,images/flat/kettlebell-pistol-squat-start.webp,images/flat/kettlebell-pistol-squat-peak.webp,
+kettlebell-reverse-lunge,Kettlebell Reverse Lunge,Zancada Inversa con Kettlebell,kettlebell,False,images/flat/kettlebell-reverse-lunge-start.webp,images/flat/kettlebell-reverse-lunge-peak.webp,
+kettlebell-rotational-lunge,Kettlebell Rotational Lunge,Zancada rotacional con pesa rusa,kettlebell,False,images/flat/kettlebell-rotational-lunge-start.webp,images/flat/kettlebell-rotational-lunge-peak.webp,
+kettlebell-russian-twist,Kettlebell Russian Twist,Giro ruso con pesa rusa,kettlebell,False,images/flat/kettlebell-russian-twist-start.webp,images/flat/kettlebell-russian-twist-peak.webp,
+kettlebell-single-leg-deadlift,Kettlebell Single Leg Deadlift,Peso muerto a una pierna con pesa rusa,kettlebell,False,images/flat/kettlebell-single-leg-deadlift-start.webp,images/flat/kettlebell-single-leg-deadlift-peak.webp,
+kettlebell-squat,Kettlebell Squat,Sentadilla con Kettlebell,kettlebell,False,images/flat/kettlebell-squat-start.webp,images/flat/kettlebell-squat-peak.webp,
+kettlebell-sumo-deadlift,Kettlebell Sumo Deadlift,Peso muerto sumo con pesa rusa,kettlebell,False,images/flat/kettlebell-sumo-deadlift-start.webp,images/flat/kettlebell-sumo-deadlift-peak.webp,
+kettlebell-sumo-high-pull,Kettlebell Sumo High Pull,Jalón sumo al mentón con pesa rusa,kettlebell,False,images/flat/kettlebell-sumo-high-pull-start.webp,images/flat/kettlebell-sumo-high-pull-peak.webp,
+kettlebell-swing,Kettlebell Swing,Swing con pesa rusa,kettlebell,False,images/flat/kettlebell-swing-start.webp,images/flat/kettlebell-swing-peak.webp,
+kettlebell-swing-clean,Kettlebell Swing Clean,Swing y cargada con pesa rusa,kettlebell,False,images/flat/kettlebell-swing-clean-start.webp,images/flat/kettlebell-swing-clean-peak.webp,
+kettlebell-turkish-get-ups,Kettlebell Turkish Get Ups,Levantamiento Turco con Kettlebell,kettlebell,False,images/flat/kettlebell-turkish-get-ups-start.webp,images/flat/kettlebell-turkish-get-ups-peak.webp,
+kettlebell-windmills,Kettlebell Windmills,Molino de Viento con Pesa Rusa,kettlebell,False,images/flat/kettlebell-windmills-start.webp,images/flat/kettlebell-windmills-peak.webp,
+knee-push-ups,Knee Push Ups,Push-Up en Rodillas,no_equipment,False,images/flat/knee-push-ups-start.webp,images/flat/knee-push-ups-peak.webp,
+knee-to-chest-stretch,Knee-to-Chest Stretch,Estiramiento Rodilla al Pecho,no_equipment,False,,,images/flat/knee-to-chest-stretch-main.webp
+kneeling-hip-flexor-stretch,Kneeling Hip Flexor Stretch,Estiramiento de Flexores de Cadera Arrodillado,no_equipment,False,,,images/flat/kneeling-hip-flexor-stretch-main.webp
+kneeling-wrist-stretch,Kneeling Wrist Stretch,Estiramiento de Muñecas Arrodillado,no_equipment,False,,,images/flat/kneeling-wrist-stretch-main.webp
+lateral-raise,Dumbbell Lateral Raise,Elevación Lateral con Mancuernas,dumbbell,False,images/flat/lateral-raise-start.webp,images/flat/lateral-raise-peak.webp,
+legs-up-the-wall,Legs-Up-the-Wall Pose,Piernas en la Pared,no_equipment,False,,,images/flat/legs-up-the-wall-main.webp
+lizard-stretch,Lizard Stretch,Estiramiento del Lagarto,no_equipment,False,,,images/flat/lizard-stretch-main.webp
+locust-pose,Locust Pose,Postura del Saltamontes,no_equipment,False,,,images/flat/locust-pose-main.webp
+low-lunge,Low Lunge,Zancada Baja,no_equipment,False,,,images/flat/low-lunge-main.webp
+low-lunge-to-half-split,Low Lunge to Half Split,Zancada Baja a Medio Split,no_equipment,False,images/flat/low-lunge-to-half-split-start.webp,images/flat/low-lunge-to-half-split-peak.webp,
+lunge,Lunge,Zancada,no_equipment,False,images/flat/lunge-start.webp,images/flat/lunge-peak.webp,
+mountain-climbers,Mountain Climbers,Mountain Climbers,no_equipment,False,images/flat/mountain-climbers-start.webp,images/flat/mountain-climbers-peak.webp,
+mountain-pose,Mountain Pose,Postura de la Montaña,no_equipment,False,,,images/flat/mountain-pose-main.webp
+neck-side-stretch,Neck Side Stretch,Estiramiento Lateral de Cuello,no_equipment,False,,,images/flat/neck-side-stretch-main.webp
+one-arm-dumbbell-push-press,One-Arm Dumbbell Push Press,Push Press con Mancuerna a Un Brazo,dumbbell,False,images/flat/one-arm-dumbbell-push-press-start.webp,images/flat/one-arm-dumbbell-push-press-peak.webp,
+one-arm-dumbbell-shoulder-press,One Arm Dumbbell Shoulder Press,Press de Hombros con Mancuerna a Un Brazo,dumbbell,False,images/flat/one-arm-dumbbell-shoulder-press-start.webp,images/flat/one-arm-dumbbell-shoulder-press-peak.webp,
+one-arm-dumbbell-swing,One-Arm Dumbbell Swing,Swing con Mancuerna a un Brazo,dumbbell,False,images/flat/one-arm-dumbbell-swing-start.webp,images/flat/one-arm-dumbbell-swing-peak.webp,
+one-arm-kettlebell-bicep-curl,One Arm Kettlebell Bicep Curl,Curl de Bíceps con Pesa Rusa a Un Brazo,kettlebell,False,images/flat/one-arm-kettlebell-bicep-curl-start.webp,images/flat/one-arm-kettlebell-bicep-curl-peak.webp,
+one-arm-kettlebell-bottoms-up-press,One-Arm Kettlebell Bottoms-Up Press,Press Strict con Pesa Rusa Invertida a Un Brazo,kettlebell,False,images/flat/one-arm-kettlebell-bottoms-up-press-start.webp,images/flat/one-arm-kettlebell-bottoms-up-press-peak.webp,
+one-arm-kettlebell-floor-glute-bridge-press,One Arm Kettlebell Floor Glute Bridge Press,Press en Puente de Glúteos en Suelo con Pesa Rusa a Un Brazo,kettlebell,False,images/flat/one-arm-kettlebell-floor-glute-bridge-press-start.webp,images/flat/one-arm-kettlebell-floor-glute-bridge-press-peak.webp,
+one-arm-kettlebell-floor-press,One Arm Kettlebell Floor Press,Press en Suelo con Pesa Rusa a Un Brazo,kettlebell,False,images/flat/one-arm-kettlebell-floor-press-start.webp,images/flat/one-arm-kettlebell-floor-press-peak.webp,
+one-arm-kettlebell-front-squat,One Arm Kettlebell Front Squat,Sentadilla Frontal con Pesa Rusa a Un Brazo,kettlebell,False,images/flat/one-arm-kettlebell-front-squat-start.webp,images/flat/one-arm-kettlebell-front-squat-peak.webp,
+one-arm-kettlebell-push-press,One Arm Kettlebell Push Press,Push Press con Pesa Rusa a Un Brazo,kettlebell,False,images/flat/one-arm-kettlebell-push-press-start.webp,images/flat/one-arm-kettlebell-push-press-peak.webp,
+one-arm-kettlebell-shoulder-press,One Arm Kettlebell Shoulder Press,Press de Hombro con Pesa Rusa a Un Brazo,kettlebell,False,images/flat/one-arm-kettlebell-shoulder-press-start.webp,images/flat/one-arm-kettlebell-shoulder-press-peak.webp,
+one-arm-kettlebell-swing,One Arm Kettlebell Swing,Swing con Pesa Rusa a Un Brazo,kettlebell,False,images/flat/one-arm-kettlebell-swing-start.webp,images/flat/one-arm-kettlebell-swing-peak.webp,
+one-arm-kettlebell-tricep-kickback,One-Arm Kettlebell Tricep Kickback,Extensión de Tríceps a Un Brazo con Pesa Rusa,kettlebell,False,images/flat/one-arm-kettlebell-tricep-kickback-start.webp,images/flat/one-arm-kettlebell-tricep-kickback-peak.webp,
+one-arm-single-leg-dumbbell-romanian-deadlift,One-Arm Single-Leg Dumbbell Romanian Deadlift,Peso Muerto Rumano a Una Pierna con Mancuerna a Un Brazo,dumbbell,False,images/flat/one-arm-single-leg-dumbbell-romanian-deadlift-start.webp,images/flat/one-arm-single-leg-dumbbell-romanian-deadlift-peak.webp,
+one-arm-single-leg-kettlebell-romanian-deadlift,One-Arm Single-Leg Kettlebell Romanian Deadlift,Peso Muerto Rumano a Una Pierna con Pesa Rusa a Un Brazo,kettlebell,False,images/flat/one-arm-single-leg-kettlebell-romanian-deadlift-start.webp,images/flat/one-arm-single-leg-kettlebell-romanian-deadlift-peak.webp,
+overhead-tricep-extension,Overhead Tricep Extension,Extensión de Tríceps por Encima de la Cabeza,dumbbell,False,images/flat/overhead-tricep-extension-start.webp,images/flat/overhead-tricep-extension-peak.webp,
+overhead-triceps-stretch,Overhead Triceps Stretch,Estiramiento de Tríceps sobre la Cabeza,no_equipment,False,,,images/flat/overhead-triceps-stretch-main.webp
+pigeon-stretch,Pigeon Stretch,Estiramiento de la Paloma,no_equipment,False,,,images/flat/pigeon-stretch-main.webp
+pike-push-ups,Pike Push Ups,Flexiones en Pica,no_equipment,False,images/flat/pike-push-ups-start.webp,images/flat/pike-push-ups-peak.webp,
+pilates-kneeling-side-kick,Pilates Kneeling Side Kick,Patada Lateral de Rodillas de Pilates,no_equipment,False,images/flat/pilates-kneeling-side-kick-start.webp,images/flat/pilates-kneeling-side-kick-peak.webp,
+pilates-leg-pull-back,Pilates Leg Pull Back,Leg Pull Back de Pilates,no_equipment,False,images/flat/pilates-leg-pull-back-start.webp,images/flat/pilates-leg-pull-back-peak.webp,
+pilates-leg-pull-front,Pilates Leg Pull Front,Leg Pull Front de Pilates,no_equipment,False,images/flat/pilates-leg-pull-front-start.webp,images/flat/pilates-leg-pull-front-peak.webp,
+pilates-roll-down,Pilates Roll Down,Roll Down de Pilates,no_equipment,False,images/flat/pilates-roll-down-start.webp,images/flat/pilates-roll-down-peak.webp,
+pilates-roll-over,Pilates Roll Over,Roll Over de Pilates,no_equipment,False,images/flat/pilates-roll-over-start.webp,images/flat/pilates-roll-over-peak.webp,
+pilates-saw,Pilates Saw,La Sierra de Pilates,no_equipment,False,images/flat/pilates-saw-start.webp,images/flat/pilates-saw-peak.webp,
+pilates-side-bend,Pilates Side Bend,Flexión Lateral de Pilates,no_equipment,False,images/flat/pilates-side-bend-start.webp,images/flat/pilates-side-bend-peak.webp,
+pilates-spine-stretch-forward,Pilates Spine Stretch Forward,Spine Stretch Forward de Pilates,no_equipment,False,images/flat/pilates-spine-stretch-forward-start.webp,images/flat/pilates-spine-stretch-forward-peak.webp,
+pilates-spine-twist,Pilates Spine Twist,Spine Twist de Pilates,no_equipment,False,images/flat/pilates-spine-twist-start.webp,images/flat/pilates-spine-twist-peak.webp,
+pistol-squat,Pistol Squat,Sentadilla a una Pierna (Pistol),no_equipment,False,images/flat/pistol-squat-start.webp,images/flat/pistol-squat-peak.webp,
+planche,Planche,Plancha Calisténica,no_equipment,False,,,images/flat/planche-main.webp
+plank,Plank,Plancha,no_equipment,False,,,images/flat/plank-main.webp
+plank-knee-tuck,Plank Knee Tuck,Rodilla al Pecho en Plancha,no_equipment,False,images/flat/plank-knee-tuck-start.webp,images/flat/plank-knee-tuck-peak.webp,
+plow-pose,Plow Pose,Postura del Arado,no_equipment,False,,,images/flat/plow-pose-main.webp
+plyo-lunge,Plyo Lunge,Zancada Pliométrica,no_equipment,False,images/flat/plyo-lunge-start.webp,images/flat/plyo-lunge-peak.webp,
+plyo-push-up,Plyo Push-Up,Flexión Pliométrica,no_equipment,False,images/flat/plyo-push-up-start.webp,images/flat/plyo-push-up-peak.webp,
+pseudo-planche-push-ups,Pseudo Planche Push Ups,Push-Ups de Pseudo Plancha,no_equipment,False,images/flat/pseudo-planche-push-ups-start.webp,images/flat/pseudo-planche-push-ups-peak.webp,
+puppy-pose,Puppy Pose,Postura del Cachorro,no_equipment,False,,,images/flat/puppy-pose-main.webp
+push-up,Push-Up,Push-Up,no_equipment,False,images/flat/push-up-start.webp,images/flat/push-up-peak.webp,
+pyramid-pose,Pyramid Pose,Postura de la Pirámide,no_equipment,False,,,images/flat/pyramid-pose-main.webp
+rear-delt-fly,Rear Delt Fly,Apertura de Deltoides Posterior,dumbbell,False,images/flat/rear-delt-fly-start.webp,images/flat/rear-delt-fly-peak.webp,
+renegade-row,Renegade Row,Remo Renegado,dumbbell,False,images/flat/renegade-row-start.webp,images/flat/renegade-row-peak.webp,
+reverse-crunches,Reverse Crunches,Crunches Inversos,no_equipment,False,images/flat/reverse-crunches-start.webp,images/flat/reverse-crunches-peak.webp,
+reverse-lunge,Reverse Lunge,Zancada Inversa,dumbbell,False,images/flat/reverse-lunge-start.webp,images/flat/reverse-lunge-peak.webp,
+reverse-nordic-curl,Reverse Nordic Curl,Nordic Curl Inverso,no_equipment,False,images/flat/reverse-nordic-curl-start.webp,images/flat/reverse-nordic-curl-peak.webp,
+reverse-plank,Reverse Plank,Plancha Inversa,no_equipment,False,,,images/flat/reverse-plank-main.webp
+reverse-plank-dips,Reverse Plank Dips,Fondos en Plancha Invertida,no_equipment,False,images/flat/reverse-plank-dips-start.webp,images/flat/reverse-plank-dips-peak.webp,
+revolved-chair-pose,Revolved Chair Pose,Postura de la Silla Girada,no_equipment,False,,,images/flat/revolved-chair-pose-main.webp
+revolved-crescent-lunge,Revolved Crescent Lunge,Zancada Alta Girada,no_equipment,False,,,images/flat/revolved-crescent-lunge-main.webp
+running,Running,Correr,no_equipment,False,,,images/flat/running-main.webp
+russian-twist,Russian Twist,Giro Ruso,no_equipment,False,images/flat/russian-twist-start.webp,images/flat/russian-twist-peak.webp,
+scissor-kicks,Scissor Kicks,Tijeras,no_equipment,False,images/flat/scissor-kicks-start.webp,images/flat/scissor-kicks-peak.webp,
+seated-forward-fold,Seated Forward Fold,Flexión Sentado hacia Adelante,no_equipment,False,,,images/flat/seated-forward-fold-main.webp
+seated-spinal-twist,Seated Spinal Twist,Giro Espinal Sentado,no_equipment,False,,,images/flat/seated-spinal-twist-main.webp
+seated-straddle-stretch,Seated Straddle Stretch,Estiramiento en Apertura Sentado,no_equipment,False,,,images/flat/seated-straddle-stretch-main.webp
+side-lunge,Side Lunge,Zancada Lateral,no_equipment,False,images/flat/side-lunge-start.webp,images/flat/side-lunge-peak.webp,
+side-lying-hip-abduction,Side-Lying Hip Abduction,Abducción de Cadera Acostado de Lado,no_equipment,False,images/flat/side-lying-hip-abduction-start.webp,images/flat/side-lying-hip-abduction-peak.webp,
+side-lying-hip-abduction-hold,Side-Lying Hip Abduction Hold,Abducción de Cadera Acostado de Lado Isométrica,no_equipment,False,,,images/flat/side-lying-hip-abduction-hold-main.webp
+side-lying-hip-adduction,Side Lying Hip Adduction,Aducción de Cadera Acostado de Lado,no_equipment,False,images/flat/side-lying-hip-adduction-start.webp,images/flat/side-lying-hip-adduction-peak.webp,
+side-lying-hip-adduction-hold,Side-Lying Hip Adduction Hold,Aducción de Cadera Acostado de Lado Isométrica,no_equipment,False,,,images/flat/side-lying-hip-adduction-hold-main.webp
+side-plank,Side Plank,Plancha Lateral,no_equipment,False,,,images/flat/side-plank-main.webp
+side-plank-leg-lift-hold,Side Plank Leg Lift Hold,Plancha Lateral con Elevación de Pierna Isométrica,no_equipment,False,,,images/flat/side-plank-leg-lift-hold-main.webp
+single-arm-dumbbell-overhead-tricep-extension,Single-Arm Dumbbell Overhead Tricep Extension,Extensión de Tríceps sobre la Cabeza con Mancuerna a Un Brazo,dumbbell,False,images/flat/single-arm-dumbbell-overhead-tricep-extension-start.webp,images/flat/single-arm-dumbbell-overhead-tricep-extension-peak.webp,
+single-arm-hammer-curl,Single-Arm Hammer Curl,Curl martillo unilateral,dumbbell,False,images/flat/single-arm-hammer-curl-start.webp,images/flat/single-arm-hammer-curl-peak.webp,
+single-db-svend-press,Single Dumbbell Svend Press,Press Svend con una Mancuerna,dumbbell,False,images/flat/single-db-svend-press-start.webp,images/flat/single-db-svend-press-peak.webp,
+single-leg-calf-raise,Single Leg Calf Raise,Elevación de Pantorrilla a Una Pierna,no_equipment,False,images/flat/single-leg-calf-raise-start.webp,images/flat/single-leg-calf-raise-peak.webp,
+single-leg-glute-bridge,Single Leg Glute Bridge,Puente de Glúteo a Una Pierna,no_equipment,False,images/flat/single-leg-glute-bridge-start.webp,images/flat/single-leg-glute-bridge-peak.webp,
+single-leg-glute-bridge-hold,Single-Leg Glute Bridge Hold,Puente de Glúteo a Una Pierna Isométrico,no_equipment,False,,,images/flat/single-leg-glute-bridge-hold-main.webp
+single-leg-rdl-hold,Single Leg RDL Hold,Peso Muerto Rumano a Una Pierna Isométrico,no_equipment,False,,,images/flat/single-leg-rdl-hold-main.webp
+single-leg-romanian-deadlift,Single Leg Romanian Deadlift,Peso Muerto Rumano a Una Pierna,dumbbell,False,images/flat/single-leg-romanian-deadlift-start.webp,images/flat/single-leg-romanian-deadlift-peak.webp,
+sit-ups,Sit-Ups,Abdominales,no_equipment,False,images/flat/sit-ups-start.webp,images/flat/sit-ups-peak.webp,
+six-inch-hold,Six Inch Hold,Mantenimiento a 15 cm del Suelo,no_equipment,False,,,images/flat/six-inch-hold-main.webp
+sphinx-pose,Sphinx Pose,Postura de la Esfinge,no_equipment,False,,,images/flat/sphinx-pose-main.webp
+spiderman-push-up,Spiderman Push-Up,Flexión Spiderman,no_equipment,False,images/flat/spiderman-push-up-start.webp,images/flat/spiderman-push-up-peak.webp,
+split-squat,Split Squat,Sentadilla en Tijera,no_equipment,False,images/flat/split-squat-start.webp,images/flat/split-squat-peak.webp,
+squat-hold,Squat Hold,Sentadilla Isométrica,no_equipment,False,,,images/flat/squat-hold-main.webp
+squat-pulse,Squat Pulse,Sentadilla con Pulsos,no_equipment,False,images/flat/squat-pulse-start.webp,images/flat/squat-pulse-peak.webp,
+stability-ball-hip-bridge,Stability Ball Hip Bridge,Puente de Cadera con Balón de Estabilidad,stability_ball,False,images/flat/stability-ball-hip-bridge-start.webp,images/flat/stability-ball-hip-bridge-peak.webp,
+stability-ball-knee-tuck,Stability Ball Knee Tuck,Encogimiento de Rodillas con Balón de Estabilidad,stability_ball,False,images/flat/stability-ball-knee-tuck-start.webp,images/flat/stability-ball-knee-tuck-peak.webp,
+stability-ball-push-up,Stability Ball Push-Up,Push-Up con Balón de Estabilidad,stability_ball,False,images/flat/stability-ball-push-up-start.webp,images/flat/stability-ball-push-up-peak.webp,
+stability-ball-push-up-hands-on-ball,Stability Ball Push-Up (Hands on Ball),Flexión sobre pelota de estabilidad (manos en la pelota),stability_ball,False,images/flat/stability-ball-push-up-hands-on-ball-start.webp,images/flat/stability-ball-push-up-hands-on-ball-peak.webp,
+stability-ball-wall-squat,Stability Ball Wall Squat,Sentadilla en Pared con Pelota,stability_ball,False,images/flat/stability-ball-wall-squat-start.webp,images/flat/stability-ball-wall-squat-peak.webp,
+standing-calf-stretch,Standing Calf Stretch,Estiramiento de Pantorrilla de Pie,no_equipment,False,,,images/flat/standing-calf-stretch-main.webp
+standing-forward-fold,Standing Forward Fold,Flexión de Pie hacia Adelante,no_equipment,False,,,images/flat/standing-forward-fold-main.webp
+standing-forward-fold-to-half-lift,Standing Forward Fold to Half Lift,Flexión de Pie a Media Elevación,no_equipment,False,images/flat/standing-forward-fold-to-half-lift-start.webp,images/flat/standing-forward-fold-to-half-lift-peak.webp,
+standing-quad-stretch,Standing Quad Stretch,Estiramiento de Cuádriceps de Pie,no_equipment,False,,,images/flat/standing-quad-stretch-main.webp
+standing-side-bend,Standing Side Bend,Flexión Lateral de Pie,no_equipment,False,,,images/flat/standing-side-bend-main.webp
+standing-side-bend-flow,Standing Side Bend Flow,Flexión Lateral de Pie Alterna,no_equipment,False,images/flat/standing-side-bend-flow-start.webp,images/flat/standing-side-bend-flow-peak.webp,
+standing-split,Standing Split,Split de Pie,no_equipment,False,,,images/flat/standing-split-main.webp
+stationary-bike,Stationary Bike,Bicicleta Estática,stationary_bike,False,,,images/flat/stationary-bike-main.webp
+strict-curl,Strict Curl,Curl Estricto,dumbbell,False,images/flat/strict-curl-start.webp,images/flat/strict-curl-peak.webp,
+suitcase-carry,Suitcase Carry,Paseo del Maletín,kettlebell,False,,,images/flat/suitcase-carry-main.webp
+superman,Superman,Superman,no_equipment,False,images/flat/superman-start.webp,images/flat/superman-peak.webp,
+supine-spinal-twist,Supine Spinal Twist,Giro Espinal Tumbado,no_equipment,False,,,images/flat/supine-spinal-twist-main.webp
+supine-windshield-wipers,Supine Windshield Wipers,Limpiaparabrisas Tumbado,no_equipment,False,images/flat/supine-windshield-wipers-start.webp,images/flat/supine-windshield-wipers-peak.webp,
+supported-shoulderstand,Supported Shoulderstand,Vela con Apoyo,no_equipment,False,,,images/flat/supported-shoulderstand-main.webp
+thoracic-bridge,Thoracic Bridge,Puente Torácico,no_equipment,False,,,images/flat/thoracic-bridge-main.webp
+thread-the-needle,Thread the Needle,Enhebrar la Aguja,no_equipment,False,,,images/flat/thread-the-needle-main.webp
+thread-the-needle-flow,Thread the Needle Flow,Enhebrar la Aguja Dinámico,no_equipment,False,images/flat/thread-the-needle-flow-start.webp,images/flat/thread-the-needle-flow-peak.webp,
+three-legged-dog,Three-Legged Downward Dog,Perro de Tres Patas,no_equipment,False,,,images/flat/three-legged-dog-main.webp
+tree-pose,Tree Pose,Postura del Árbol,no_equipment,False,,,images/flat/tree-pose-main.webp
+triangle-pose,Triangle Pose,Postura del Triángulo,no_equipment,False,,,images/flat/triangle-pose-main.webp
+tricep-kickback,Dumbbell Tricep Kickback,Patada de Tríceps con Mancuerna,dumbbell,False,images/flat/tricep-kickback-start.webp,images/flat/tricep-kickback-peak.webp,
+upward-dog,Upward-Facing Dog,Perro Boca Arriba,no_equipment,False,,,images/flat/upward-dog-main.webp
+v-sit,V-Sit,Posición en V,no_equipment,False,,,images/flat/v-sit-main.webp
+v-ups,V Ups,V-Ups,no_equipment,False,images/flat/v-ups-start.webp,images/flat/v-ups-peak.webp,
+walking-lunge,Walking Lunge,Zancada Caminando,no_equipment,False,images/flat/walking-lunge-start.webp,images/flat/walking-lunge-peak.webp,
+wall-push-ups,Wall Push Ups,Push-Ups en Pared,no_equipment,False,images/flat/wall-push-ups-start.webp,images/flat/wall-push-ups-peak.webp,
+wall-sit,Wall Sit,Sentadilla en Pared,no_equipment,False,,,images/flat/wall-sit-main.webp
+warrior-one,Warrior I,Guerrero I,no_equipment,False,,,images/flat/warrior-one-main.webp
+warrior-three,Warrior III,Guerrero III,no_equipment,False,,,images/flat/warrior-three-main.webp
+warrior-two,Warrior II,Guerrero II,no_equipment,False,,,images/flat/warrior-two-main.webp
+wide-grip-push-ups,Wide Grip Push Ups,Flexiones con Agarre Ancho,no_equipment,False,images/flat/wide-grip-push-ups-start.webp,images/flat/wide-grip-push-ups-peak.webp,
+wide-legged-forward-fold,Wide-Legged Forward Fold,Flexión con Piernas Abiertas,no_equipment,False,,,images/flat/wide-legged-forward-fold-main.webp
+zottman-curl,Zottman Curl,Curl Zottman,dumbbell,False,images/flat/zottman-curl-start.webp,images/flat/zottman-curl-peak.webp,
+back-extension,Back Extension,Extensión de Espalda,no_equipment,True,images/flat/back-extension-start.webp,images/flat/back-extension-peak.webp,
+band-assisted-pull-ups,Band Assisted Pull Ups,Dominadas Asistidas con Banda,resistance_band,True,images/flat/band-assisted-pull-ups-start.webp,images/flat/band-assisted-pull-ups-peak.webp,
+banded-good-morning,Banded Good Morning,Buenos Días con Banda,loop_band,True,images/flat/banded-good-morning-start.webp,images/flat/banded-good-morning-peak.webp,
+banded-hip-thrust,Banded Hip Thrust,Empuje de Cadera con Banda,loop_band,True,images/flat/banded-hip-thrust-start.webp,images/flat/banded-hip-thrust-peak.webp,
+banded-romanian-deadlift,Banded Romanian Deadlift,Peso Muerto Rumano con Banda,loop_band,True,images/flat/banded-romanian-deadlift-start.webp,images/flat/banded-romanian-deadlift-peak.webp,
+banded-seated-hip-abduction,Banded Seated Hip Abduction,Abducción de Cadera Sentado con Banda,loop_band,True,images/flat/banded-seated-hip-abduction-start.webp,images/flat/banded-seated-hip-abduction-peak.webp,
+bench-dips,Bench Dips,Fondos en Banco,no_equipment,True,images/flat/bench-dips-start.webp,images/flat/bench-dips-peak.webp,
+bench-leg-pull-in,Bench Leg Pull-In,Encogimiento de Piernas en Banco,no_equipment,True,images/flat/bench-leg-pull-in-start.webp,images/flat/bench-leg-pull-in-peak.webp,
+box-squat,Box Squat,Sentadilla en Caja,no_equipment,True,images/flat/box-squat-start.webp,images/flat/box-squat-peak.webp,
+bulgarian-split-squat,Bulgarian Split Squat,Sentadilla Búlgara,dumbbell,True,images/flat/bulgarian-split-squat-start.webp,images/flat/bulgarian-split-squat-peak.webp,
+camel-pose,Camel Pose,Postura del Camello,no_equipment,True,,,images/flat/camel-pose-main.webp
+captains-chair-knee-raise,Captain's Chair Knee Raise,Elevación de Rodillas en Silla Romana,no_equipment,True,images/flat/captains-chair-knee-raise-start.webp,images/flat/captains-chair-knee-raise-peak.webp,
+captains-chair-leg-raise,Captain's Chair Leg Raise,Elevación de Piernas en Silla Romana,no_equipment,True,images/flat/captains-chair-leg-raise-start.webp,images/flat/captains-chair-leg-raise-peak.webp,
+chest-supported-db-row,Chest-Supported Dumbbell Row,Remo con Mancuernas con Apoyo en el Pecho,dumbbell,True,images/flat/chest-supported-db-row-start.webp,images/flat/chest-supported-db-row-peak.webp,
+chest-supported-dumbbell-shrug,Chest Supported Dumbbell Shrug,Encogimiento de Hombros con Mancuernas y Apoyo en el Pecho,dumbbell,True,images/flat/chest-supported-dumbbell-shrug-start.webp,images/flat/chest-supported-dumbbell-shrug-peak.webp,
+chest-supported-kettlebell-row,Chest-Supported Kettlebell Row,Remo con Kettlebell Apoyado en el Pecho,kettlebell,True,images/flat/chest-supported-kettlebell-row-start.webp,images/flat/chest-supported-kettlebell-row-peak.webp,
+close-grip-db-bench-press,Close-Grip Dumbbell Bench Press,Press de Banca con Mancuernas y Agarre Cerrado,dumbbell,True,images/flat/close-grip-db-bench-press-start.webp,images/flat/close-grip-db-bench-press-peak.webp,
+concentration-curl,Concentration Curl,Curl de Concentración,dumbbell,True,images/flat/concentration-curl-start.webp,images/flat/concentration-curl-peak.webp,
+db-bench-press,Dumbbell Bench Press,Press de Banca con Mancuernas,dumbbell,True,images/flat/db-bench-press-start.webp,images/flat/db-bench-press-peak.webp,
+db-fly,Dumbbell Fly,Aperturas con Mancuernas,dumbbell,True,images/flat/db-fly-start.webp,images/flat/db-fly-peak.webp,
+db-reverse-wrist-curl,Dumbbell Reverse Wrist Curl,Curl de Muñeca Inverso con Mancuerna,dumbbell,True,images/flat/db-reverse-wrist-curl-start.webp,images/flat/db-reverse-wrist-curl-peak.webp,
+decline-crunch,Decline Crunch,Crunch Declinado,no_equipment,True,images/flat/decline-crunch-start.webp,images/flat/decline-crunch-peak.webp,
+decline-db-fly,Decline Dumbbell Fly,Aperturas con Mancuernas en Banco Declinado,dumbbell,True,images/flat/decline-db-fly-start.webp,images/flat/decline-db-fly-peak.webp,
+donkey-calf-raise,Donkey Calf Raise,Elevación de Pantorrilla a la Burra,no_equipment,True,images/flat/donkey-calf-raise-start.webp,images/flat/donkey-calf-raise-peak.webp,
+double-kettlebell-bicep-curl,Double Kettlebell Bicep Curl,Curl de Bíceps con Dos Pesas Rusas,kettlebell,True,images/flat/double-kettlebell-bicep-curl-start.webp,images/flat/double-kettlebell-bicep-curl-peak.webp,
+downward-dog-pedal,Downward Dog Pedal,Pedaleo en Perro Boca Abajo,no_equipment,True,images/flat/downward-dog-pedal-start.webp,images/flat/downward-dog-pedal-peak.webp,
+dumbbell-hip-thrust,Dumbbell Hip Thrust,Empuje de Cadera con Mancuerna,dumbbell,True,images/flat/dumbbell-hip-thrust-start.webp,images/flat/dumbbell-hip-thrust-peak.webp,
+dumbbell-wrist-curl,Dumbbell Wrist Curl,Curl de Muñeca con Mancuerna,dumbbell,True,images/flat/dumbbell-wrist-curl-start.webp,images/flat/dumbbell-wrist-curl-peak.webp,
+jefferson-curl,Jefferson Curl,Jefferson curl,dumbbell,True,images/flat/jefferson-curl-start.webp,images/flat/jefferson-curl-peak.webp,
+kettlebell-concentration-curl,Kettlebell Concentration Curl,Curl de concentración con kettlebell,kettlebell,True,images/flat/kettlebell-concentration-curl-start.webp,images/flat/kettlebell-concentration-curl-peak.webp,
+kettlebell-hip-thrust,Kettlebell Hip Thrust,Empuje de Cadera con Kettlebell,kettlebell,True,images/flat/kettlebell-hip-thrust-start.webp,images/flat/kettlebell-hip-thrust-peak.webp,
+kettlebell-reverse-wrist-curl,Kettlebell Reverse Wrist Curl,Curl de Muñeca Inverso con Kettlebell,kettlebell,True,images/flat/kettlebell-reverse-wrist-curl-start.webp,images/flat/kettlebell-reverse-wrist-curl-peak.webp,
+kettlebell-svend-press,Kettlebell Svend Press,Press Svend con Kettlebells,kettlebell,True,images/flat/kettlebell-svend-press-start.webp,images/flat/kettlebell-svend-press-peak.webp,
+kettlebell-wrist-curl,Kettlebell Wrist Curl,Curl de Muñeca con Kettlebell,kettlebell,True,images/flat/kettlebell-wrist-curl-start.webp,images/flat/kettlebell-wrist-curl-peak.webp,
+lateral-leg-swing,Lateral Leg Swing,Balanceo Lateral de Pierna,no_equipment,True,images/flat/lateral-leg-swing-start.webp,images/flat/lateral-leg-swing-peak.webp,
+leg-swing-front-to-back,Front-to-Back Leg Swing,Balanceo de Pierna Adelante y Atrás,no_equipment,True,images/flat/leg-swing-front-to-back-start.webp,images/flat/leg-swing-front-to-back-peak.webp,
+lying-leg-raise,Lying Leg Raise,Elevación de Piernas Acostado,no_equipment,True,images/flat/lying-leg-raise-start.webp,images/flat/lying-leg-raise-peak.webp,
+one-arm-kettlebell-row,One Arm Kettlebell Row,Remo con Pesa Rusa a Un Brazo,kettlebell,True,images/flat/one-arm-kettlebell-row-start.webp,images/flat/one-arm-kettlebell-row-peak.webp,
+reverse-tabletop-hip-pulses,Reverse Tabletop Hip Pulses,Pulsos de Cadera en Mesa Invertida,no_equipment,True,images/flat/reverse-tabletop-hip-pulses-start.webp,images/flat/reverse-tabletop-hip-pulses-peak.webp,
+reverse-tabletop-hold,Reverse Tabletop Hold,Mesa Invertida Isométrica,no_equipment,True,,,images/flat/reverse-tabletop-hold-main.webp
+savasana,Corpse Pose,Postura del Cadáver,no_equipment,True,,,images/flat/savasana-main.webp
+seated-db-press,Seated Dumbbell Shoulder Press,Press de Hombro con Mancuernas Sentado,dumbbell,True,images/flat/seated-db-press-start.webp,images/flat/seated-db-press-peak.webp,
+seated-dumbbell-curl,Seated Dumbbell Curl,Curl con Mancuernas Sentado,dumbbell,True,images/flat/seated-dumbbell-curl-start.webp,images/flat/seated-dumbbell-curl-peak.webp,
+seated-dumbbell-lateral-raise,Seated Dumbbell Lateral Raise,Elevación Lateral con Mancuerna Sentado,dumbbell,True,images/flat/seated-dumbbell-lateral-raise-start.webp,images/flat/seated-dumbbell-lateral-raise-peak.webp,
+seated-dumbbell-tricep-extension,Seated Dumbbell Tricep Extension,Extensión de Tríceps con Mancuerna Sentado,dumbbell,True,images/flat/seated-dumbbell-tricep-extension-start.webp,images/flat/seated-dumbbell-tricep-extension-peak.webp,
+side-lying-lateral-raise,Side-Lying Lateral Raise,Elevación Lateral Tumbado de Lado,dumbbell,True,images/flat/side-lying-lateral-raise-start.webp,images/flat/side-lying-lateral-raise-peak.webp,
+side-plank-leg-lift,Side Plank with Leg Lift,Plancha Lateral con Elevación de Pierna,no_equipment,True,images/flat/side-plank-leg-lift-start.webp,images/flat/side-plank-leg-lift-peak.webp,
+single-arm-db-row,Single-Arm Dumbbell Row,Remo con Mancuerna a Un Brazo,dumbbell,True,images/flat/single-arm-db-row-start.webp,images/flat/single-arm-db-row-peak.webp,
+step-ups,Step Ups,Step Ups,no_equipment,True,images/flat/step-ups-start.webp,images/flat/step-ups-peak.webp,
+torso-twists,Torso Twists,Giros de Torso,no_equipment,True,,,images/flat/torso-twists-main.webp
+walking,Walking,Caminar,no_equipment,True,,,images/flat/walking-main.webp
