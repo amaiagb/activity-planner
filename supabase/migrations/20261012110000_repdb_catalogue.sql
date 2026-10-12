@@ -352,9 +352,18 @@ insert into repdb_catalogue_seed (id,slug,name,description,instructions,category
   ('30000000-0000-4000-8000-000000000340','walking','Caminar','Marcha natural sobre terreno llano, manteniendo siempre un pie en contacto con el suelo, lo que la convierte en la forma de menor impacto de acumular trabajo aeróbico.','Ponte erguido, con el peso sobre la parte media de los pies y los hombros relajados, sin llevarlos hacia atrás. Da un paso al frente y apoya primero el talón, luego rueda sobre el pie y empuja con la almohadilla y los dedos. Mantén al menos un pie en el suelo en todo momento — en cuanto ambos se despegan estás corriendo, no caminando. Deja que los brazos oscilen con naturalidad desde el hombro, brazo contrario a pierna contraria, con los codos ligeramente flexionados. Mira al frente en lugar de a los pies y respira con un ritmo constante y sostenible. Continúa el tiempo o la distancia deseados, eligiendo un ritmo al que todavía podrías mantener una conversación.','cardio','compound','beginner',null,false,true,'no_equipment')
   ,('30000000-0000-4000-8000-000000000341','double-kettlebell-bicep-curl','Curl de Bíceps con Dos Pesas Rusas','Un curl de bíceps de pie con una pesa rusa en cada mano, sujeta por el asa. La masa descentrada en la parte inferior de la pesa añade un ligero reto de agarre y estabilidad.','Ponte de pie sujetando una pesa rusa en cada mano por el asa, con las palmas mirando hacia adelante. Mantén los codos pegados a los costados y las pesas colgando a lo largo de los brazos. Sube ambas pesas rusas hacia los hombros flexionando los codos. Aprieta los bíceps en la parte superior, luego baja de forma controlada hasta la posición inicial. Repite el número de repeticiones recomendado.','strength','isolation','beginner',null,false,true,'kettlebell');
 
+-- Keep the underscore slugs used by the original planner wherever a legacy
+-- exercise has the same RepDB slug with hyphens.
+update repdb_catalogue_seed seed
+set slug = replace(seed.slug, '-', '_')
+where exists (select 1 from public.exercises legacy where legacy.slug = replace(seed.slug, '-', '_'));
+
 insert into public.exercises (id,slug,name,description,instructions,category,movement_pattern,difficulty,impact_level,is_outdoor,is_active)
 select id,slug,name,description,instructions,category,movement_pattern,difficulty,impact_level,is_outdoor,is_active from repdb_catalogue_seed
 on conflict (slug) do update set name=excluded.name,description=excluded.description,instructions=excluded.instructions,category=excluded.category,movement_pattern=excluded.movement_pattern,difficulty=excluded.difficulty,impact_level=excluded.impact_level,is_outdoor=excluded.is_outdoor,is_active=true;
+
+-- Preserve the original English planner label for the legacy compatibility slug.
+update public.exercises set name = 'Bodyweight squat' where slug = 'bodyweight_squat';
 
 -- Every catalogue row has a minimal executable prescription. Timed movements
 -- can use the duration, while rep-based movements have three default sets.
