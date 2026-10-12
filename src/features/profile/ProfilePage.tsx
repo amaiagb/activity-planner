@@ -197,7 +197,7 @@ export function ProfilePage() {
     <p className="eyebrow">{t('YOUR SETTINGS')}</p>
     <h1 id="profile-title">{t('Profile')}</h1>
     <Link className="card profile-user-card" to="/profile/personal" aria-label={`${t('Edit personal details')}: ${displayName}`}>
-      <span className="profile-avatar" aria-hidden="true">🐻</span>
+      <span className="profile-avatar" aria-hidden="true">🦝</span>
       <div><h2>{displayName}</h2>{summary && <p>{summary}</p>}</div>
       <span className="profile-settings-arrow" aria-hidden="true">›</span>
     </Link>

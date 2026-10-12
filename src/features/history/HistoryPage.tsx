@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { buildActivityCalendar, loadWorkoutHistory } from '../../lib/historyData'
+import type { FormEvent } from 'react'
+import { buildActivityCalendar, loadWorkoutHistory, saveManualActivity } from '../../lib/historyData'
 import type { WorkoutHistoryData } from '../../lib/historyData'
 import { useAuth } from '../auth/useAuth'
 import { useI18n } from '../../lib/i18n'
@@ -22,6 +23,11 @@ export function HistoryPage() {
   const [history, setHistory] = useState<WorkoutHistoryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [activityDate, setActivityDate] = useState<string | null>(null)
+  const [activityType, setActivityType] = useState<'training' | 'walking' | 'padel'>('training')
+  const [duration, setDuration] = useState('30')
+  const [exercises, setExercises] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -44,10 +50,31 @@ export function HistoryPage() {
     return new Intl.DateTimeFormat(language, { weekday: 'short', timeZone: 'UTC' }).format(date)
   })
 
+  async function registerActivity(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!session || !activityDate || !history) return
+    setSaving(true)
+    setError(null)
+    try {
+      await saveManualActivity(session.user.id, {
+        activity_date: activityDate,
+        activity_type: activityType,
+        duration_minutes: Number(duration),
+        exercises: activityType === 'training' ? exercises.trim() || null : null,
+      })
+      setHistory(await loadWorkoutHistory(session.user.id))
+      setActivityDate(null)
+      setExercises('')
+    } catch {
+      setError('Could not save activity.')
+    } finally { setSaving(false) }
+  }
+
   return (
     <section className="page-content history-page" aria-labelledby="history-title">
       <p className="eyebrow">{t('YOUR ACTIVITY')}</p>
       <h1 id="history-title">{t('History')}</h1>
+      <button className="button button-primary" type="button" onClick={() => setActivityDate(history.today)}>{t('Register activity')}</button>
       {error && <p className="form-error" role="alert">{error}</p>}
       <div className="history-summary-grid">
         <article className="card history-summary-card" aria-labelledby="weekly-summary-title">
@@ -71,7 +98,7 @@ export function HistoryPage() {
 
       <section className="activity-calendar-section" aria-labelledby="activity-calendar-title">
         <div className="section-heading-row"><h2 id="activity-calendar-title">{t('Training activity')}</h2><p>{monthLabel(history.today, language)}</p></div>
-        <table className="activity-calendar"><caption className="sr-only">{t('Training activity calendar')} · {monthLabel(history.today, language)}</caption><thead><tr>{weekdayLabels.map((label, index) => <th scope="col" key={index}>{label}</th>)}</tr></thead><tbody>{calendarWeeks.map((week, weekIndex) => <tr key={weekIndex}>{week.map((day, dayIndex) => <td key={day.date ?? `empty-${weekIndex}-${dayIndex}`}>{day.date ? <span className={`activity-calendar-day day-${day.state}`} aria-label={`${displayDate(day.date, language, history.timeZone)}: ${t(`calendar-${day.state}`)}`}><span aria-hidden="true">{Number(day.date.slice(-2))}</span><span className="sr-only">{t(`calendar-${day.state}`)}</span>{day.state === 'active' && <span className="calendar-check" aria-hidden="true">✓</span>}</span> : null}</td>)}</tr>)}</tbody></table>
+        <table className="activity-calendar"><caption className="sr-only">{t('Training activity calendar')} · {monthLabel(history.today, language)}</caption><thead><tr>{weekdayLabels.map((label, index) => <th scope="col" key={index}>{label}</th>)}</tr></thead><tbody>{calendarWeeks.map((week, weekIndex) => <tr key={weekIndex}>{week.map((day, dayIndex) => <td key={day.date ?? `empty-${weekIndex}-${dayIndex}`}>{day.date && day.date <= history.today ? <button className={`activity-calendar-day day-${day.state}`} type="button" aria-label={`${displayDate(day.date, language, history.timeZone)}: ${t(`calendar-${day.state}`)}. ${t('Register activity')}`} onClick={() => setActivityDate(day.date)}><span aria-hidden="true">{Number(day.date.slice(-2))}</span><span className="sr-only">{t(`calendar-${day.state}`)}</span>{day.state === 'active' && <span className="calendar-check" aria-hidden="true">✓</span>}</button> : day.date ? <span className={`activity-calendar-day day-${day.state}`} aria-label={`${displayDate(day.date, language, history.timeZone)}: ${t(`calendar-${day.state}`)}`}><span>{Number(day.date.slice(-2))}</span></span> : null}</td>)}</tr>)}</tbody></table>
         <ul className="activity-calendar-legend" aria-label={t('Calendar legend')}><li><span className="legend-swatch is-active" aria-hidden="true">✓</span>{t('Completed activity')}</li><li><span className="legend-swatch" aria-hidden="true">·</span>{t('No completed activity')}</li><li><span className="legend-swatch is-unknown" aria-hidden="true">?</span>{t('No data yet')}</li></ul>
       </section>
 
@@ -80,11 +107,21 @@ export function HistoryPage() {
         {history.recentWorkouts.length === 0 ? <p className="empty-state">{t('Completed workouts will appear here.')}</p> : <ul className="history-list">
           {history.recentWorkouts.map((workout) => <li className="card history-record" key={workout.id}>
             <div className="history-record-heading"><div><h3>{t(workout.name)}</h3><time dateTime={workout.completionDate}>{displayDate(workout.completionDate, language, history.timeZone)}</time></div><span>{workout.durationMinutes} min</span></div>
-            <p>{t(displayCategory(workout.category))}</p>
+            <p>{t(displayCategory(workout.category))}{workout.manual ? ` · ${t('Manually recorded')}` : ''}</p>
+            {workout.exercises && <p>{workout.exercises}</p>}
             {workout.perceivedExertion !== null && <p>{t('Perceived exertion:')} {workout.perceivedExertion} / 5</p>}
           </li>)}
         </ul>}
       </section>
+      {activityDate && <div className="dialog-backdrop" role="presentation"><form className="card today-workout-dialog activity-dialog" role="dialog" aria-modal="true" aria-labelledby="activity-dialog-title" onSubmit={(event) => void registerActivity(event)}>
+        <h2 id="activity-dialog-title">{t('Register activity')}</h2>
+        <label>{t('Date')}<input type="date" value={activityDate} max={history.today} onChange={(event) => setActivityDate(event.target.value)} required /></label>
+        <label>{t('Activity type')}<select value={activityType} onChange={(event) => setActivityType(event.target.value as typeof activityType)}><option value="training">{t('Training')}</option><option value="walking">{t('Walking')}</option><option value="padel">{t('Padel')}</option></select></label>
+        <label>{t('Duration (minutes)')}<input type="number" min="1" max="1440" required value={duration} onChange={(event) => setDuration(event.target.value)} /></label>
+        {activityType === 'training' && <label>{t('Exercises (optional)')}<textarea maxLength={2000} value={exercises} onChange={(event) => setExercises(event.target.value)} placeholder={t('You can leave this blank.')} /></label>}
+        {error && <p className="form-error" role="alert">{t(error)}</p>}
+        <div className="button-row"><button className="button button-primary" type="submit" disabled={saving}>{saving ? t('Saving…') : t('Save activity')}</button><button className="button button-secondary" type="button" onClick={() => setActivityDate(null)}>{t('Cancel')}</button></div>
+      </form></div>}
     </section>
   )
 }

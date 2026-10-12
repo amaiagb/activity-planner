@@ -221,6 +221,8 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .activity-calendar th { padding: 7px 2px; color: var(--color-muted); font-size: 0.78rem; font-weight: 700; }
 .activity-calendar td { height: 46px; padding: 0; }
 .activity-calendar-day { position: relative; display: grid; width: 100%; height: 42px; place-items: center; border: 1px solid var(--color-border); border-radius: 12px; color: var(--color-muted); font-size: 0.88rem; }
+.activity-calendar button.activity-calendar-day { padding: 0; background: var(--color-surface); cursor: pointer; font: inherit; }
+.activity-calendar button.activity-calendar-day:hover { border-color: var(--color-focus); }
 .activity-calendar-day.day-active { border-color: var(--color-success); background: color-mix(in srgb, var(--color-success-soft) 34%, var(--color-surface)); color: var(--color-ink); font-weight: 800; }
 .activity-calendar-day.day-unknown, .activity-calendar-day.day-future { border-style: dashed; opacity: 0.65; }
 .calendar-check { position: absolute; top: 0; right: 5px; color: var(--color-success); font-size: 0.72rem; }
@@ -282,6 +284,9 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .today-workout-dialog fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 .today-workout-dialog legend { margin-bottom: 10px; font-weight: 750; }
 .today-workout-dialog select { width: 100%; }
+.activity-dialog label { display: grid; gap: 7px; color: var(--color-muted); font-size: 0.9rem; font-weight: 650; }
+.activity-dialog input, .activity-dialog select, .activity-dialog textarea { width: 100%; }
+.activity-dialog textarea { min-height: 84px; resize: vertical; }
 .today-equipment-options { display: grid; gap: 9px; }
 .workout-start-card { display: grid; justify-items: start; gap: 12px; }
 .workout-start-card p { margin: 0; color: var(--color-muted); line-height: 1.55; }

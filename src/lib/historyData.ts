@@ -20,6 +20,14 @@ export type CompletedWorkoutHistoryRow = {
   planned_workout: { workout_date: string; name: string; category: string } | null
 }
 
+export type ManualActivityRow = {
+  id: string
+  activity_date: string
+  activity_type: 'training' | 'walking' | 'padel'
+  duration_minutes: number
+  exercises: string | null
+}
+
 export type WorkoutSummary = {
   completed: number
   planned: number
@@ -35,6 +43,8 @@ export type WorkoutHistoryData = {
     completionDate: string
     durationMinutes: number
     perceivedExertion: number | null
+    manual?: boolean
+    exercises?: string | null
   }>
   weekly: WorkoutSummary
   monthly: WorkoutSummary
@@ -148,18 +158,21 @@ export function summarizeWorkoutHistory(
   today = localIsoDate(),
   trackingStartedOn = '0001-01-01',
   timeZone = 'UTC',
+  manualActivities: ManualActivityRow[] = [],
 ): WorkoutHistoryData {
   const weekly = summaryFor(workouts, sessions, startOfWeek(today), startOfNextWeek(today))
   const monthly = summaryFor(workouts, sessions, startOfMonth(today), startOfNextMonth(today))
-  const activityDates = [...new Set(sessions
+  const activityDates = [...new Set([...sessions
     .filter(isActivityCredit)
     .map((session) => session.completed_local_date!)
-    .filter((date) => date >= trackingStartedOn && date <= today))].sort()
+    .filter((date) => date >= trackingStartedOn && date <= today), ...manualActivities
+      .map((activity) => activity.activity_date)
+      .filter((date) => date >= trackingStartedOn && date <= today)])].sort()
   const { currentStreak, bestStreak } = streakMetrics(activityDates, today)
   const monthStart = startOfMonth(today)
   const monthEnd = startOfNextMonth(today)
   return {
-    recentWorkouts: sessions.flatMap((session) => {
+    recentWorkouts: [...sessions.flatMap((session) => {
       const workout = session.planned_workout
       if (!workout) return []
       return [{
@@ -170,7 +183,16 @@ export function summarizeWorkoutHistory(
         durationMinutes: session.actual_duration_minutes ?? session.planned_duration_minutes,
         perceivedExertion: session.perceived_exertion,
       }]
-    }).slice(0, 25),
+    }), ...manualActivities.map((activity) => ({
+      id: activity.id,
+      name: activity.activity_type === 'training' ? 'Training' : activity.activity_type === 'walking' ? 'Walking' : 'Padel',
+      category: activity.activity_type,
+      completionDate: activity.activity_date,
+      durationMinutes: activity.duration_minutes,
+      perceivedExertion: null,
+      manual: true,
+      exercises: activity.exercises,
+    }))].sort((a, b) => b.completionDate.localeCompare(a.completionDate)).slice(0, 25),
     weekly,
     monthly,
     currentStreak,
@@ -185,23 +207,34 @@ export function summarizeWorkoutHistory(
 
 export async function loadWorkoutHistory(userId: string): Promise<WorkoutHistoryData> {
   if (!supabase) throw new Error('Supabase is not configured.')
-  const [planned, sessions, profile] = await Promise.all([
+  const [planned, sessions, manualActivities, profile] = await Promise.all([
     supabase.from('planned_workouts').select('workout_date,status,duration_minutes').eq('user_id', userId).order('workout_date', { ascending: false }),
     supabase.from('workout_sessions').select('id,completed_at,completed_local_date,completion_timezone,actual_duration_minutes,planned_duration_minutes,perceived_exertion,note,exercise_sessions(status),planned_workout:planned_workouts(workout_date,name,category)').eq('user_id', userId).eq('status', 'completed').order('completed_at', { ascending: false }),
+    supabase.from('manual_activities').select('id,activity_date,activity_type,duration_minutes,exercises').eq('user_id', userId).order('activity_date', { ascending: false }),
     supabase.from('profiles').select('time_zone,streak_tracking_started_on').eq('user_id', userId).maybeSingle(),
   ])
-  const error = planned.error ?? sessions.error ?? profile.error
+  const error = planned.error ?? sessions.error ?? manualActivities.error ?? profile.error
   if (error) throw new Error(error.message)
   const timeZone = await getOrInitializeUserTimeZone(userId)
   const today = localDateInTimeZone(new Date(), timeZone)
-  const trackingStartedOn = profile.data?.streak_tracking_started_on ?? today
+  const configuredTrackingStart = profile.data?.streak_tracking_started_on ?? today
+  const firstManualDate = (manualActivities.data ?? []).reduce<string | null>((earliest, activity) =>
+    !earliest || activity.activity_date < earliest ? activity.activity_date : earliest, null)
+  const trackingStartedOn = firstManualDate && firstManualDate < configuredTrackingStart ? firstManualDate : configuredTrackingStart
   return summarizeWorkoutHistory(
     (planned.data ?? []) as PlannedWorkoutHistoryRow[],
     (sessions.data ?? []) as unknown as CompletedWorkoutHistoryRow[],
     today,
     trackingStartedOn,
     timeZone,
+    (manualActivities.data ?? []) as ManualActivityRow[],
   )
+}
+
+export async function saveManualActivity(userId: string, activity: Omit<ManualActivityRow, 'id'>) {
+  if (!supabase) throw new Error('Supabase is not configured.')
+  const { error } = await supabase.from('manual_activities').insert({ user_id: userId, ...activity })
+  if (error) throw new Error(error.message)
 }
 
 export function formatActiveTime(minutes: number) {
