@@ -21,7 +21,7 @@ select ok((
   where relnamespace = 'public'::regnamespace
     and relname = any(array[
       'profiles', 'availability', 'preferences', 'user_equipment', 'excluded_exercises',
-      'body_measurements', 'weekly_plans', 'planned_workouts', 'workout_sessions', 'exercise_sessions'
+      'body_measurements', 'user_workout_templates', 'user_workout_template_exercises', 'planned_workouts', 'workout_sessions', 'exercise_sessions'
     ])
 ), 'RLS is enabled on every user-owned table');
 
