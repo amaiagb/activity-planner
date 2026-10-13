@@ -269,15 +269,17 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 
 .planner-page { max-width: 760px; }
 .training-quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 22px 0 30px; }
+.training-page { display: flex; min-height: calc(100vh - 190px); flex-direction: column; }
+.training-page .training-quick-actions { width: min(100%, 560px); align-self: center; margin: auto; justify-items: stretch; }
 .templates-section { display: grid; gap: 16px; }
 .template-card-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .template-card { position: relative; display: grid; gap: 12px; min-height: 190px; padding: 20px; cursor: pointer; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
 .template-card:hover, .template-card:focus-visible { transform: translateY(-2px); border-color: var(--color-accent); box-shadow: 0 12px 28px color-mix(in srgb, var(--color-ink) 12%, transparent); outline: none; }
 .template-card h3 { margin: 0; font-size: 1.1rem; font-weight: 800; }
-.template-card p { margin: 0; color: var(--color-muted); line-height: 1.45; }
+.template-card p { margin: 0; color: var(--color-muted); font-size: .8rem; }
 .template-card-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .template-meta { color: var(--color-muted); font-size: .9rem; }
-.template-exercise-preview { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.template-exercise-preview { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .template-menu-wrap { position: relative; margin: -7px -8px 0 0; }
 .template-menu-button { width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: var(--color-muted); font-size: 1.5rem; line-height: 1; cursor: pointer; }
 .template-menu-button:hover, .template-menu-button:focus-visible { background: var(--color-surface-muted); color: var(--color-ink); }
@@ -448,7 +450,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 
 @media (max-width: 680px) {
   .week-day-card { grid-template-columns: minmax(0, 1fr); gap: 10px; }
-  .training-quick-actions, .template-card-grid { grid-template-columns: 1fr; }
+  .training-quick-actions { grid-template-columns: 1fr; }
   .template-selected-heading { align-items: flex-start; flex-direction: column; }
   .template-detail-heading { flex-direction: column; gap: 10px; }
   .week-day-date { grid-template-columns: 1fr auto; align-items: center; }
