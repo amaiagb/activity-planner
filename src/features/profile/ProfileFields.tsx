@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react'
-import { fitnessLevels, goals, weekDays } from '../../types/profile'
+import { fitnessLevels, goals } from '../../types/profile'
 import type { ProfileData, ProfileFormValues } from '../../types/profile'
 import { useI18n } from '../../lib/i18n'
 import { localizeEquipmentName } from '../../lib/catalogueTranslations'
@@ -46,16 +46,7 @@ export function ProfileFields({ values, data, onChange, section = 'all' }: Props
       {section !== 'personal' && <>
 
       <fieldset className="form-section">
-        <legend>{t('When you’re available')}</legend>
-        <p className="field-help">{t('Choose at least one day.')}</p>
-        <div className="option-grid day-grid">
-          {weekDays.map(({ key, label }) => (
-            <label className="check-option" key={key}>
-              <input type="checkbox" checked={values.days[key]} onChange={(event) => onChange({ ...values, days: { ...values.days, [key]: event.target.checked } })} />
-              <span>{t(label).slice(0, 3)}</span>
-            </label>
-          ))}
-        </div>
+        <legend>{t('Workout preferences')}</legend>
         <label className="field-label" htmlFor="duration">{t('Usual workout time')}</label>
         <div className="input-with-suffix">
           <input id="duration" type="number" min={5} max={240} step={5} required value={values.duration} onChange={(event) => onChange({ ...values, duration: Number(event.target.value) })} />

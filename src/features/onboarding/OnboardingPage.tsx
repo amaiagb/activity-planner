@@ -40,10 +40,6 @@ export function OnboardingPage() {
     event.preventDefault()
     setError(null)
     if (!session || !data) return
-    if (!Object.values(values.days).some(Boolean)) {
-      setError(t('Choose at least one day you are available.'))
-      return
-    }
     setSaving(true)
     try {
       await saveProfileData(session.user.id, values)

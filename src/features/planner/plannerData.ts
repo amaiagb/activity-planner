@@ -1,10 +1,8 @@
-import { generateTodayWorkout, generateWeeklyPlan, regenerateWorkout } from '../../planner'
-import type { TodayWorkoutRequest } from '../../planner'
 import { exerciseBySlug } from '../../planner/catalogue'
-import type { PlannerInput, PlannedWorkout, WeeklyPlan, WorkoutHistory } from '../../planner'
+import type { PlannerInput, PlannedWorkout, WorkoutHistory } from '../../planner'
 import { supabase } from '../../lib/supabase'
 import { getOrInitializeUserTimeZone, localDateInTimeZone } from '../../lib/userTimeZone'
-import type { FitnessLevel, WeekDayKey } from '../../types/profile'
+import type { FitnessLevel } from '../../types/profile'
 
 export type ExerciseGuide = {
   id: string
@@ -36,12 +34,6 @@ function client() {
 
 function throwOnError(result: { error: { message: string } | null }) {
   if (result.error) throw new Error(result.error.message)
-}
-
-function mondayOf(date = new Date()): string {
-  const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7))
-  return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`
 }
 
 function loadExerciseCatalogue(db: ReturnType<typeof client>) {
@@ -84,7 +76,7 @@ export async function loadPlannerContext(userId: string): Promise<PlannerContext
   const db = client()
   const [profile, availability, preferences, equipmentResult, exclusions, historyResult, databaseExercises] = await Promise.all([
     db.from('profiles').select('fitness_level').eq('user_id', userId).maybeSingle(),
-    db.from('availability').select('monday,tuesday,wednesday,thursday,friday,saturday,sunday,default_duration_minutes').eq('user_id', userId).maybeSingle(),
+    db.from('availability').select('default_duration_minutes').eq('user_id', userId).maybeSingle(),
     db.from('preferences').select('likes_strength,likes_cardio,likes_walking,likes_hiit,likes_mobility,can_go_outside,outside_is_weather_dependent').eq('user_id', userId).maybeSingle(),
     db.from('user_equipment').select('equipment:equipment(slug,name)').eq('user_id', userId),
     db.from('excluded_exercises').select('exercise:exercises(slug)').eq('user_id', userId),
@@ -116,8 +108,6 @@ export async function loadPlannerContext(userId: string): Promise<PlannerContext
     }
   }
 
-  const days = (['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as WeekDayKey[])
-    .filter((day) => availability.data?.[day])
   const exclusionSlugs = (exclusions.data ?? []).flatMap((item) => {
     const exercise = item.exercise as unknown as { slug: string } | null
     return exercise?.slug ? [exercise.slug] : []
@@ -127,7 +117,7 @@ export async function loadPlannerContext(userId: string): Promise<PlannerContext
   const fitnessLevel = profileFitness === 'intermediate' || profileFitness === 'advanced' ? profileFitness : 'beginner'
   return {
     input: {
-      availability: { days, durationMinutes: availability.data?.default_duration_minutes ?? 30 },
+      availability: { days: [], durationMinutes: availability.data?.default_duration_minutes ?? 30 },
       equipment: availableEquipment.map((item) => item.slug),
       preferences: {
         strength: preferences.data?.likes_strength ?? false,
@@ -141,122 +131,11 @@ export async function loadPlannerContext(userId: string): Promise<PlannerContext
       excludedExerciseIds: exclusionSlugs.flatMap((slug) => exerciseBySlug.get(slug)?.id ?? []),
       fitnessLevel: fitnessLevel as FitnessLevel,
       history,
-      weekStart: mondayOf(),
     },
     exercises: guides,
     databaseExerciseIds: dbExerciseIds,
     equipmentLabels: availableEquipment.map((item) => item.name),
   }
-}
-
-export async function loadWeeklyPlan(userId: string, weekStart: string): Promise<WeeklyPlan | null> {
-  const db = client()
-  const found = await db.from('weekly_plans').select('id,week_start,requested_sessions,unscheduled_sessions').eq('user_id', userId).eq('week_start', weekStart).maybeSingle()
-  throwOnError(found)
-  if (!found.data) return null
-  const workoutsResult = await db.from('planned_workouts').select('workout_json').eq('weekly_plan_id', found.data.id).order('workout_date')
-  throwOnError(workoutsResult)
-  return {
-    weekStart,
-    requestedSessions: found.data.requested_sessions,
-    unscheduledSessions: (found.data.unscheduled_sessions ?? []) as WeeklyPlan['unscheduledSessions'],
-    workouts: (workoutsResult.data ?? []).flatMap((row) => row.workout_json ? [row.workout_json as unknown as PlannedWorkout] : []),
-  }
-}
-
-export async function saveWeeklyPlan(userId: string, plan: WeeklyPlan, replacePlanned = false): Promise<WeeklyPlan> {
-  const db = client()
-  const parent = await db.from('weekly_plans').upsert({
-    user_id: userId,
-    week_start: plan.weekStart,
-    requested_sessions: plan.requestedSessions,
-    unscheduled_sessions: plan.unscheduledSessions,
-  }, { onConflict: 'user_id,week_start' }).select('id').single()
-  throwOnError(parent)
-  if (!parent.data) throw new Error('Could not save the weekly plan.')
-
-  const [existingResult, sessionsResult] = await Promise.all([
-    db.from('planned_workouts').select('id,workout_date,status').eq('weekly_plan_id', parent.data.id),
-    db.from('workout_sessions').select('planned_workout_id,status').eq('user_id', userId).in('status', ['in_progress', 'completed']),
-  ])
-  throwOnError(existingResult)
-  throwOnError(sessionsResult)
-  const existing = existingResult.data ?? []
-  const protectedIds = new Set((sessionsResult.data ?? []).map((session) => session.planned_workout_id))
-  const protectedDates = new Set(existing.filter((row) => row.status !== 'planned' || protectedIds.has(row.id)).map((row) => row.workout_date))
-
-  if (replacePlanned) {
-    const deletions = existing.filter((row) => row.status === 'planned' && !protectedIds.has(row.id) && !plan.workouts.some((workout) => workout.date === row.workout_date))
-    for (const row of deletions) {
-      const deleted = await db.from('planned_workouts').delete().eq('id', row.id).eq('user_id', userId)
-      throwOnError(deleted)
-    }
-  }
-
-  const rows = plan.workouts.filter((workout) => !protectedDates.has(workout.date)).map((workout) => {
-    const savedId = existing.find((row) => row.workout_date === workout.date && row.status === 'planned')?.id ?? crypto.randomUUID()
-    const savedWorkout = { ...workout, id: savedId }
-    return {
-    id: savedId,
-    weekly_plan_id: parent.data.id,
-    user_id: userId,
-    workout_date: workout.date,
-    template_slug: workout.templateSlug,
-    name: workout.name,
-    category: workout.category,
-    duration_minutes: workout.durationMinutes,
-    is_outdoor: workout.isOutdoor,
-    intensity: workout.intensity,
-    movement_patterns: workout.movementPatterns,
-    muscle_groups: workout.muscleGroups,
-    exercises: savedWorkout.exercises,
-    workout_json: savedWorkout,
-    status: 'planned',
-  }})
-  if (rows.length) {
-    const upserted = await db.from('planned_workouts').upsert(rows, { onConflict: 'weekly_plan_id,workout_date' })
-    throwOnError(upserted)
-  }
-  return await loadWeeklyPlan(userId, plan.weekStart) ?? plan
-}
-
-export async function getOrCreateWeeklyPlan(userId: string, context: PlannerContext, weekStart: string): Promise<WeeklyPlan> {
-  const existing = await loadWeeklyPlan(userId, weekStart)
-  if (existing) return existing
-  const generated = generateWeeklyPlan({ ...context.input, weekStart })
-  return saveWeeklyPlan(userId, generated)
-}
-
-export async function regenerateDay(userId: string, context: PlannerContext, plan: WeeklyPlan, date: string): Promise<WeeklyPlan> {
-  const next = regenerateWorkout(date, plan, context.input.history, { ...context.input, weekStart: plan.weekStart })
-  if (next === plan) return plan
-  return saveWeeklyPlan(userId, next, true)
-}
-
-export async function createTodayWorkout(userId: string, context: PlannerContext, plan: WeeklyPlan, date: string, request: TodayWorkoutRequest): Promise<WeeklyPlan> {
-  const current = plan.workouts.find((workout) => workout.date === date)
-  if (current && current.status !== 'planned') throw new Error('This workout can no longer be changed.')
-  const db = client()
-  if (current) {
-    const sessions = await db.from('workout_sessions').select('id,status').eq('user_id', userId).eq('planned_workout_id', current.id)
-    throwOnError(sessions)
-    if ((sessions.data ?? []).length) throw new Error('This workout already has a session.')
-  }
-  const workout = generateTodayWorkout(date, context.input, request)
-  if (!workout) throw new Error(request.outdoor ? 'Easy walk is unavailable.' : 'No workout matches these choices.')
-  const wasUnscheduled = plan.unscheduledSessions.some((item) => item.date === date)
-  const next: WeeklyPlan = {
-    ...plan,
-    requestedSessions: plan.requestedSessions + (!current && !wasUnscheduled ? 1 : 0),
-    workouts: [...plan.workouts.filter((item) => item.date !== date), workout].sort((a, b) => a.date.localeCompare(b.date)),
-    unscheduledSessions: plan.unscheduledSessions.filter((item) => item.date !== date),
-  }
-  return saveWeeklyPlan(userId, next)
-}
-
-export async function regenerateWeek(userId: string, context: PlannerContext, plan: WeeklyPlan): Promise<WeeklyPlan> {
-  const next = generateWeeklyPlan({ ...context.input, weekStart: plan.weekStart })
-  return saveWeeklyPlan(userId, next, true)
 }
 
 export async function startWorkout(userId: string, workout: PlannedWorkout, databaseExerciseIds: Record<string, string>) {
@@ -320,6 +199,63 @@ export async function abandonWorkoutSession(userId: string, sessionId: string, w
   throwOnError(plannedWorkout)
 }
 
+export type SavedTemplate = {
+  id: string
+  name: string
+  description: string | null
+  duration_minutes: number
+  is_favorite: boolean
+  created_at: string
+  exercises: Array<{ exercise_id: string; slug: string; name: string; prescribed_sets: number | null; prescribed_reps: string | null; prescribed_duration_seconds: number | null; rest_seconds: number }>
+}
+
+export async function loadSavedTemplates(userId: string): Promise<SavedTemplate[]> {
+  const result = await client().from('user_workout_templates').select('id,name,description,duration_minutes,is_favorite,created_at,user_workout_template_exercises(exercise_id,position,prescribed_sets,prescribed_reps,prescribed_duration_seconds,rest_seconds,exercise:exercises(slug,name))').eq('user_id', userId).order('updated_at', { ascending: false })
+  throwOnError(result)
+  return (result.data ?? []).map((row) => {
+    const blocks = (row.user_workout_template_exercises ?? []) as unknown as Array<{ exercise_id: string; position: number; prescribed_sets: number | null; prescribed_reps: string | null; prescribed_duration_seconds: number | null; rest_seconds: number; exercise: { slug: string; name: string } | null }>
+    return { id: row.id, name: row.name, description: row.description, duration_minutes: row.duration_minutes, is_favorite: row.is_favorite, created_at: row.created_at, exercises: blocks.sort((a, b) => a.position - b.position).flatMap((block) => block.exercise ? [{ exercise_id: block.exercise_id, slug: block.exercise.slug, name: block.exercise.name, prescribed_sets: block.prescribed_sets, prescribed_reps: block.prescribed_reps, prescribed_duration_seconds: block.prescribed_duration_seconds, rest_seconds: block.rest_seconds }] : []) }
+  })
+}
+
+export async function saveTemplate(userId: string, input: { name: string; description: string; durationMinutes: number; exercises: Array<{ exerciseId: string; sets: number; reps: string; durationSeconds: number | null }> }) {
+  if (!input.name.trim() || !input.exercises.length) throw new Error('Choose a name and at least one exercise for your template.')
+  const db = client()
+  const template = await db.from('user_workout_templates').insert({ user_id: userId, name: input.name.trim(), description: input.description.trim() || null, duration_minutes: input.durationMinutes }).select('id').single()
+  throwOnError(template)
+  if (!template.data) throw new Error('Could not save the template.')
+  const blocks = await db.from('user_workout_template_exercises').insert(input.exercises.map((exercise, index) => ({ template_id: template.data.id, user_id: userId, exercise_id: exercise.exerciseId, position: index + 1, prescribed_sets: exercise.sets, prescribed_reps: exercise.reps.trim() || null, prescribed_duration_seconds: exercise.durationSeconds, rest_seconds: 45 })))
+  if (blocks.error) { await db.from('user_workout_templates').delete().eq('id', template.data.id).eq('user_id', userId); throw new Error(blocks.error.message) }
+}
+
+export async function toggleTemplateFavorite(userId: string, templateId: string, isFavorite: boolean) {
+  const result = await client().from('user_workout_templates').update({ is_favorite: isFavorite }).eq('id', templateId).eq('user_id', userId); throwOnError(result)
+}
+
+export async function deleteTemplate(userId: string, templateId: string) {
+  const result = await client().from('user_workout_templates').delete().eq('id', templateId).eq('user_id', userId); throwOnError(result)
+}
+
+export async function createWorkoutFromTemplate(userId: string, template: SavedTemplate, date: string): Promise<PlannedWorkout> {
+  const id = crypto.randomUUID()
+  const workout: PlannedWorkout = { id, date, templateSlug: `user_template_${template.id}`, name: template.name, category: 'strength', durationMinutes: template.duration_minutes, exercises: template.exercises.map((exercise) => ({ id: exercise.exercise_id, slug: exercise.slug, name: exercise.name, prescribedSets: exercise.prescribed_sets, prescribedReps: exercise.prescribed_reps, prescribedDurationSeconds: exercise.prescribed_duration_seconds, restSeconds: exercise.rest_seconds })), status: 'planned', isOutdoor: false, intensity: 'moderate', movementPatterns: [], muscleGroups: [] }
+  const result = await client().from('planned_workouts').insert({ id, user_id: userId, workout_date: date, template_slug: workout.templateSlug, name: workout.name, category: workout.category, duration_minutes: workout.durationMinutes, is_outdoor: false, intensity: workout.intensity, movement_patterns: [], muscle_groups: [], exercises: workout.exercises, workout_json: workout, source_type: 'user_template', source_template_id: template.id, status: 'planned' })
+  throwOnError(result)
+  return workout
+}
+
+export async function createStandaloneWorkout(userId: string, workout: PlannedWorkout): Promise<PlannedWorkout> {
+  const savedWorkout = { ...workout, id: crypto.randomUUID() }
+  const result = await client().from('planned_workouts').insert({ id: savedWorkout.id, user_id: userId, workout_date: savedWorkout.date, template_slug: savedWorkout.templateSlug, name: savedWorkout.name, category: savedWorkout.category, duration_minutes: savedWorkout.durationMinutes, is_outdoor: savedWorkout.isOutdoor, intensity: savedWorkout.intensity, movement_patterns: savedWorkout.movementPatterns, muscle_groups: savedWorkout.muscleGroups, exercises: savedWorkout.exercises, workout_json: savedWorkout, source_type: 'generated', status: 'planned' })
+  throwOnError(result)
+  return savedWorkout
+}
+
+export async function loadStandaloneWorkout(userId: string, workoutId: string): Promise<PlannedWorkout | null> {
+  const result = await client().from('planned_workouts').select('workout_json').eq('user_id', userId).eq('id', workoutId).maybeSingle(); throwOnError(result)
+  return result.data?.workout_json ? result.data.workout_json as unknown as PlannedWorkout : null
+}
+
 export async function skipPlannedWorkout(userId: string, workout: PlannedWorkout) {
   const db = client()
   const skippedWorkout = { ...workout, status: 'skipped' as const }
@@ -330,6 +266,8 @@ export async function skipPlannedWorkout(userId: string, workout: PlannedWorkout
 }
 
 export function currentWeekStart() {
-  return mondayOf()
+  const date = new Date()
+  date.setDate(date.getDate() - ((date.getDay() + 6) % 7))
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 }
 

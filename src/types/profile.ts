@@ -14,13 +14,8 @@ export const fitnessLevels = [
 ] as const
 
 export const weekDays = [
-  { key: 'monday', label: 'Monday' },
-  { key: 'tuesday', label: 'Tuesday' },
-  { key: 'wednesday', label: 'Wednesday' },
-  { key: 'thursday', label: 'Thursday' },
-  { key: 'friday', label: 'Friday' },
-  { key: 'saturday', label: 'Saturday' },
-  { key: 'sunday', label: 'Sunday' },
+  { key: 'monday', label: 'Monday' }, { key: 'tuesday', label: 'Tuesday' }, { key: 'wednesday', label: 'Wednesday' },
+  { key: 'thursday', label: 'Thursday' }, { key: 'friday', label: 'Friday' }, { key: 'saturday', label: 'Saturday' }, { key: 'sunday', label: 'Sunday' },
 ] as const
 
 export const measurementFields = [
@@ -82,11 +77,11 @@ export type ProfileData = {
 }
 
 export type ProfileFormValues = {
+  days: Record<WeekDayKey, boolean>
   displayName: string
   primaryGoal: Goal | ''
   secondaryGoal: Goal | ''
   fitnessLevel: FitnessLevel | ''
-  days: Record<WeekDayKey, boolean>
   duration: number
   likes: Record<'strength' | 'cardio' | 'walking' | 'hiit' | 'mobility', boolean>
   canGoOutside: boolean
@@ -96,19 +91,11 @@ export type ProfileFormValues = {
 }
 
 export const emptyProfileForm = (): ProfileFormValues => ({
+  days: { monday: false, tuesday: false, wednesday: false, thursday: false, friday: false, saturday: false, sunday: false },
   displayName: '',
   primaryGoal: '',
   secondaryGoal: '',
   fitnessLevel: '',
-  days: {
-    monday: false,
-    tuesday: false,
-    wednesday: false,
-    thursday: false,
-    friday: false,
-    saturday: false,
-    sunday: false,
-  },
   duration: 30,
   likes: { strength: false, cardio: false, walking: false, hiit: false, mobility: false },
   canGoOutside: false,
@@ -124,7 +111,7 @@ export function toProfileForm(data: ProfileData): ProfileFormValues {
   value.secondaryGoal = data.profile?.secondary_goal ?? ''
   value.fitnessLevel = data.profile?.fitness_level ?? ''
   if (data.availability) {
-    for (const day of weekDays) value.days[day.key] = data.availability[day.key]
+    for (const day of weekDays) value.days[day.key] = data.availability[day.key] ?? false
     value.duration = data.availability.default_duration_minutes
   }
   if (data.preferences) {

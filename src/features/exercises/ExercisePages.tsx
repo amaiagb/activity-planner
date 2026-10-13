@@ -17,7 +17,7 @@ function PlaceholderMedia({ name, size }: { name: string; size: 'thumbnail' | 'd
   )
 }
 
-function ExerciseThumbnail({ exercise }: { exercise: CatalogueExercise }) {
+export function ExerciseThumbnail({ exercise }: { exercise: CatalogueExercise }) {
   const [failed, setFailed] = useState(false)
   const image = exercise.media.find((item) => item.thumbnail_url)
   if (!image || failed) return <PlaceholderMedia name={exercise.name} size="thumbnail" />

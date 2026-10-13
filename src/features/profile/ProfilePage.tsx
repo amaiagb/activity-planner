@@ -15,7 +15,7 @@ type ProfileSection = 'training' | 'personal' | 'measurements' | undefined
 function selectSection(values: ProfileFormValues, section: Exclude<ProfileSection, undefined>) {
   if (section === 'personal') return { displayName: values.displayName, primaryGoal: values.primaryGoal, fitnessLevel: values.fitnessLevel }
   return {
-    days: values.days, duration: values.duration, likes: values.likes, canGoOutside: values.canGoOutside,
+    duration: values.duration, likes: values.likes, canGoOutside: values.canGoOutside,
     outsideWeatherDependent: values.outsideWeatherDependent, equipmentIds: values.equipmentIds,
   }
 }
@@ -91,10 +91,6 @@ export function ProfilePage() {
     if (!session || !section || (section !== 'personal' && section !== 'training')) return false
     setError(null)
     setNotice(null)
-    if (section === 'training' && !Object.values(values.days).some(Boolean)) {
-      setError(t('Choose at least one day you are available.'))
-      return false
-    }
     setSaving(true)
     try {
       if (section === 'personal') await savePersonalData(session.user.id, values)

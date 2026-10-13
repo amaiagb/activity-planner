@@ -10,7 +10,7 @@ export async function loadProfileData(userId: string): Promise<ProfileData> {
   const client = getClient()
   const results = await Promise.all([
     client.from('profiles').select('user_id, display_name, primary_goal, secondary_goal, fitness_level').eq('user_id', userId).maybeSingle(),
-    client.from('availability').select('user_id, monday, tuesday, wednesday, thursday, friday, saturday, sunday, default_duration_minutes').eq('user_id', userId).maybeSingle(),
+    client.from('availability').select('user_id, default_duration_minutes').eq('user_id', userId).maybeSingle(),
     client.from('preferences').select('user_id, likes_strength, likes_cardio, likes_walking, likes_hiit, likes_mobility, can_go_outside, outside_is_weather_dependent').eq('user_id', userId).maybeSingle(),
     client.from('user_equipment').select('equipment_id').eq('user_id', userId),
     client.from('excluded_exercises').select('exercise_id').eq('user_id', userId),
@@ -51,7 +51,6 @@ export async function saveTrainingData(userId: string, values: ProfileFormValues
   const writes = await Promise.all([
     client.from('availability').upsert({
       user_id: userId,
-      ...values.days,
       default_duration_minutes: values.duration,
     }, { onConflict: 'user_id' }),
     client.from('preferences').upsert({

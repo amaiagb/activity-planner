@@ -9,15 +9,12 @@ async function profileIsComplete(userId: string): Promise<boolean> {
   if (!supabase) return false
   const [profileResult, availabilityResult, preferencesResult] = await Promise.all([
     supabase.from('profiles').select('primary_goal, fitness_level').eq('user_id', userId).maybeSingle(),
-    supabase.from('availability').select('monday, tuesday, wednesday, thursday, friday, saturday, sunday').eq('user_id', userId).maybeSingle(),
+    supabase.from('availability').select('default_duration_minutes').eq('user_id', userId).maybeSingle(),
     supabase.from('preferences').select('user_id').eq('user_id', userId).maybeSingle(),
   ])
   const error = profileResult.error ?? availabilityResult.error ?? preferencesResult.error
   if (error) throw new Error(error.message)
-  const hasDay = availabilityResult.data
-    ? Object.values(availabilityResult.data).some(Boolean)
-    : false
-  return Boolean(profileResult.data?.primary_goal && profileResult.data.fitness_level && hasDay && preferencesResult.data)
+  return Boolean(profileResult.data?.primary_goal && profileResult.data.fitness_level && availabilityResult.data && preferencesResult.data)
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

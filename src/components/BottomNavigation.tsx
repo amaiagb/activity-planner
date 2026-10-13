@@ -2,8 +2,8 @@ import { NavLink } from 'react-router-dom'
 import { useI18n } from '../lib/i18n'
 
 const navigationItems = [
-  { to: '/today', label: 'Today', icon: '◷' },
-  { to: '/week', label: 'Week', icon: '▦' },
+  { to: '/today', label: 'Train', icon: '+' },
+  { to: '/templates', label: 'Templates', icon: '▦' },
   { to: '/history', label: 'History', icon: '↗' },
   { to: '/exercises', label: 'Exercises', icon: '🏋' },
   { to: '/profile', label: 'Profile', icon: '○' },
