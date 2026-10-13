@@ -16,7 +16,7 @@ insert into public.profiles (user_id, display_name) values
   ('b0000000-0000-4000-8000-000000000002', 'User B');
 
 select ok((
-  select count(*) = 10 and bool_and(relrowsecurity)
+  select count(*) = 11 and bool_and(relrowsecurity)
   from pg_class
   where relnamespace = 'public'::regnamespace
     and relname = any(array[
