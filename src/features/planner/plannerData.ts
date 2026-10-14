@@ -209,6 +209,82 @@ export type SavedTemplate = {
   exercises: Array<{ exercise_id: string; slug: string; name: string; prescribed_sets: number | null; prescribed_reps: string | null; prescribed_duration_seconds: number | null; rest_seconds: number }>
 }
 
+export type SavedResource = {
+  id: string
+  original_url: string
+  provider: 'youtube' | 'instagram' | 'tiktok'
+  provider_video_id: string | null
+  title: string | null
+  source_title: string | null
+  thumbnail_url: string | null
+  is_favorite: boolean
+  created_at: string
+}
+
+export async function loadSavedResources(userId: string): Promise<SavedResource[]> {
+  const result = await client().from('user_resources').select('id,original_url,provider,provider_video_id,title,source_title,thumbnail_url,is_favorite,created_at').eq('user_id', userId).order('created_at', { ascending: false })
+  throwOnError(result)
+  return (result.data ?? []) as SavedResource[]
+}
+
+export function detectResourceUrl(value: string): { provider: SavedResource['provider']; videoId: string | null } | null {
+  try {
+    const url = new URL(value.trim())
+    const host = url.hostname.toLowerCase().replace(/^www\./, '')
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtu.be') {
+      const videoId = host === 'youtu.be' ? url.pathname.slice(1).split('/')[0] : (url.searchParams.get('v') ?? url.pathname.match(/\/(?:shorts|embed)\/([^/?]+)/)?.[1] ?? null)
+      return videoId ? { provider: 'youtube', videoId } : null
+    }
+    if (host === 'instagram.com') {
+      const match = url.pathname.match(/^\/(?:p|reel|tv)\/([^/?]+)/)
+      return match ? { provider: 'instagram', videoId: match[1] } : null
+    }
+    if (host === 'tiktok.com') {
+      const match = url.pathname.match(/\/video\/(\d+)/) ?? url.pathname.match(/\/player\/v1\/(\d+)/)
+      return match ? { provider: 'tiktok', videoId: match[1] } : null
+    }
+    if (host === 'vm.tiktok.com') {
+      return url.pathname.length > 1 ? { provider: 'tiktok', videoId: null } : null
+    }
+  } catch { /* invalid URL */ }
+  return null
+}
+
+export async function saveResource(userId: string, input: { url: string; title: string }): Promise<SavedResource> {
+  const parsed = detectResourceUrl(input.url)
+  if (!parsed) throw new Error('Enter a valid YouTube, Instagram or TikTok video URL.')
+  let sourceTitle: string | null = null
+  let thumbnailUrl: string | null = null
+  let providerVideoId = parsed.videoId
+  if (parsed.provider === 'youtube' && parsed.videoId) thumbnailUrl = `https://i.ytimg.com/vi/${encodeURIComponent(parsed.videoId)}/hqdefault.jpg`
+  if (parsed.provider === 'youtube' || parsed.provider === 'tiktok') {
+    try {
+      const endpoint = parsed.provider === 'youtube' ? `https://www.youtube.com/oembed?url=${encodeURIComponent(input.url.trim())}&format=json` : `https://www.tiktok.com/oembed?url=${encodeURIComponent(input.url.trim())}`
+      const response = await fetch(endpoint)
+      if (response.ok) {
+        const metadata = await response.json() as { title?: unknown; thumbnail_url?: unknown; html?: unknown }
+        sourceTitle = typeof metadata.title === 'string' ? metadata.title.trim().slice(0, 500) || null : null
+        thumbnailUrl = typeof metadata.thumbnail_url === 'string' ? metadata.thumbnail_url : thumbnailUrl
+        if (parsed.provider === 'tiktok' && !providerVideoId && typeof metadata.html === 'string') providerVideoId = metadata.html.match(/data-video-id=["'](\d+)["']/)?.[1] ?? null
+      }
+    } catch { /* metadata is optional; the resource can still be saved */ }
+  }
+  const result = await client().from('user_resources').insert({ user_id: userId, original_url: input.url.trim(), provider: parsed.provider, provider_video_id: providerVideoId, title: input.title.trim() || null, source_title: sourceTitle, thumbnail_url: thumbnailUrl }).select('id,original_url,provider,provider_video_id,title,source_title,thumbnail_url,is_favorite,created_at').single()
+  throwOnError(result)
+  if (!result.data) throw new Error('Could not save the resource.')
+  return result.data as SavedResource
+}
+
+export async function deleteResource(userId: string, resourceId: string) {
+  const result = await client().from('user_resources').delete().eq('id', resourceId).eq('user_id', userId)
+  throwOnError(result)
+}
+
+export async function toggleResourceFavorite(userId: string, resourceId: string, isFavorite: boolean) {
+  const result = await client().from('user_resources').update({ is_favorite: isFavorite }).eq('id', resourceId).eq('user_id', userId)
+  throwOnError(result)
+}
+
 export async function loadSavedTemplates(userId: string): Promise<SavedTemplate[]> {
   const result = await client().from('user_workout_templates').select('id,name,description,duration_minutes,is_favorite,created_at,user_workout_template_exercises(exercise_id,position,prescribed_sets,prescribed_reps,prescribed_duration_seconds,rest_seconds,exercise:exercises(slug,name))').eq('user_id', userId).order('updated_at', { ascending: false })
   throwOnError(result)

@@ -7,7 +7,7 @@ import { LoginPage } from '../features/auth/LoginPage'
 import { PublicOnly, RequireAuthenticated } from '../features/auth/RouteGuards'
 import { OnboardingPage } from '../features/onboarding/OnboardingPage'
 import { ProfilePage } from '../features/profile/ProfilePage'
-import { TrainingPage, WorkoutPage } from '../features/planner/PlannerPages'
+import { ResourceCollectionPage, ResourceDetailPage, TemplateCollectionPage, TrainingPage, WorkoutPage } from '../features/planner/PlannerPages'
 import { NewTemplatePage, TemplateDetailPage } from '../features/planner/TemplatePages'
 import { HistoryPage } from '../features/history/HistoryPage'
 import { ExerciseDetailPage, ExercisesPage } from '../features/exercises/ExercisePages'
@@ -32,8 +32,11 @@ function AppRoutes() {
             <Route path="/profile/:section?" element={<RequireAuthenticated><ProfilePage /></RequireAuthenticated>} />
             <Route path="/today" element={<RequireAuthenticated><TrainingPage /></RequireAuthenticated>} />
             <Route path="/templates" element={<RequireAuthenticated><TrainingPage /></RequireAuthenticated>} />
+            <Route path="/templates/collection" element={<RequireAuthenticated><TemplateCollectionPage /></RequireAuthenticated>} />
             <Route path="/templates/new" element={<RequireAuthenticated><NewTemplatePage /></RequireAuthenticated>} />
             <Route path="/templates/:templateId" element={<RequireAuthenticated><TemplateDetailPage /></RequireAuthenticated>} />
+            <Route path="/resources/collection" element={<RequireAuthenticated><ResourceCollectionPage /></RequireAuthenticated>} />
+            <Route path="/resources/:resourceId" element={<RequireAuthenticated><ResourceDetailPage /></RequireAuthenticated>} />
             <Route path="/workout/:id" element={<RequireAuthenticated><WorkoutPage /></RequireAuthenticated>} />
             <Route path="/history" element={<RequireAuthenticated><HistoryPage /></RequireAuthenticated>} />
             <Route path="/exercises" element={<RequireAuthenticated><ExercisesPage /></RequireAuthenticated>}>
