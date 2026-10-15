@@ -140,12 +140,25 @@ export async function loadPlannerContext(userId: string): Promise<PlannerContext
 
 export async function startWorkout(userId: string, workout: PlannedWorkout, databaseExerciseIds: Record<string, string>) {
   const db = client()
+  // Resolve the exercise IDs again at start time. The planner context is cached
+  // for the page lifetime, while catalogue migrations can replace rows/IDs.
+  // Starting with stale IDs makes the exercise_sessions insert fail after the
+  // workout session has already been created.
+  const slugs = [...new Set(workout.exercises.map((exercise) => exercise.slug))]
+  const catalogue = slugs.length
+    ? await db.from('exercises').select('id,slug').in('slug', slugs).eq('is_active', true)
+    : { data: [], error: null }
+  throwOnError(catalogue)
+  const currentIds = Object.fromEntries((catalogue.data ?? []).map((exercise) => [exercise.slug, exercise.id]))
+  const resolvedIds = { ...databaseExerciseIds, ...currentIds }
+  const missing = slugs.filter((slug) => !resolvedIds[slug])
+  if (missing.length) throw new Error(`Exercise catalogue is missing: ${missing.join(', ')}`)
+
   const session = await db.from('workout_sessions').insert({ planned_workout_id: workout.id, user_id: userId, planned_duration_minutes: workout.durationMinutes }).select('id,started_at').single()
   throwOnError(session)
   if (!session.data) throw new Error('Could not start the workout session.')
   const exerciseRows = workout.exercises.map((exercise, index) => {
-    const exerciseId = databaseExerciseIds[exercise.slug]
-    if (!exerciseId) throw new Error(`Exercise ${exercise.slug} is missing from the Supabase catalogue.`)
+    const exerciseId = resolvedIds[exercise.slug]
     return { workout_session_id: session.data.id, planned_workout_id: workout.id, user_id: userId, exercise_id: exerciseId, position: index + 1 }
   })
   if (exerciseRows.length) {
