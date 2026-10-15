@@ -54,7 +54,7 @@ export function LoginPage() {
   const signingIn = mode === 'sign_in'
 
   return (
-    <section className="page-content" aria-labelledby="login-title">
+    <section className="page-content login-page" aria-labelledby="login-title">
       <p className="eyebrow">{t('PERSONAL FITNESS PLANNER')}</p>
       <h1 id="login-title">{t(signingIn ? 'Welcome back' : 'Create your account')}</h1>
       <div className="card form-card">

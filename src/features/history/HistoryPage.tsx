@@ -13,6 +13,11 @@ function monthLabel(value: string, language: string) {
   return new Intl.DateTimeFormat(language, { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${value.slice(0, 7)}-15T12:00:00Z`))
 }
 
+function monthYearLabel(value: string, language: string) {
+  const parts = new Intl.DateTimeFormat(language, { month: 'long', year: 'numeric', timeZone: 'UTC' }).formatToParts(new Date(`${value.slice(0, 7)}-15T12:00:00Z`))
+  return parts.filter((part) => part.type === 'month' || part.type === 'year').map((part) => part.value).join(' ')
+}
+
 export function HistoryPage() {
   const { t, language } = useI18n()
   const { session } = useAuth()
@@ -68,23 +73,21 @@ export function HistoryPage() {
   }
 
   return (
-    <section className="page-content history-page" aria-labelledby="history-title">
-      <div className="history-hero">
-        <div className="streak-badge" aria-label={`${history.currentStreak} ${t('days in a row')}`}><span aria-hidden="true">✦</span><strong>{history.currentStreak}</strong></div>
-        <div><p className="eyebrow">{t('KEEP MOVING')}</p><h1 id="history-title">{t('Your streak')}</h1></div>
-        <span className="history-hero-sparkle" aria-hidden="true">✦</span>
-      </div>
+    <section className="page-content history-page streak-page" aria-labelledby="history-title">
+      <p className="eyebrow streak-page-kicker">{monthYearLabel(history.today, language)}</p>
+      <section className="streak-hero" aria-label={`${history.currentStreak} ${t('days in a row')}`}>
+        <div><h1 id="history-title">{history.currentStreak}</h1><p>{t('days in a row')}</p><span className="streak-claim">{t(history.currentStreak ? 'Streak on fire' : 'Start a streak today')}</span></div>
+        <svg className="streak-hero-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 4 5 5 5 10a5 5 0 1 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9Z" /></svg>
+      </section>
       {error && <p className="form-error" role="alert">{error}</p>}
-      <div className="history-streak-cards">
-        <article className="card history-streak-card current"><span className="streak-card-icon">⚡</span><strong>{history.currentStreak}</strong><span>{t('CURRENT STREAK')}</span></article>
-        <article className="card history-streak-card"><span className="streak-card-icon">🏆</span><strong>{history.bestStreak}</strong><span>{t('BEST STREAK')}</span></article>
-        <article className="card history-streak-card"><span className="streak-card-icon">📅</span><strong>{history.activeDaysThisMonth}</strong><span>{t('THIS MONTH')}</span></article>
+      <div className="history-streak-cards streak-metrics">
+        <article className="history-streak-card"><strong>{history.bestStreak}</strong><span>{t('BEST STREAK')}</span></article>
+        <article className="history-streak-card"><strong>{history.activeDaysThisMonth}</strong><span>{t('THIS MONTH')}</span></article>
       </div>
-      <button className="button button-primary history-register-cta" type="button" onClick={() => setActivityDate(history.today)}><span aria-hidden="true">＋</span>{t('Register activity')}</button>
 
       <section className="activity-calendar-section" aria-labelledby="activity-calendar-title">
         <div className="section-heading-row"><h2 id="activity-calendar-title">{t('Training activity')}</h2><p>{monthLabel(history.today, language)}</p></div>
-        <table className="activity-calendar"><caption className="sr-only">{t('Training activity calendar')} · {monthLabel(history.today, language)}</caption><thead><tr>{weekdayLabels.map((label, index) => <th scope="col" key={index}>{label}</th>)}</tr></thead><tbody>{calendarWeeks.map((week, weekIndex) => <tr key={weekIndex}>{week.map((day, dayIndex) => <td key={day.date ?? `empty-${weekIndex}-${dayIndex}`}>{day.date && day.date <= history.today ? <button className={`activity-calendar-day day-${day.state}`} type="button" aria-label={`${displayDate(day.date, language, history.timeZone)}: ${t(`calendar-${day.state}`)}`} onClick={() => day.state === 'active' ? setDetailDate(day.date) : setActivityDate(day.date)}><span aria-hidden="true">{Number(day.date.slice(-2))}</span><span className="sr-only">{t(`calendar-${day.state}`)}</span>{day.state === 'active' && <span className="calendar-check" aria-hidden="true">✓</span>}</button> : day.date ? <span className={`activity-calendar-day day-${day.state}`} aria-label={`${displayDate(day.date, language, history.timeZone)}: ${t(`calendar-${day.state}`)}`}><span>{Number(day.date.slice(-2))}</span></span> : null}</td>)}</tr>)}</tbody></table>
+        <table className="activity-calendar"><caption className="sr-only">{t('Training activity calendar')} · {monthLabel(history.today, language)}</caption><thead><tr>{weekdayLabels.map((label, index) => <th scope="col" key={index}>{label}</th>)}</tr></thead><tbody>{calendarWeeks.map((week, weekIndex) => <tr key={weekIndex}>{week.map((day, dayIndex) => <td key={day.date ?? `empty-${weekIndex}-${dayIndex}`}>{day.date && day.date <= history.today ? <button className={`activity-calendar-day day-${day.state}`} type="button" disabled={day.date === history.today && day.state !== 'active'} aria-label={`${displayDate(day.date, language, history.timeZone)}: ${t(`calendar-${day.state}`)}`} onClick={() => day.state === 'active' ? setDetailDate(day.date) : setActivityDate(day.date)}><span aria-hidden="true">{Number(day.date.slice(-2))}</span><span className="sr-only">{t(`calendar-${day.state}`)}</span>{day.state === 'active' && <span className="calendar-check" aria-hidden="true">✓</span>}</button> : day.date ? <span className={`activity-calendar-day day-${day.state}`} aria-label={`${displayDate(day.date, language, history.timeZone)}: ${t(`calendar-${day.state}`)}`}><span>{Number(day.date.slice(-2))}</span></span> : null}</td>)}</tr>)}</tbody></table>
         <ul className="activity-calendar-legend" aria-label={t('Calendar legend')}><li><span className="legend-swatch is-active" aria-hidden="true">✓</span>{t('Completed activity')}</li><li><span className="legend-swatch" aria-hidden="true">·</span>{t('No completed activity')}</li><li><span className="legend-swatch is-unknown" aria-hidden="true">?</span>{t('No data yet')}</li></ul>
       </section>
 

@@ -59,7 +59,7 @@ export function OnboardingPage() {
   if (!data) return <section className="page-content"><p className="form-error" role="alert">{error ?? t('Profile data is unavailable.')}</p></section>
 
   return (
-    <section className="page-content" aria-labelledby="onboarding-title">
+    <section className="page-content onboarding-page" aria-labelledby="onboarding-title">
       <p className="eyebrow">{t('LET’S GET STARTED')}</p>
       <h1 id="onboarding-title">{t('Set up your profile')}</h1>
       <p className="form-intro page-intro">{t('A few details help your planner fit your routine. Your goals and measurements are profile information only.')}</p>

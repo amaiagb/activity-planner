@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Activity Planner · Racha (Opción C)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+:root{--bg:#F6F3EC;--surface:#fff;--ink:#111;--muted:#5C5951;--line:#E6E2D8;--lime:#C6FF3D;--hot:#C2410C;--flame:#FF6A1A;--blue:#3D5AFE;--yellow:#FFE14D;--core-shadow:#111;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E0E10;--surface:#1A1A1E;--ink:#F4F1EA;--muted:#B4B0A6;--line:#2B2B31;--hot:#FF8A4C;--core-shadow:#fff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E0E10;--surface:#1A1A1E;--ink:#F4F1EA;--muted:#B4B0A6;--line:#2B2B31;--hot:#FF8A4C;--core-shadow:#C6FF3D;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:600 16px/1.4 "Space Grotesk",system-ui,sans-serif}
+.app{max-width:440px;margin:0 auto;padding:18px 18px 130px}
+.disp{font-family:"Archivo Black",Impact,system-ui,sans-serif;text-transform:uppercase;letter-spacing:-.01em;line-height:.95}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.date{margin:0 0 14px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.hero{background:var(--lime);color:#111;border-radius:28px;padding:24px 22px;position:relative;overflow:hidden}
+.hero svg.art{position:absolute;right:-26px;bottom:-30px;width:190px;height:190px;color:#111;opacity:.1;fill:currentColor;stroke:none}
+.hero .big{font-size:96px;margin:0}
+.hero .u{font-weight:700;font-size:18px;margin:2px 0 14px}
+.hero .claim{display:inline-block;background:#111;color:var(--lime);border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px;margin:0}
+.facts{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border-radius:20px;margin-top:14px}
+.facts div{padding:16px}
+.facts div+div{border-left:1px solid var(--line)}
+.facts b{display:block;font:400 30px/1 "Archivo Black",Impact,sans-serif}
+.facts span{font-size:13px;color:var(--muted);font-weight:600}
+.cal{background:var(--surface);border-radius:24px;padding:16px;margin-top:14px}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+h2{margin:0;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.mnav{display:flex;gap:4px}
+.mnav button{width:44px;height:44px;border:0;border-radius:14px;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dow{text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding-bottom:4px}
+.d{aspect-ratio:1;min-height:40px;border:2px solid transparent;border-radius:50%;background:transparent;color:var(--ink);font:700 15px inherit;font-family:inherit;display:grid;place-items:center;cursor:pointer}
+.d.on{background:var(--lime);color:#111}
+.d.off{border:2px dashed var(--line);color:var(--muted)}
+.d.nodata,.d.future{color:var(--muted);opacity:.4;cursor:default}
+.d.today{border:2px solid var(--ink)}
+.detail{display:flex;align-items:center;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.detail .ic{color:var(--hot)}
+.detail p{margin:0;font-size:15px}.detail small{display:block;color:var(--muted);font-weight:500;font-size:13px}
+.link{margin-left:auto;background:none;border:0;color:var(--ink);font:700 14px inherit;font-family:inherit;text-decoration:underline;text-underline-offset:3px;min-height:44px;cursor:pointer}
+.note{font-size:12px;color:var(--muted);text-align:center;margin:22px 0 0}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:6px 10px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+nav ul{max-width:440px;margin:0 auto;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr 1.3fr 1fr 1fr;gap:2px;align-items:end}
+nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;color:var(--muted);font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:.03em;position:relative}
+nav a[aria-current]:not(.h){color:var(--ink)}
+nav a[aria-current]:not(.h):before{content:"";position:absolute;top:-7px;width:28px;height:4px;border-radius:0 0 4px 4px;background:var(--lime);box-shadow:0 0 0 1px #111}
+nav .home a{color:var(--ink);margin-top:-22px}
+nav .home .core{width:62px;height:62px;border-radius:20px;background:var(--lime);color:#111;border:2px solid #111;box-shadow:3px 3px 0 var(--core-shadow);display:grid;place-items:center}
+nav .home .core .ic{width:28px;height:28px}
+</style>
+</head>
+<body>
+<main class="app">
+  <p class="date">Octubre 2026</p>
+  <section class="hero" aria-label="Racha actual">
+    <svg class="art" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1.2 4.6 6 5.8 6 11a6 6 0 0 1-12 0c0-2.4 1.2-3.6 2.4-4.8 0 2.4 1.2 3.6 2.4 3.6C10.8 8.4 9.6 5.6 12 2z"/></svg>
+    <p class="big disp">10</p>
+    <p class="u">días seguidos</p>
+    <p class="claim">Racha on fire</p>
+  </section>
+
+  <section class="facts" aria-label="Métricas">
+    <div><b>12</b><span>Mejor racha</span></div>
+    <div><b>12</b><span>Días activos este mes</span></div>
+  </section>
+
+  <section class="cal" aria-label="Calendario">
+    <div class="head"><h2>Octubre</h2>
+      <div class="mnav"><button aria-label="Mes anterior"><svg class="ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button><button aria-label="Mes siguiente"><svg class="ic" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></div></div>
+    <div class="grid" id="cal"></div>
+    <div class="detail"><svg class="ic" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg><p><b>Mié 14 oct</b><small>Entrenamiento · Paseo</small></p><button class="link">Registrar</button></div>
+  </section>
+  <p class="note">Prototipo con datos de ejemplo · la silueta de llama del hero es un hueco reservado para la futura ilustración de progreso.</p>
+</main>
+
+<nav aria-label="Navegación principal"><ul>
+ <li><a href="#"><svg class="ic" viewBox="0 0 24 24"><path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12"/></svg>Ejercicios</a></li>
+ <li><a href="#"><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="3"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>Rutinas</a></li>
+ <li class="home"><a class="h" href="#"><span class="core"><svg class="ic" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg></span>Hoy</a></li>
+ <li><a href="#" aria-current="page"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>Racha</a></li>
+ <li><a href="#"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg>Perfil</a></li>
+</ul></nav>
+
+<script>
+(function(){
+var on=[3,4,6,7,8,9,10,11,12,13,14,15],today=15,start=3,h='';
+['L','M','X','J','V','S','D'].forEach(function(d){h+='<div class="dow">'+d+'</div>'});
+for(var i=0;i<3;i++)h+='<div></div>';
+for(var d=1;d<=31;d++){
+ var c='d',l;
+ if(d>today){c+=' future';l='Futuro'}
+ else if(d<start){c+=' nodata';l='Sin datos'}
+ else if(on.indexOf(d)>-1){c+=' on';l='Con actividad'}
+ else{c+=' off';l='Sin actividad, registrar'}
+ if(d===today)c+=' today';
+ h+='<button class="'+c+'" aria-label="'+d+' de octubre, '+l+'"'+(/future|nodata/.test(c)?' disabled':'')+'>'+d+'</button>';
+}
+document.getElementById('cal').innerHTML=h;
+})();
+</script>
+</body>
+</html>

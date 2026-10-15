@@ -24,11 +24,12 @@ describe('planner pages', () => {
     plannerMocks.loadSavedTemplates.mockResolvedValue([])
     plannerMocks.loadSavedResources.mockResolvedValue([])
   })
-  it('renders the two daily training actions', async () => {
+  it('renders the today hero and shortcut links', async () => {
     renderPage('/today')
-    expect(await screen.findByRole('heading', { name: 'Train' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Time to move' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Create workout' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Use a template' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Favorite routines/i })).toHaveAttribute('href', '/templates')
+    expect(screen.getByRole('link', { name: /Saved resources/i })).toHaveAttribute('href', '/resources/collection')
     expect(plannerMocks.loadPlannerContext).toHaveBeenCalledWith('authenticated-user')
   })
   it('renders the template and resource collection entry points', async () => {

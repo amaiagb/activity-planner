@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Activity Planner · Workout (Opción C)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+:root{--bg:#F6F3EC;--surface:#fff;--ink:#111;--muted:#5C5951;--line:#E6E2D8;--lime:#C6FF3D;--blue:#3D5AFE;--core-shadow:#111;--cta-shadow:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E0E10;--surface:#1A1A1E;--ink:#F4F1EA;--muted:#B4B0A6;--line:#2B2B31;--core-shadow:#fff;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E0E10;--surface:#1A1A1E;--ink:#F4F1EA;--muted:#B4B0A6;--line:#2B2B31;--core-shadow:#C6FF3D;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:600 16px/1.4 "Space Grotesk",system-ui,sans-serif}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+[hidden]{display:none!important}
+.app{max-width:440px;margin:0 auto;padding:10px 18px 130px}
+.disp{font-family:"Archivo Black",Impact,system-ui,sans-serif;text-transform:uppercase;letter-spacing:-.01em;line-height:.95}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;flex:none}
+button,input,textarea{font:inherit;color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.ib{width:44px;height:44px;border:0;border-radius:14px;background:transparent;display:grid;place-items:center;cursor:pointer;margin-left:-8px}
+h1{font-size:34px;margin:4px 0 14px}
+.head{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;background:var(--bg);padding:2px 0 12px}
+.prog{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--muted);font-weight:700}
+.bar{flex:1;height:10px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--lime);border-radius:6px;box-shadow:inset 0 0 0 1.5px #111;transition:width .2s}
+.banner{background:var(--lime);color:#111;border-radius:16px;padding:12px 16px;font-weight:700;margin-bottom:12px}
+.list{background:var(--surface);border-radius:20px;overflow:hidden;margin:0;padding:0;list-style:none}
+.it+.it{border-top:1px solid var(--line)}
+.r{display:flex;align-items:center;gap:4px;padding:6px 6px 6px 10px;min-height:72px}
+.chk{width:44px;height:44px;border-radius:50%;border:2.5px solid var(--ink);background:transparent;display:grid;place-items:center;cursor:pointer;flex:none;color:transparent;margin-right:8px}
+.chk .ic{width:20px;height:20px;stroke-width:3.5}
+.chk[aria-pressed="true"]{background:var(--lime);color:#111}
+.sk{width:44px;height:44px;border:0;border-radius:14px;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none}
+.sk[aria-pressed="true"]{background:var(--line);color:var(--ink)}
+.nm{flex:1;min-width:0;text-align:left;border:0;background:none;padding:6px 0;cursor:pointer}
+.nm b{display:block;font-size:16px}.nm small{font-size:13px;color:var(--muted);font-weight:500}
+.it.d .nm b{color:var(--muted)}
+.it.s .nm b{color:var(--muted);text-decoration:line-through}
+.tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.tag.now{background:var(--lime);color:#111}.tag.sk2{background:var(--line);color:var(--muted)}
+.det{padding:0 16px 16px 66px;font-weight:500;font-size:15px;color:var(--muted)}
+.det a{display:inline-flex;align-items:center;gap:4px;color:var(--ink);font-weight:700;margin-top:8px;min-height:44px;text-underline-offset:3px}
+.cta{width:100%;min-height:64px;border:2px solid #111;border-radius:18px;background:#111;color:var(--lime);font-family:"Archivo Black",Impact,sans-serif;font-size:20px;text-transform:uppercase;cursor:pointer;box-shadow:4px 4px 0 var(--cta-shadow);margin-top:22px}
+.cta:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--cta-shadow)}
+.note{font-size:12px;color:var(--muted);text-align:center;margin:22px 0 0}
+.dlg{position:fixed;inset:0;background:var(--bg);z-index:20;overflow:auto;padding:calc(10px + env(safe-area-inset-top,0px)) 18px calc(28px + env(safe-area-inset-bottom,0px))}
+.dlg .in{max-width:440px;margin:0 auto}
+label,.lb{display:block;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:20px 0 8px}
+.fld{width:100%;background:var(--surface);border:2px solid transparent;border-radius:16px;padding:12px 14px;min-height:52px;font-weight:600}
+textarea.fld{min-height:96px;resize:vertical}
+.rpe{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.rpe button{min-height:48px;border:0;border-radius:14px;background:var(--surface);font:700 17px "Space Grotesk",sans-serif;cursor:pointer}
+.rpe button[aria-pressed="true"]{background:var(--lime);color:#111}
+.hint{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-weight:600;margin-top:6px}
+.txt{display:block;width:100%;min-height:48px;margin-top:10px;border:0;background:none;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.lnk{display:inline-flex;align-items:center;gap:4px;border:0;background:none;color:var(--ink);font-weight:700;margin-top:8px;min-height:44px;padding:0;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.mv{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.bk{position:absolute;inset:0;background:rgba(17,17,17,.6)}
+.sh{position:relative;width:100%;max-width:440px;max-height:90vh;overflow:auto;background:var(--bg);border-radius:28px 28px 0 0;padding:8px 18px calc(24px + env(safe-area-inset-bottom,0px))}
+@media (min-width:600px){.mv{align-items:center}.sh{border-radius:28px;max-height:84vh}}
+.mtop{display:flex;justify-content:flex-end;position:sticky;top:0;z-index:2;margin:0 -6px}
+.mtop .ib{background:var(--surface);margin:0}
+.mm{position:relative;aspect-ratio:16/10;border-radius:20px;overflow:hidden;background:#23413A;margin:4px 0 16px}
+.fr{position:absolute;inset:0;opacity:0;transition:opacity .12s}
+.fr.on{opacity:1}
+.fr svg{display:block;width:100%;height:100%}
+.pos{position:absolute;left:10px;bottom:10px;background:#111;color:var(--lime);border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700}
+.pp{position:absolute;right:6px;bottom:6px;width:44px;height:44px;border:0;border-radius:50%;background:var(--lime);color:#111;display:grid;place-items:center;cursor:pointer}
+.sh h1{font-size:30px;margin:0 0 12px}
+.sh h3{margin:0 0 10px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tgs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+.tg{background:var(--surface);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:700}
+.tg.m{background:var(--lime);color:#111}
+ol.st{list-style:none;margin:0 0 22px;padding:0;counter-reset:s;background:var(--surface);border-radius:20px}
+li.sp{counter-increment:s;display:flex;gap:12px;padding:14px 16px;font-weight:500}
+li.sp+li.sp{border-top:1px solid var(--line)}
+li.sp:before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--lime);color:#111;font:700 14px/26px "Space Grotesk",sans-serif;text-align:center}
+.sec{width:100%;min-height:52px;border:2px solid var(--ink);border-radius:16px;background:transparent;font-weight:700;font-size:16px;cursor:pointer}
+.sec[disabled]{border-color:var(--line);color:var(--muted);cursor:default}
+.minfo{font-size:14px;color:var(--muted);font-weight:500;margin:10px 2px 0}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--line);padding:6px 10px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+nav ul{max-width:440px;margin:0 auto;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr 1.3fr 1fr 1fr;gap:2px;align-items:end}
+nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;color:var(--muted);font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:.03em}
+nav .home a{color:var(--ink);margin-top:-22px}
+nav .home .core{width:62px;height:62px;border-radius:20px;background:var(--lime);color:#111;border:2px solid #111;box-shadow:3px 3px 0 var(--core-shadow);display:grid;place-items:center}
+nav .home .core .ic{width:28px;height:28px}
+</style>
+</head>
+<body>
+<main class="app" id="app">
+  <button class="ib" aria-label="Volver a Hoy"><svg class="ic" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+  <h1 class="disp">Entreno<br>de hoy</h1>
+  <div class="head"><div class="prog"><div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="6" id="pb"><i id="pf"></i></div><span id="pt"></span></div></div>
+  <div class="banner" id="ban" role="status" hidden></div>
+  <ol class="list" id="ls"></ol>
+  <button class="cta" id="fin">Finalizar entreno</button>
+  <p class="note">Prototipo con datos de ejemplo (series y repeticiones ilustrativas). Marca, salta y expande ejercicios; "Ver ejercicio" abre el detalle en un modal sin salir (ilustraciones simuladas).</p>
+</main>
+
+<div class="dlg" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dt" hidden>
+  <div class="in">
+    <button class="ib" id="x" aria-label="Cerrar sin guardar"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <h1 class="disp" id="dt">¿Cómo ha ido?</h1>
+    <label for="dur">Duración (min)</label>
+    <input class="fld" id="dur" type="number" inputmode="numeric" value="40">
+    <span class="lb">Esfuerzo (RPE)</span>
+    <div class="rpe" id="rpe" role="group" aria-label="Esfuerzo percibido de 1 a 10"></div>
+    <div class="hint"><span>1 · Muy suave</span><span>10 · Máximo</span></div>
+    <label for="nt">Notas</label>
+    <textarea class="fld" id="nt" placeholder="Opcional"></textarea>
+    <button class="cta" id="save">Guardar entreno</button>
+    <button class="txt" id="skipall">Cerrar como sesión saltada</button>
+  </div>
+</div>
+
+<div class="mv" id="mv" hidden>
+  <div class="bk" id="bk"></div>
+  <div class="sh" id="msh" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <div class="mtop"><button class="ib" id="mx" aria-label="Cerrar ejercicio"><svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="mm" id="mm"><span class="fr on" id="mf1"></span><span class="fr" id="mf2"></span><span class="pos" id="mpos">1 / 2</span><button class="pp" id="pp" aria-label="Pausar animación"></button></div>
+    <h1 class="disp" id="mt"></h1>
+    <div class="tgs" id="mtg"></div>
+    <h3>Instrucciones</h3>
+    <ol class="st" id="mst"></ol>
+    <button class="sec" id="mex">Excluir de mis entrenos</button>
+    <p class="minfo" id="minfo" role="status"></p>
+  </div>
+</div>
+
+<nav id="nav" aria-label="Navegación principal"><ul>
+ <li><a href="#"><svg class="ic" viewBox="0 0 24 24"><path d="M3 10v4M6 8v8M18 8v8M21 10v4M6 12h12"/></svg>Ejercicios</a></li>
+ <li><a href="#"><svg class="ic" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="3"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>Rutinas</a></li>
+ <li class="home"><a href="#"><span class="core"><svg class="ic" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></svg></span>Hoy</a></li>
+ <li><a href="#"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>Racha</a></li>
+ <li><a href="#"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg>Perfil</a></li>
+</ul></nav>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var X=[["Sentadilla","Piernas","3 × 12"],["Zancadas","Piernas","3 × 10 por pierna"],["Hip thrust","Glúteo","3 × 12"],["Peso muerto rumano","Piernas","3 × 10"],["Elevación de talones","Piernas","3 × 15"],["Plancha","Core","3 × 30 s"]];
+var S=["d","d","s","p","p","p"],open=-1,rpe=null,CK='<svg class="ic" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>',SK='<svg class="ic" viewBox="0 0 24 24"><path d="M5 5l9 7-9 7zM19 5v14"/></svg>';
+function render(){
+ var now=S.indexOf("p"),done=S.filter(function(s){return s!=="p"}).length;
+ $("ls").innerHTML=X.map(function(x,i){
+  var s=S[i],tag=i===now?'<span class="tag now">Ahora</span>':(s==="s"?'<span class="tag sk2">Saltado</span>':'');
+  return '<li class="it '+s+'"><div class="r"><button class="chk" data-c="'+i+'" aria-pressed="'+(s==="d")+'" aria-label="Hecho: '+x[0]+'">'+CK+'</button>'
+   +'<button class="nm" data-o="'+i+'" aria-expanded="'+(open===i)+'"><b>'+x[0]+tag+'</b><small>'+x[1]+' · '+x[2]+'</small></button>'
+   +'<button class="sk" data-s="'+i+'" aria-pressed="'+(s==="s")+'" aria-label="Saltar: '+x[0]+'">'+SK+'</button></div>'
+   +(open===i?'<div class="det">Colócate en la posición inicial y mueve con control, sin balanceos.<br><button class="lnk" data-v="'+i+'">Ver ejercicio<svg class="ic" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M9 6l6 6-6 6"/></svg></button></div>':'')+'</li>'}).join("");
+ $("pf").style.width=(done/X.length*100)+"%";$("pb").setAttribute("aria-valuenow",done);
+ $("pt").textContent=done+" de "+X.length}
+$("ls").addEventListener("click",function(e){
+ var c=e.target.closest("[data-c]"),s=e.target.closest("[data-s]"),o=e.target.closest("[data-o]"),v=e.target.closest("[data-v]"),f;
+ if(c){f=+c.dataset.c;S[f]=S[f]==="d"?"p":"d"}
+ else if(s){f=+s.dataset.s;S[f]=S[f]==="s"?"p":"s"}
+ else if(v){openV(+v.dataset.v,v);return}
+ else if(o){f=+o.dataset.o;open=open===f?-1:f}
+ else return;
+ render();var b=document.querySelector('[data-'+(c?'c':s?'s':'o')+'="'+f+'"]');if(b)b.focus()});
+$("rpe").innerHTML=[1,2,3,4,5,6,7,8,9,10].map(function(n){return '<button aria-pressed="false" data-r="'+n+'">'+n+'</button>'}).join("");
+$("rpe").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;rpe=b.dataset.r;
+ [].forEach.call($("rpe").children,function(x){x.setAttribute("aria-pressed",x===b)})});
+function show(){$("dlg").hidden=false;$("app").inert=true;$("nav").inert=true;$("x").focus()}
+function hide(msg){$("dlg").hidden=true;$("app").inert=false;$("nav").inert=false;if(msg){$("ban").textContent=msg;$("ban").hidden=false;window.scrollTo(0,0)}$("fin").focus()}
+$("fin").addEventListener("click",show);
+$("x").addEventListener("click",function(){hide()});
+$("save").addEventListener("click",function(){hide("Entreno guardado.")});
+$("skipall").addEventListener("click",function(){hide("Sesión cerrada como saltada.")});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("dlg").hidden)hide()});
+var fi=0,pz=false,tm=null,lastV=null,curV=0,exm={},RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+var PLAY='<svg class="ic" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg>',PAUSE='<svg class="ic" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>';
+var P='<svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="160" height="100" fill="#23413A"/><path d="M20 92h120" stroke="#F4F1EA" stroke-width="3" stroke-linecap="round" opacity=".4"/><g fill="none" stroke="#F4F1EA" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">';
+var FA=P+'<circle cx="80" cy="22" r="9" fill="#E8C9A0" stroke="none"/><path d="M80 34v26M80 40l-18 14M80 40l18 14M80 60l-8 30M80 60l8 30"/></g></svg>';
+var FB=P+'<circle cx="72" cy="38" r="9" fill="#E8C9A0" stroke="none"/><path d="M74 49l6 16M76 54l28-2M80 65l26 4-3 21M80 65l14 8-8 17"/></g></svg>';
+function setF(n){fi=n;$('mf1').classList.toggle('on',n===0);$('mf2').classList.toggle('on',n===1);$('mpos').textContent=(n+1)+' / 2'}
+function run(){clearInterval(tm);if(!pz)tm=setInterval(function(){setF(1-fi)},800);$('pp').setAttribute('aria-label',pz?'Reanudar animación':'Pausar animación');$('pp').innerHTML=pz?PLAY:PAUSE}
+function exSet(){var on=exm[curV];$('mex').disabled=!!on;$('mex').textContent=on?'Excluido':'Excluir de mis entrenos';$('minfo').textContent=on?'No saldrá en tus entrenos. Puedes volver a incluirlo desde Perfil.':''}
+function openV(i,from){lastV=from;curV=i;var x=X[i];$('mt').textContent=x[0];
+ $('mtg').innerHTML='<span class="tg m">'+x[1]+'</span><span class="tg">'+x[2]+'</span>';
+ $('mst').innerHTML=['Colócate en la posición inicial con la espalda neutra.','Haz el movimiento con control, sin balanceos.','Vuelve a la posición inicial y repite.'].map(function(s){return '<li class="sp">'+s+'</li>'}).join('');
+ $('mf1').innerHTML=FA;$('mf2').innerHTML=FB;pz=RM;setF(0);run();exSet();
+ $('mv').hidden=false;$('app').inert=true;$('nav').inert=true;$('msh').scrollTop=0;$('mx').focus()}
+function closeV(){clearInterval(tm);$('mv').hidden=true;$('app').inert=false;$('nav').inert=false;if(lastV)lastV.focus()}
+$('pp').addEventListener('click',function(){pz=!pz;run()});
+$('mm').addEventListener('click',function(e){if(pz&&!e.target.closest('#pp'))setF(1-fi)});
+$('mx').addEventListener('click',closeV);$('bk').addEventListener('click',closeV);
+$('mex').addEventListener('click',function(){exm[curV]=true;exSet()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('mv').hidden)closeV()});
+render();
+})();
+</script>
+</body>
+</html>
