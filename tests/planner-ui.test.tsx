@@ -18,6 +18,8 @@ vi.mock('../src/features/planner/plannerData', () => ({
   getOrCreateWeeklyPlan: plannerMocks.getOrCreateWeeklyPlan,
   loadActiveSession: vi.fn(),
   loadPlannerContext: plannerMocks.loadPlannerContext,
+  loadSavedTemplates: vi.fn().mockResolvedValue([]),
+  loadSavedResources: vi.fn().mockResolvedValue([]),
   regenerateDay: vi.fn(),
   regenerateWeek: vi.fn(),
   setExerciseStatus: vi.fn(),
