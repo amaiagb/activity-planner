@@ -32,12 +32,10 @@ describe('planner pages', () => {
     expect(screen.getByRole('link', { name: /Saved resources/i })).toHaveAttribute('href', '/resources/collection')
     expect(plannerMocks.loadPlannerContext).toHaveBeenCalledWith('authenticated-user')
   })
-  it('renders the template and resource collection entry points', async () => {
+  it('renders the routines overview entry points', async () => {
     renderPage('/templates')
     expect(await screen.findByRole('heading', { name: 'Routines' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /New template/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Add resource/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /View all templates/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /View all resources/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Create workout' })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: /View all/ })).toHaveLength(2)
   })
 })
