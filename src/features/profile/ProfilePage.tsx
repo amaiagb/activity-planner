@@ -9,6 +9,7 @@ import { ProfileFields } from './ProfileFields'
 import { MeasurementManager } from './MeasurementManager'
 import { useI18n } from '../../lib/i18n'
 import { localizeExerciseCopy } from '../../lib/catalogueTranslations'
+import { UiIcon } from '../../components/UiIcon'
 
 type ProfileSection = 'training' | 'personal' | 'measurements' | undefined
 
@@ -145,7 +146,7 @@ export function ProfilePage() {
   if (section) {
     const titles = { training: 'Training', personal: 'Personal details', measurements: 'Measurements' } as const
     return <section className="page-content profile-page" aria-labelledby="profile-section-title">
-      <Link className="profile-back-link" to="/profile">← {t('Back to profile')}</Link>
+      <Link className="profile-back-link" to="/profile"><UiIcon name="chevron-left" /> {t('Back to profile')}</Link>
       <h1 ref={sectionHeadingRef} id="profile-section-title" tabIndex={-1}>{t(titles[section])}</h1>
       {section === 'measurements' ? <MeasurementManager userId={session.user.id} measurements={data.measurements} onChanged={refresh} onDirtyChange={setMeasurementDirty} blocker={blocker} /> : <form className="card form-card profile-form" onSubmit={(event) => { event.preventDefault(); void saveSection() }}>
         <ProfileFields section={section} values={values} data={data} onChange={setValues} />
@@ -195,11 +196,11 @@ export function ProfilePage() {
     <Link className="card profile-user-card" to="/profile/personal" aria-label={`${t('Edit personal details')}: ${displayName}`}>
       <span className="profile-avatar" aria-hidden="true">🦝</span>
       <div><h2>{displayName}</h2>{summary && <p>{summary}</p>}</div>
-      <span className="profile-settings-arrow" aria-hidden="true">›</span>
+      <span className="profile-settings-arrow" aria-hidden="true"><UiIcon name="chevron-right" /></span>
     </Link>
     <nav className="profile-settings-list" aria-label={t('Profile settings')}>
       {settingsRows.map((row) => <Link className="card profile-settings-row" to={row.to} key={row.to}>
-        <span className="profile-settings-copy"><strong>{t(row.title)}</strong><span>{t(row.description)}</span></span><span className="profile-settings-arrow" aria-hidden="true">›</span>
+        <span className="profile-settings-copy"><strong>{t(row.title)}</strong><span>{t(row.description)}</span></span><span className="profile-settings-arrow" aria-hidden="true"><UiIcon name="chevron-right" /></span>
       </Link>)}
     </nav>
     <section className="app-preferences-card profile-app-preferences" aria-labelledby="app-preferences-title">
@@ -212,7 +213,7 @@ export function ProfilePage() {
           const offset = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0
           if (offset) { event.preventDefault(); const next = (index + offset + options.length) % options.length; const nextButton = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]; nextButton?.focus(); void setTheme(options[next]).catch(() => setError(t('Could not save theme preference.'))) }
           if (event.key === 'Home' || event.key === 'End') { event.preventDefault(); const next = event.key === 'Home' ? 0 : options.length - 1; const nextButton = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]; nextButton?.focus(); void setTheme(options[next]).catch(() => setError(t('Could not save theme preference.'))) }
-        }}><span aria-hidden="true">{value === 'system' ? '◐' : value === 'light' ? '☀' : '☾'}</span><span>{t(value === 'system' ? 'System' : value === 'light' ? 'Light' : 'Dark')}</span></button>)}
+        }}><span aria-hidden="true"><UiIcon name={value === 'system' ? 'system' : value === 'light' ? 'sun' : 'moon'} /></span><span>{t(value === 'system' ? 'System' : value === 'light' ? 'Light' : 'Dark')}</span></button>)}
       </div></div>
     </section>
     {error && <p className="form-error" role="alert">{error}</p>}
