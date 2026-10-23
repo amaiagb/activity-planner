@@ -486,7 +486,17 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .status-planned { background: color-mix(in srgb, var(--color-accent) 25%, var(--color-surface)); }
 .week-day-actions { justify-content: flex-end; }
 .week-day-actions .button { min-height: 42px; padding: 8px 12px; }
-.dialog-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; background: rgb(8 18 14 / 54%); padding: 20px; }
+.dialog-backdrop, .modal-backdrop { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; background: rgba(17,17,17,.6); padding: 20px; }
+.modal-sheet-backdrop { align-items: end; padding: 0; }
+.modal { width: min(100%, 680px); max-height: min(90vh, 820px); overflow: auto; border-radius: 28px; padding: 0; }
+.modal-sheet-backdrop .modal { width: 100%; max-height: min(92vh, 900px); border-radius: 28px 28px 0 0; }
+.modal-header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(16px + env(safe-area-inset-top)) 20px 16px; background: var(--color-surface); }
+.modal-title-wrap { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.modal-title-wrap h2 { margin: 0; }
+.modal-close { width: 44px; height: 44px; flex: 0 0 44px; }
+.modal-body { padding: 0 20px 20px; }
+.modal-footer { display: grid; gap: 8px; padding: 0 20px 20px; }
+.modal-footer .button-primary { width: 100%; }
 .confirm-dialog { width: min(100%, 440px); padding: 26px; }
 .confirm-dialog h2 { margin-top: 0; }
 .confirm-dialog p { color: var(--color-muted); line-height: 1.55; }

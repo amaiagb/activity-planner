@@ -121,7 +121,7 @@ export function ExercisesPage() {
           if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
           else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
         }
-      }}><section className="exercise-detail-dialog" role="dialog" aria-modal="true" aria-label={t('Exercise tutorial')}><Outlet /></section></div>}
+      }}><section className="exercise-detail-dialog" aria-label={t('Exercise tutorial')}><Outlet /></section></div>}
     </>
   )
 }

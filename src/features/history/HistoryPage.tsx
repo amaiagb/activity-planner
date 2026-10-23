@@ -5,6 +5,7 @@ import type { WorkoutHistoryData } from '../../lib/historyData'
 import { useAuth } from '../auth/useAuth'
 import { useI18n } from '../../lib/i18n'
 import { UiIcon } from '../../components/UiIcon'
+import { Modal } from '../../components/Modal'
 
 function displayDate(value: string, language: string, timeZone = 'UTC') {
   return new Intl.DateTimeFormat(language, { year: 'numeric', month: 'short', day: 'numeric', timeZone }).format(new Date(`${value}T12:00:00Z`))
@@ -92,16 +93,15 @@ export function HistoryPage() {
         <ul className="activity-calendar-legend" aria-label={t('Calendar legend')}><li><span className="legend-swatch is-active" aria-hidden="true"><UiIcon name="check" /></span>{t('Completed activity')}</li><li><span className="legend-swatch" aria-hidden="true">·</span>{t('No completed activity')}</li><li><span className="legend-swatch is-unknown" aria-hidden="true">?</span>{t('No data yet')}</li></ul>
       </section>
 
-      {detailDate && <div className="dialog-backdrop" role="presentation"><section className="card confirm-dialog activity-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="activity-detail-title"><span className="detail-icon" aria-hidden="true"><UiIcon name="check" /></span><h2 id="activity-detail-title">{displayDate(detailDate, language, history.timeZone)}</h2>{history.activityDetails.filter((activity) => activity.date === detailDate).map((activity) => <p key={`${activity.name}-${activity.durationMinutes}`}>{t(activity.name)} · {activity.durationMinutes} min</p>)}<button className="button button-secondary" type="button" onClick={() => setDetailDate(null)}>{t('Close')}</button></section></div>}
-      {activityDate && <div className="dialog-backdrop" role="presentation"><form className="card today-workout-dialog activity-dialog" role="dialog" aria-modal="true" aria-labelledby="activity-dialog-title" onSubmit={(event) => void registerActivity(event)}>
-        <h2 id="activity-dialog-title">{t('Register activity')}</h2>
+      {detailDate && <Modal title={displayDate(detailDate, language, history.timeZone)} onClose={() => setDetailDate(null)} className="confirm-dialog activity-detail-dialog"><span className="detail-icon" aria-hidden="true"><UiIcon name="check" /></span>{history.activityDetails.filter((activity) => activity.date === detailDate).map((activity) => <p key={`${activity.name}-${activity.durationMinutes}`}>{t(activity.name)} · {activity.durationMinutes} min</p>)}<button className="button button-secondary" type="button" onClick={() => setDetailDate(null)}>{t('Close')}</button></Modal>}
+      {activityDate && <Modal title={t('Register activity')} onClose={() => setActivityDate(null)} className="today-workout-dialog activity-dialog"><form onSubmit={(event) => void registerActivity(event)}>
         <label>{t('Date')}<input type="date" value={activityDate} max={history.today} onChange={(event) => setActivityDate(event.target.value)} required /></label>
         <label>{t('Activity type')}<select value={activityType} onChange={(event) => setActivityType(event.target.value as typeof activityType)}><option value="training">{t('Training')}</option><option value="walking">{t('Walking')}</option><option value="padel">{t('Padel')}</option></select></label>
         <label>{t('Duration (minutes)')}<input type="number" min="1" max="1440" required value={duration} onChange={(event) => setDuration(event.target.value)} /></label>
         {activityType === 'training' && <label>{t('Exercises (optional)')}<textarea maxLength={2000} value={exercises} onChange={(event) => setExercises(event.target.value)} placeholder={t('You can leave this blank.')} /></label>}
         {error && <p className="form-error" role="alert">{t(error)}</p>}
         <div className="button-row"><button className="button button-primary" type="submit" disabled={saving}>{saving ? t('Saving…') : t('Save activity')}</button><button className="button button-secondary" type="button" onClick={() => setActivityDate(null)}>{t('Cancel')}</button></div>
-      </form></div>}
+      </form></Modal>}
     </section>
   )
 }

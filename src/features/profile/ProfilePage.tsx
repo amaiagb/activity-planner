@@ -11,6 +11,7 @@ import { useI18n } from '../../lib/i18n'
 import { UiIcon } from '../../components/UiIcon'
 import { AccentTile } from '../../components/AccentTile'
 import { localizeExerciseCopy } from '../../lib/catalogueTranslations'
+import { Modal } from '../../components/Modal'
 
 type ProfileSection = 'training' | 'personal' | 'measurements' | undefined
 
@@ -171,16 +172,11 @@ export function ProfilePage() {
         <p>{t('This permanently removes your account and its saved profile, measurements, plans, and workout history.')}</p>
         <button className="text-button danger-text" type="button" disabled={deletingAccount} onClick={() => void removeAccount()}>{deletingAccount ? t('Deleting account…') : t('Delete account permanently')}</button>
       </section>}
-      {blocker.state === 'blocked' && section !== 'measurements' && <div className="dialog-backdrop" role="presentation"><section className="card confirm-dialog unsaved-dialog" role="alertdialog" aria-modal="true" aria-labelledby="unsaved-title" aria-describedby="unsaved-description" onKeyDown={(event) => {
-        if (event.key !== 'Tab') return
-        const controls = [...event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled])')]
-        if (event.shiftKey && document.activeElement === controls[0]) { event.preventDefault(); controls.at(-1)?.focus() }
-        else if (!event.shiftKey && document.activeElement === controls.at(-1)) { event.preventDefault(); controls[0]?.focus() }
-      }}>
-        <h2 id="unsaved-title">{t('Unsaved changes')}</h2><p id="unsaved-description">{t('Save your changes before leaving this screen?')}</p>
+      {blocker.state === 'blocked' && section !== 'measurements' && <Modal title={t('Unsaved changes')} onClose={() => blocker.reset()} className="confirm-dialog unsaved-dialog">
+        <p>{t('Save your changes before leaving this screen?')}</p>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="button-row"><button ref={saveAndLeaveRef} className="button button-primary" type="button" disabled={saving} onClick={() => void saveSection()}>{t('Save and leave')}</button><button className="button button-secondary" type="button" disabled={saving} onClick={() => { setValues(savedValues); blocker.proceed() }}>{t('Discard changes and leave')}</button><button className="text-button" type="button" onClick={() => blocker.reset()}>{t('Continue editing')}</button></div>
-      </section></div>}
+      </Modal>}
     </section>
   }
 

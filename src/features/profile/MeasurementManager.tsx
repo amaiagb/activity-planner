@@ -5,6 +5,7 @@ import { useI18n } from '../../lib/i18n'
 import { measurementFields } from '../../types/profile'
 import type { MeasurementInput } from '../../lib/profileData'
 import type { MeasurementKey, MeasurementRecord } from '../../types/profile'
+import { Modal } from '../../components/Modal'
 
 type Props = {
   userId: string
@@ -112,8 +113,8 @@ export function MeasurementManager({ userId, measurements, onChanged, onDirtyCha
       </div>
       {error && <p className="form-error" role="alert">{error}</p>}
       {form && (
-        <form className="card form-card measurement-form" onSubmit={submit}>
-          <h3>{editingId ? t('Edit measurement') : t('New measurement')}</h3>
+        <Modal title={editingId ? t('Edit measurement') : t('New measurement')} onClose={() => setForm(null)} className="form-card measurement-form">
+          <form onSubmit={submit}>
           <label className="field-label" htmlFor="measured-at">{t('Date')}</label>
           <input id="measured-at" type="date" required value={form.measured_at} onChange={(event) => setForm({ ...form, measured_at: event.target.value })} />
           <div className="field-grid measurement-grid">
@@ -130,7 +131,8 @@ export function MeasurementManager({ userId, measurements, onChanged, onDirtyCha
             <button className="button button-primary" type="submit" disabled={saving}>{saving ? t('Saving…') : t('Save measurement')}</button>
             <button className="button button-quiet" type="button" onClick={() => setForm(null)}>{t('Cancel')}</button>
           </div>
-        </form>
+          </form>
+        </Modal>
       )}
       {measurements.length === 0 ? (
         <p className="empty-state">{t('No measurements saved yet. Adding them is optional.')}</p>
@@ -155,16 +157,11 @@ export function MeasurementManager({ userId, measurements, onChanged, onDirtyCha
           ))}
         </ul>
       )}
-      {blocker.state === 'blocked' && <div className="dialog-backdrop" role="presentation"><section className="card confirm-dialog unsaved-dialog" role="alertdialog" aria-modal="true" aria-labelledby="measurement-unsaved-title" aria-describedby="measurement-unsaved-description" onKeyDown={(event) => {
-        if (event.key !== 'Tab') return
-        const controls = [...event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled])')]
-        if (event.shiftKey && document.activeElement === controls[0]) { event.preventDefault(); controls.at(-1)?.focus() }
-        else if (!event.shiftKey && document.activeElement === controls.at(-1)) { event.preventDefault(); controls[0]?.focus() }
-      }}>
-        <h2 id="measurement-unsaved-title">{t('Unsaved changes')}</h2><p id="measurement-unsaved-description">{t('Save your changes before leaving this screen?')}</p>
+      {blocker.state === 'blocked' && <Modal title={t('Unsaved changes')} onClose={() => blocker.reset()} className="confirm-dialog unsaved-dialog">
+        <p>{t('Save your changes before leaving this screen?')}</p>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="button-row"><button ref={saveAndLeaveRef} className="button button-primary" type="button" disabled={saving} onClick={() => void saveCurrentForm()}>{t('Save and leave')}</button><button className="button button-secondary" type="button" disabled={saving} onClick={() => { setForm(null); setEditingId(null); blocker.proceed() }}>{t('Discard changes and leave')}</button><button className="text-button" type="button" onClick={() => blocker.reset()}>{t('Continue editing')}</button></div>
-      </section></div>}
+      </Modal>}
     </section>
   )
 }

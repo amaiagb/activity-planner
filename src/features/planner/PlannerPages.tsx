@@ -33,6 +33,7 @@ import { displayTerm } from "../exercises/exerciseCatalogueLogic";
 import { loadWorkoutHistory } from "../../lib/historyData";
 import type { WorkoutHistoryData } from "../../lib/historyData";
 import { UiIcon } from "../../components/UiIcon";
+import { Modal } from "../../components/Modal";
 import { AccentTile } from "../../components/AccentTile";
 import { CheckOption } from "../../components/CheckOption";
 import { loadExerciseDetail } from "../exercises/exerciseData";
@@ -690,18 +691,11 @@ export function TrainingPage() {
         </>
       )}
       {resourceModalOpen && (
-        <div
-          className="dialog-backdrop"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget)
-              setResourceModalOpen(false);
-          }}
-        >
+        <Modal title={t("Add resource")} onClose={() => setResourceModalOpen(false)} className="resource-dialog" hideHeader>
           <form
             className="card resource-dialog"
-            role="dialog"
-            aria-modal="true"
+
+
             aria-labelledby="resource-dialog-title"
             onSubmit={(event) => void addResource(event)}
           >
@@ -760,7 +754,7 @@ export function TrainingPage() {
               </button>
             </div>
           </form>
-        </div>
+        </Modal>
       )}
     </section>
   );
@@ -1368,8 +1362,8 @@ export function ResourceCollectionPage() {
       )}
       {resourceModalOpen && (
         <div
-          className="dialog-backdrop"
-          role="presentation"
+          className="modal-backdrop"
+
           onMouseDown={(event) => {
             if (event.target === event.currentTarget)
               setResourceModalOpen(false);
@@ -1377,8 +1371,8 @@ export function ResourceCollectionPage() {
         >
           <form
             className="card resource-dialog"
-            role="dialog"
-            aria-modal="true"
+
+
             aria-labelledby="resource-collection-dialog-title"
             onSubmit={(event) => void addResource(event)}
           >
@@ -1816,14 +1810,11 @@ export function WorkoutPage() {
         </>
       )}
       {finishOpen && (
-        <div
-          className="dialog-backdrop workout-finish-overlay"
-          role="presentation"
-        >
+        <Modal title={t("Finish session")} onClose={() => setFinishOpen(false)} className="form-card workout-finish-dialog" hideHeader>
           <section
             className="card form-card workout-finish-dialog"
-            role="dialog"
-            aria-modal="true"
+
+
             aria-labelledby="finish-workout-title"
           >
             <div className="section-heading-row">
@@ -1884,7 +1875,7 @@ export function WorkoutPage() {
               {t("End session as skipped")}
             </button>
           </section>
-        </div>
+        </Modal>
       )}
       {exerciseModal && (
         <WorkoutExerciseModal
@@ -1955,16 +1946,16 @@ function WorkoutExerciseModal({
   }, [exercise]);
   return (
     <div
-      className="dialog-backdrop workout-exercise-backdrop"
-      role="presentation"
+      className="modal-backdrop workout-exercise-backdrop"
+
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
       <section
         className="card workout-exercise-dialog"
-        role="dialog"
-        aria-modal="true"
+
+
         aria-labelledby="workout-exercise-title"
       >
         <div className="section-heading-row">
