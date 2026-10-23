@@ -1904,7 +1904,7 @@ function WorkoutExerciseModal({
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const [exercise, setExercise] = useState<CatalogueExercise | null>(null);
   const [error, setError] = useState(false);
-  const [paused] = useState(
+  const [paused, setPaused] = useState(
     () =>
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false,
   );
@@ -1979,7 +1979,9 @@ function WorkoutExerciseModal({
           <>
             <div className="workout-exercise-media">
               {exercise.media.length ? (
+                <>
                 <img
+                  className="workout-exercise-frame"
                   src={
                     exercise.media[frame]?.media_url ??
                     exercise.media[frame]?.thumbnail_url ??
@@ -1987,6 +1989,8 @@ function WorkoutExerciseModal({
                   }
                   alt={exercise.media[frame]?.alt_text ?? exercise.name}
                 />
+                {exercise.media.length > 1 && <><span className="workout-exercise-position">{frame + 1} / {exercise.media.length}</span><button className="workout-exercise-pause" type="button" aria-label={paused ? t("Resume animation") : t("Pause animation")} onClick={() => setPaused((value) => !value)}><UiIcon name={paused ? "play" : "skip"} /></button></>}
+                </>
               ) : (
                 <div
                   className="exercise-placeholder exercise-placeholder-detail"

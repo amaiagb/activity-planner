@@ -201,16 +201,16 @@ export function ExerciseDetailPage() {
   }
 
   return <>
-    <header className="exercise-detail-header"><button ref={backButton} className="button button-secondary" type="button" aria-label={t(returnTo ? 'Back to workout' : 'Back to exercises')} onClick={closeDetail}><UiIcon name="chevron-left" /> <span>{t(returnTo ? 'Back to workout' : 'Exercises')}</span></button>{exercise && <p className="eyebrow">{t(displayTerm(exercise.category))}</p>}</header>
+    <header className="exercise-detail-header"><button ref={backButton} className="button button-secondary" type="button" aria-label={t(returnTo ? 'Back to workout' : 'Back to exercises')} onClick={closeDetail}><UiIcon name="chevron-left" /> <span>{t(returnTo ? 'Back to workout' : 'Exercises')}</span></button>{exercise && <span className="exercise-detail-category">{t(displayTerm(exercise.category))}</span>}</header>
     {loading ? <p role="status">{t('Loading exercise…')}</p> : error ? <div><p className="form-error" role="alert">{t('Could not load this exercise.')}</p><button className="button button-secondary" type="button" onClick={() => setRetryCount((value) => value + 1)}>{t('Try again')}</button></div> : !exercise ? <section><h1>{t('Exercise unavailable')}</h1><p>{t('This exercise is inactive or no longer exists.')}</p></section> : <article className="exercise-detail-content">
       <h1>{exercise.name}</h1>
       <div className="exercise-hero-media"><TutorialMedia key={exercise.id} exercise={exercise} media={exercise.media} /></div>
       {exercise.description && <p className="exercise-description">{exercise.description}</p>}
       {exercise.catalogueSource === 'repdb' && exercise.sourceData?.tips_es?.length ? <aside className="exercise-tips"><h2>{t('Tips')}</h2><ul>{(language === 'es' ? exercise.sourceData.tips_es : exercise.sourceData.tips_en).map((tip, index) => <li key={`${index}-${tip}`}>{tip}</li>)}</ul></aside> : null}
-      <section className="exercise-instructions-section" aria-labelledby="exercise-instructions-title"><h2 id="exercise-instructions-title">{t('Instructions')}</h2>{instructionSteps(exercise.instructions).length ? <ol>{instructionSteps(exercise.instructions).map((step, index) => <li key={`${index}-${step}`}>{step}</li>)}</ol> : <p>{t('Written instructions are not available yet.')}</p>}</section>
+      <section className="exercise-instructions-section" aria-labelledby="exercise-instructions-title"><h2 id="exercise-instructions-title">{t('Instructions')}</h2>{instructionSteps(exercise.instructions).length ? <ol className="exercise-instructions">{instructionSteps(exercise.instructions).map((step, index) => <li key={`${index}-${step}`}>{step}</li>)}</ol> : <p>{t('Written instructions are not available yet.')}</p>}</section>
       <section className="exercise-detail-facts" aria-label={t('Exercise details')}>
-        {exercise.muscles.length > 0 && <div><h2>{t('Muscles worked')}</h2><p>{exercise.muscles.map((muscle) => t(displayTerm(muscle))).join(', ')}</p></div>}
-        {exercise.equipment.length > 0 && <div><h2>{t('Equipment')}</h2><p>{equipmentSummary(exercise.equipment, t)}</p></div>}
+        {exercise.muscles.length > 0 && <div><h2>{t('Muscles worked')}</h2><p className="exercise-detail-tags exercise-muscle-tags">{exercise.muscles.map((muscle) => <span key={muscle}>{t(displayTerm(muscle))}</span>)}</p></div>}
+        {exercise.equipment.length > 0 && <div><h2>{t('Equipment')}</h2><p className="exercise-detail-tags exercise-equipment-tags">{exercise.equipment.flatMap((group) => group).map((item) => <span key={item.slug}>{item.name}</span>)}</p></div>}
         <div><h2>{t('Movement details')}</h2><p>{[exercise.movement_pattern && t(displayTerm(exercise.movement_pattern)), exercise.difficulty && `${t(displayTerm(exercise.difficulty))} ${t('level')}`, exercise.impact_level && `${t(displayTerm(exercise.impact_level))} ${t('impact')}`, t(exercise.is_outdoor ? 'Outdoor' : 'Indoor')].filter(Boolean).join(' · ')}</p></div>
       </section>
       {session && <section className="exercise-exclusion-control" aria-label={t('Plan inclusion')}>
@@ -219,7 +219,7 @@ export function ExerciseDetailPage() {
         {exclusionError && excludedExerciseIds === null && <p className="form-error" role="alert">{t('Could not update exercise exclusions.')}</p>}
         {excludedExerciseIds !== null && <>
           <p className="field-help">{t('This preference applies when you create future plans.')}</p>
-          <button className={excludedExerciseIds.includes(exercise.id) ? 'button button-secondary' : 'button button-primary'} type="button" disabled={savingExclusion} onClick={() => void toggleExerciseExclusion()}>
+          <button className="button button-secondary" type="button" disabled={savingExclusion} onClick={() => void toggleExerciseExclusion()}>
             {savingExclusion ? t('Saving…') : t(excludedExerciseIds.includes(exercise.id) ? 'Include in plans' : 'Exclude from plans')}
           </button>
           {exclusionError && <p className="form-error" role="alert">{t('Could not update exercise exclusions.')}</p>}
