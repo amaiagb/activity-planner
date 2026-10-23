@@ -133,7 +133,7 @@ h1 { margin: 0 0 26px; font-size: clamp(28px, 9vw, 34px); line-height: 1.05; let
 .bottom-navigation { position: fixed; z-index: 10; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: 1fr 1fr 1.3fr 1fr 1fr; gap: 4px; border-top: 1px solid var(--color-border); background: var(--color-background); padding: 8px max(12px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
 .nav-item { position: relative; display: flex; min-height: 56px; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 14px; color: var(--color-muted); font-size: 0.69rem; font-weight: 700; letter-spacing: 0.04em; text-decoration: none; text-transform: uppercase; }
 .nav-item.active { color: var(--color-ink); }
-.nav-item.active:not(.nav-item-today)::before { position: absolute; top: -9px; width: 28px; height: 4px; border-radius: 999px; background: var(--color-accent); content: ""; }
+.nav-item.active:not(.nav-item-today)::before { position: absolute; top: 0; width: 28px; height: 4px; border: 1px solid var(--color-ink); border-top: 0; border-radius: 0 0 4px 4px; background: var(--color-accent); content: ""; }
 .nav-item-today { z-index: 1; min-height: 78px; margin-top: -30px; }
 .nav-item-today .nav-icon { display: grid; width: 62px; height: 62px; place-items: center; border: 2px solid var(--color-ink); border-radius: 20px; background: var(--color-accent); box-shadow: 3px 3px 0 var(--color-ink); color: var(--color-ink); }
 .nav-item-today.active .nav-icon { box-shadow: 3px 3px 0 var(--color-ink); }

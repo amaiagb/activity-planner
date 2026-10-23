@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useI18n } from '../lib/i18n'
 
 const navigationItems = [
@@ -20,10 +20,14 @@ function NavigationIcon({ name }: { name: typeof navigationItems[number]['icon']
 
 export function BottomNavigation({ inert = false }: { inert?: boolean }) {
   const { t } = useI18n()
+  const { pathname } = useLocation()
+  const isNavigationItemActive = (to: string) => to === '/templates'
+    ? pathname === '/templates' || pathname.startsWith('/templates/') || pathname === '/resources' || pathname.startsWith('/resources/')
+    : pathname === to || pathname.startsWith(`${to}/`)
   return (
     <nav className="bottom-navigation" aria-label={t('Main navigation')} inert={inert || undefined} aria-hidden={inert || undefined}>
       {navigationItems.map(({ to, label, icon }) => (
-        <NavLink key={to} to={to} className={({ isActive }) => `nav-item nav-item-${icon}${isActive ? ' active' : ''}`}>
+        <NavLink key={to} to={to} aria-current={isNavigationItemActive(to) ? 'page' : undefined} className={() => `nav-item nav-item-${icon}${isNavigationItemActive(to) ? ' active' : ''}`}>
           <span className="nav-icon"><NavigationIcon name={icon} /></span>
           <span>{t(label)}</span>
         </NavLink>
