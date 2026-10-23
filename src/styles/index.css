@@ -124,7 +124,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .page-content { max-width: 680px; margin: 0 auto; }
 .eyebrow { margin: 0 0 10px; color: var(--color-muted); font-size: 0.72rem; font-weight: 750; letter-spacing: 0.13em; }
 h1, h2, h3 { font-family: var(--font-display); }
-h1 { margin: 0 0 26px; font-size: clamp(2rem, 7vw, 3rem); line-height: 1.05; letter-spacing: -0.04em; }
+h1 { margin: 0 0 26px; font-size: clamp(28px, 9vw, 34px); line-height: 1.05; letter-spacing: -0.04em; }
 .card { border: 1px solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); box-shadow: var(--shadow-card); }
 .placeholder-card { display: flex; min-height: 240px; flex-direction: column; align-items: flex-start; justify-content: center; padding: clamp(24px, 6vw, 42px); }
 .placeholder-card p { max-width: 38ch; margin: 18px 0 22px; color: var(--color-muted); line-height: 1.65; }
@@ -205,7 +205,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .profile-form { display: grid; gap: 26px; }
 .profile-page { display: grid; gap: 16px; }
 .profile-page > h1 { margin: 0 0 6px; }
-.profile-back-link { width: fit-content; min-height: 40px; color: var(--color-muted); font-weight: 700; text-decoration: none; }
+.profile-back-link { display: inline-flex; width: fit-content; min-height: 40px; align-items: center; gap: 4px; color: var(--color-muted); font-weight: 700; text-decoration: none; }
 .profile-user-card { display: flex; min-width: 0; align-items: center; gap: 16px; padding: 22px; color: var(--color-ink); text-decoration: none; transition: border-color var(--motion-fast) ease, transform var(--motion-fast) ease; }
 .profile-user-card:hover, .profile-user-card:focus-visible { border-color: var(--color-focus); transform: translateY(-1px); }
 .profile-avatar { display: grid; width: 58px; height: 58px; flex: 0 0 58px; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--color-accent) 48%, var(--color-surface)); color: var(--color-ink); font-size: 1.25rem; font-weight: 800; }
@@ -281,7 +281,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .measurement-record-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .measurement-record-heading h3 { margin: 0; font-size: 1rem; }
 .compact-actions { gap: 14px; }
-.text-button { min-height: 40px; border: 0; background: transparent; padding: 4px; color: var(--color-ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.text-button { display: flex; min-height: 40px; align-items: center; border: 0; background: transparent; padding: 4px; color: var(--color-ink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .danger-text { color: var(--color-danger); }
 .measurement-values { display: flex; flex-wrap: wrap; gap: 9px 20px; margin: 17px 0 0; }
 .measurement-values div { display: flex; gap: 5px; font-size: 0.88rem; }
@@ -319,7 +319,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .activity-calendar-section { margin-top: 28px; }
 .activity-calendar-section .section-heading-row { margin-bottom: 12px; }
 .activity-calendar-section h2 { margin: 0; font-size: 1.25rem; }
-.activity-calendar-section .section-heading-row p { margin: 0; color: var(--color-muted); text-transform: capitalize; }
+.activity-calendar-section .section-heading-row p { margin: 0; color: var(--color-muted); }
 .activity-calendar { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 5px; text-align: center; }
 .activity-calendar th { padding: 7px 2px; color: var(--color-muted); font-size: 0.78rem; font-weight: 700; }
 .activity-calendar td { height: 46px; padding: 0; }
@@ -615,7 +615,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 
 /* Phase 2D: workout flow, exercise detail, auth, onboarding and profile. */
 .planner-page:has(.workout-start-card), .planner-page:has(.execution-list) { max-width: 620px; }
-.planner-page:has(.workout-start-card) > h1, .planner-page:has(.execution-list) > h1 { font-family: var(--font-display); font-size: clamp(2.4rem, 10vw, 4rem); letter-spacing: -.08em; text-transform: uppercase; }
+.planner-page:has(.workout-start-card) > h1, .planner-page:has(.execution-list) > h1 { font-family: var(--font-display); font-size: clamp(28px, 9vw, 34px); letter-spacing: -.04em; }
 .workout-start-card { border: 0; border-radius: 20px; background: var(--color-surface); padding: 20px; }
 .workout-start-card p { color: var(--color-muted); }
 .execution-list { display: grid; gap: 0; overflow: hidden; margin: 20px 0; border-radius: 20px; background: var(--color-surface); padding: 0; list-style: none; }
@@ -628,15 +628,15 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .exercise-detail-overlay { display: flex; align-items: flex-end; justify-content: center; background: rgb(17 17 17 / 62%); padding: 0; }
 .exercise-detail-dialog { width: min(100%, 620px); min-height: 0; max-height: 92vh; overflow: auto; border-radius: 28px 28px 0 0; background: var(--color-background); padding: 10px 20px calc(28px + env(safe-area-inset-bottom)); }
 .exercise-detail-header { position: sticky; top: 0; z-index: 2; margin: 0 -4px; padding-bottom: 8px; background: var(--color-background); }
-.exercise-detail-content > h1 { font-family: var(--font-display); font-size: clamp(2rem, 8vw, 3rem); text-transform: uppercase; }
+.exercise-detail-content > h1 { font-family: var(--font-display); font-size: clamp(28px, 9vw, 34px); }
 .exercise-hero-media { border: 0; border-radius: 20px; background: var(--color-surface-muted); }
 .exercise-detail-facts > div { border-top: 0; border-radius: 16px; background: var(--color-surface); padding: 14px 16px; }
 .login-page, .onboarding-page { max-width: 560px; }
-.login-page > h1, .onboarding-page > h1 { font-family: var(--font-display); font-size: clamp(2.3rem, 9vw, 3.5rem); letter-spacing: -.08em; text-transform: uppercase; }
+.login-page > h1, .onboarding-page > h1 { font-family: var(--font-display); font-size: clamp(28px, 9vw, 34px); letter-spacing: -.04em; }
 .login-page .form-card, .onboarding-page .form-card { border: 0; border-radius: 24px; background: var(--color-surface); padding: 24px; }
 .login-page .button-primary, .onboarding-page .button-primary { width: 100%; }
 .profile-page { max-width: 620px; }
-.profile-page > h1 { font-family: var(--font-display); font-size: clamp(2.3rem, 9vw, 3.5rem); letter-spacing: -.08em; text-transform: uppercase; }
+.profile-page > h1 { font-family: var(--font-display); font-size: clamp(28px, 9vw, 34px); letter-spacing: -.04em; }
 .profile-user-card { border: 0; border-radius: 20px; background: var(--color-surface); padding: 16px; }
 .profile-avatar { background: var(--color-accent); color: var(--color-ink); }
 .profile-settings-list { overflow: hidden; border-radius: 20px; background: var(--color-surface); }
@@ -645,7 +645,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .profile-app-preferences { border: 0; border-radius: 20px; background: var(--color-surface); }
 .workout-page { max-width: 440px; }
 .workout-back-link { display: inline-flex; min-height: 44px; align-items: center; color: var(--color-ink); font-weight: 700; text-decoration: none; }
-.workout-page > h1 { max-width: 8ch; margin: 8px 0 18px; font-size: clamp(2.4rem, 10vw, 3.5rem); line-height: .92; text-transform: uppercase; }
+.workout-page > h1 { max-width: 8ch; margin: 8px 0 18px; font-size: clamp(28px, 9vw, 34px); line-height: .98; }
 .workout-progress { position: sticky; z-index: 3; top: 0; height: 10px; overflow: hidden; border-radius: 6px; background: var(--color-border); }
 .workout-progress > span { display: block; height: 100%; border: 1.5px solid var(--color-primary-ink); border-radius: inherit; background: var(--color-accent); transition: width .2s ease; }
 .workout-page > .progress-copy { margin: 7px 0 12px; padding: 0; background: transparent; text-align: right; }
@@ -693,12 +693,13 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 /* Phase 2C: collection and catalogue surfaces use the same continuous list language. */
 .collection-page { max-width: 440px; }
 .resource-collection-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; margin: 0 0 18px; }
-.resource-collection-heading h1 { margin: 0; font-family: var(--font-display); font-size: clamp(2rem, 8vw, 3rem); letter-spacing: -.07em; }
+.resource-collection-heading h1 { margin: 0; font-family: var(--font-display); font-size: clamp(28px, 9vw, 34px); letter-spacing: -.04em; }
 .resource-collection-back { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 14px; font-size: 1.5rem; text-decoration: none; }
 .resource-collection-back:hover, .resource-collection-back:focus-visible { background: var(--color-surface); }
 .resource-collection-add { white-space: nowrap; }
+.collection-page > .section-heading-row .button-primary, .resource-collection-add { width: 64px; min-width: 64px; min-height: 64px; padding: 0; }
 .collection-page > .section-heading-row { margin-top: 16px; }
-.collection-page > .section-heading-row h1 { font-family: var(--font-display); font-size: clamp(2.2rem, 8vw, 3.4rem); letter-spacing: -.07em; }
+.collection-page > .section-heading-row h1 { font-family: var(--font-display); font-size: clamp(28px, 9vw, 34px); letter-spacing: -.04em; }
 .collection-page .collection-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 18px 0 14px; }
 .collection-page .collection-search-field { width: 100%; flex: 1 1 100%; }
 .collection-page .collection-filters input[type="search"] { min-height: 52px; border: 0; border-radius: 16px; background: var(--color-surface); padding: 0 16px; }
@@ -721,7 +722,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .collection-list .collection-list-row .favorite-button, .collection-list .collection-list-row .resource-menu-button { position: static; width: 36px; height: 36px; }
 .collection-page .collection-hint { margin: 10px 0 0; color: var(--color-muted); }
 .exercise-catalogue { max-width: 440px; }
-.exercise-catalogue > h1 { font-family: var(--font-display); font-size: clamp(2.2rem, 8vw, 3.4rem); letter-spacing: -.07em; }
+.exercise-catalogue > h1 { font-family: var(--font-display); font-size: clamp(28px, 9vw, 34px); letter-spacing: -.04em; }
 .exercise-catalogue .exercise-search { min-height: 52px; border: 0; border-radius: 16px; background: var(--color-surface); padding: 0 16px; }
 .exercise-search-field { min-height: 52px; border-radius: 16px; background: var(--color-surface); padding: 0 16px; }
 .exercise-search-field .exercise-search { min-height: 48px; border: 0; background: transparent; padding: 0; }
@@ -775,7 +776,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .streak-metrics .history-streak-card > span { color: var(--color-muted); font-size: .68rem; letter-spacing: .08em; }
 .streak-page .activity-calendar-section { margin-top: 14px; border: 1px solid var(--color-border); border-radius: 20px; background: var(--color-surface); padding: 20px; }
 .streak-page .activity-calendar-section .section-heading-row { margin-bottom: 18px; }
-.streak-page .activity-calendar-section h2 { font-family: var(--font-display); font-size: 1.2rem; text-transform: capitalize; }
+.streak-page .activity-calendar-section h2 { font-family: var(--font-display); font-size: 1.2rem; }
 .streak-page .activity-calendar-section .section-heading-row p { font-weight: 700; }
 .streak-page .activity-calendar { border-spacing: 3px 7px; }
 .streak-page .activity-calendar-day { width: 38px; height: 38px; margin: auto; border: 1px solid transparent; border-radius: 50%; background: transparent; }
@@ -789,7 +790,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .streak-page .calendar-check { display: none; }
 .templates-page { max-width: 620px; }
 .templates-main-bar { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
-.templates-main-bar h1 { margin: 0; font-family: var(--font-display); font-size: clamp(2.4rem, 9vw, 4.2rem); letter-spacing: -.08em; }
+.templates-main-bar h1 { margin: 0; font-family: var(--font-display); font-size: clamp(28px, 9vw, 34px); letter-spacing: -.04em; }
 .templates-create-cta { width: 100%; margin-bottom: 34px; }
 .templates-page .templates-section, .templates-page .resources-section { gap: 13px; margin-top: 0; }
 .templates-page .resources-section { margin-top: 34px; }

@@ -76,8 +76,8 @@ export function HistoryPage() {
   return (
     <section className="page-content history-page streak-page" aria-labelledby="history-title">
       <p className="eyebrow streak-page-kicker">{monthYearLabel(history.today, language)}</p>
-      <section className="streak-hero" aria-label={`${history.currentStreak} ${t('days in a row')}`}>
-        <div><h1 id="history-title">{history.currentStreak}</h1><p>{t('days in a row')}</p><span className="streak-claim">{t(history.currentStreak ? 'Streak on fire' : 'Start a streak today')}</span></div>
+      <section className="streak-hero" aria-label={`${history.currentStreak} ${t(history.currentStreak === 1 ? 'day in a row' : 'days in a row')}`}>
+        <div><h1 id="history-title">{history.currentStreak}</h1><p>{t(history.currentStreak === 1 ? 'day in a row' : 'days in a row')}</p><span className="streak-claim">{t(history.currentStreak ? 'Streak on fire' : 'Start a streak today')}</span></div>
         <svg className="streak-hero-flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c1 4 5 5 5 10a5 5 0 1 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9Z" /></svg>
       </section>
       {error && <p className="form-error" role="alert">{error}</p>}
