@@ -4,6 +4,7 @@ import { filterExercises, displayTerm, groupExercisesByLetter, instructionSteps 
 import { loadExerciseCatalogue, loadExerciseDetail } from './exerciseData'
 import type { CatalogueExercise, ExerciseMedia } from './exerciseData'
 import { useI18n } from '../../lib/i18n'
+import { UiIcon } from '../../components/UiIcon'
 import { loadExcludedExerciseIds, setExerciseExcluded } from '../../lib/profileData'
 import { useAuth } from '../auth/useAuth'
 
@@ -39,7 +40,7 @@ function ExerciseRow({ exercise, onOpen }: { exercise: CatalogueExercise; onOpen
     <Link className="exercise-row" to={`/exercises/${exercise.id}`} aria-label={`${t('View ')}${exercise.name}`} onClick={(event) => onOpen(event.currentTarget)}>
       <ExerciseThumbnail exercise={exercise} />
       <span className="exercise-row-copy"><strong>{exercise.name}</strong><span>{bodyPart}{equipment ? ` · ${equipment}` : ''}</span></span>
-      <span className="exercise-row-arrow" aria-hidden="true">›</span>
+      <UiIcon className="exercise-row-arrow" name="chevron-right" />
     </Link>
   )
 }
@@ -92,7 +93,7 @@ export function ExercisesPage() {
           <p className="eyebrow">{t('MOVEMENT LIBRARY')}</p>
           <h1 id="exercises-title">{t('Exercises')}</h1>
           <label className="field-label" htmlFor="exercise-search">{t('Search exercises')}</label>
-          <input id="exercise-search" className="exercise-search" type="search" placeholder={t('Name, muscle, equipment…')} value={search} onChange={(event) => setSearch(event.target.value)} />
+          <label className="exercise-search-field"><UiIcon name="search" /><input id="exercise-search" className="exercise-search" type="search" placeholder={t('Name, muscle, equipment…')} value={search} onChange={(event) => setSearch(event.target.value)} /></label>
           <div className="exercise-filters">
             <label><span className="sr-only">{t('Filter by body part')}</span><select aria-label={t('Filter by body part')} value={bodyPart} onChange={(event) => setBodyPart(event.target.value)}><option value="">{t('Any body part')}</option>{bodyParts.map((part) => <option key={part} value={part}>{t(displayTerm(part))}</option>)}</select></label>
             <label><span className="sr-only">{t('Filter by equipment')}</span><select aria-label={t('Filter by equipment')} value={equipment} onChange={(event) => setEquipment(event.target.value)}><option value="">{t('Any equipment')}</option>{equipmentOptions.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></label>
@@ -200,7 +201,7 @@ export function ExerciseDetailPage() {
   }
 
   return <>
-    <header className="exercise-detail-header"><button ref={backButton} className="button button-secondary" type="button" aria-label={t(returnTo ? 'Back to workout' : 'Back to exercises')} onClick={closeDetail}>← <span>{t(returnTo ? 'Back to workout' : 'Exercises')}</span></button>{exercise && <p className="eyebrow">{t(displayTerm(exercise.category))}</p>}</header>
+    <header className="exercise-detail-header"><button ref={backButton} className="button button-secondary" type="button" aria-label={t(returnTo ? 'Back to workout' : 'Back to exercises')} onClick={closeDetail}><UiIcon name="chevron-left" /> <span>{t(returnTo ? 'Back to workout' : 'Exercises')}</span></button>{exercise && <p className="eyebrow">{t(displayTerm(exercise.category))}</p>}</header>
     {loading ? <p role="status">{t('Loading exercise…')}</p> : error ? <div><p className="form-error" role="alert">{t('Could not load this exercise.')}</p><button className="button button-secondary" type="button" onClick={() => setRetryCount((value) => value + 1)}>{t('Try again')}</button></div> : !exercise ? <section><h1>{t('Exercise unavailable')}</h1><p>{t('This exercise is inactive or no longer exists.')}</p></section> : <article className="exercise-detail-content">
       <h1>{exercise.name}</h1>
       <div className="exercise-hero-media"><TutorialMedia key={exercise.id} exercise={exercise} media={exercise.media} /></div>
