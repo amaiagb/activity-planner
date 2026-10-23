@@ -146,7 +146,7 @@ h1 { margin: 0 0 26px; font-size: clamp(2rem, 7vw, 3rem); line-height: 1.05; let
 .accent-yellow { background: var(--accent-yellow); }
 .accent-pink { background: var(--accent-pink); }
 .pat-dots { --pattern-ink: rgba(17,17,17,.14); background-image: radial-gradient(circle, var(--pattern-ink) 3px, transparent 3px); background-size: 16px 16px; }
-.pat-diag { --pattern-ink: rgba(17,17,17,.14); background-image: repeating-linear-gradient(135deg, transparent 0 8px, var(--pattern-ink) 8px 10px); }
+.pat-diag { --pattern-ink: rgba(17,17,17,.11); background-image: repeating-linear-gradient(135deg, transparent 0 10px, var(--pattern-ink) 10px 16px); }
 .pat-lines { --pattern-ink: rgba(17,17,17,.14); background-image: repeating-linear-gradient(0deg, transparent 0 8px, var(--pattern-ink) 8px 10px); }
 .pat-hero { --pattern-ink: rgba(17,17,17,.10); }
 
@@ -211,8 +211,10 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .profile-avatar { display: grid; width: 58px; height: 58px; flex: 0 0 58px; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--color-accent) 48%, var(--color-surface)); color: var(--color-ink); font-size: 1.25rem; font-weight: 800; }
 .profile-user-card h2 { overflow-wrap: anywhere; margin: 0; font-size: 1.2rem; }
 .profile-user-card p { margin: 5px 0 0; color: var(--color-muted); font-size: .9rem; }
+.profile-user-card > .accent-tile { width: 58px; height: 58px; flex: 0 0 58px; border-radius: 50%; }
 .profile-settings-list { display: grid; gap: 10px; }
 .profile-settings-row { display: flex; min-height: 76px; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; text-decoration: none; transition: border-color var(--motion-fast) ease, transform var(--motion-fast) ease; }
+.profile-settings-row > .accent-tile { width: 40px; height: 40px; flex: 0 0 40px; }
 .profile-settings-row:hover { border-color: var(--color-focus); transform: translateY(-1px); }
 .profile-settings-copy { display: grid; min-width: 0; gap: 4px; }
 .profile-settings-copy strong { font-size: .98rem; }
@@ -370,6 +372,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .template-menu button:hover, .template-menu button:focus-visible { background: color-mix(in srgb, var(--color-danger) 10%, transparent); }
 .template-detail-page { max-width: 700px; }
 .template-detail-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin: 10px 0 22px; }
+.template-detail-heading > .accent-tile { flex: 0 0 56px; }
 .template-detail-heading h1 { margin: 0; font-weight: 850; }
 .template-detail-duration { border-radius: 999px; background: var(--color-surface-muted); padding: 8px 12px; color: var(--color-muted); white-space: nowrap; }
 .template-detail-card { padding: 24px; }
@@ -707,6 +710,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .collection-page .template-card-grid, .collection-page .resource-card-grid { grid-template-columns: 1fr; }
 .collection-list { display: grid; overflow: hidden; border-radius: 20px; background: var(--color-surface); }
 .collection-list .collection-list-row { min-height: 76px; align-items: center; border: 0; border-bottom: 1px solid var(--color-border); border-radius: 0; background: transparent; padding: 10px 12px 10px 16px; box-shadow: none; }
+.collection-list .template-card { display: flex; gap: 13px; }
 .collection-list .collection-list-row:last-child { border-bottom: 0; }
 .collection-list .collection-list-row:hover { background: var(--color-surface-muted); transform: none; }
 .collection-list .collection-list-row h3 { display: -webkit-box; margin: 0; overflow: hidden; font-size: .85rem; line-height: 1.2; text-overflow: ellipsis; white-space: normal; -webkit-box-orient: vertical; -webkit-line-clamp: 3; font-family: var(--font-body);}
@@ -800,6 +804,8 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .resource-thumbnail-wrap { position: relative; display: block; width: 78px; height: 78px; flex: 0 0 78px; }
 .resource-thumbnail { display: block; width: 100%; height: 100%; overflow: hidden; border-radius: 14px; object-fit: cover; background: var(--color-surface-muted); }
 .resource-thumbnail-fallback { display: grid; place-items: center; }
+.resource-thumbnail-fallback > .accent-tile { width: 100%; height: 100%; border-radius: 14px; }
+.resource-thumbnail-fallback > .accent-tile .platform-icon { width: 28px; height: 28px; }
 .resource-thumbnail-fallback-art { display: grid; width: 100%; height: 100%; place-items: center; align-content: center; gap: 4px; overflow: hidden; border-radius: 14px; color: var(--color-ink); }
 .resource-thumbnail-fallback-art .platform-icon { width: 28px; height: 28px; }
 .resource-thumbnail-fallback-art small { font-size: .58rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
@@ -813,6 +819,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .resource-platform-badge-instagram { background: var(--color-pink); }
 .resource-platform-badge-tiktok { background: var(--color-accent); }
 .collection-list .resource-card { display: flex; min-height: 96px; align-items: center; gap: 13px; padding: 9px 12px 9px 16px; }
+.collection-list .resource-thumbnail-wrap { width: 58px; height: 58px; flex-basis: 58px; }
 .collection-list .resource-card .resource-thumbnail { margin: 0; }
 .resource-list .resource-thumbnail-wrap { width: 58px; height: 58px; flex-basis: 58px; }
 .resource-list .resource-thumbnail-fallback-art { border-radius: 13px; }

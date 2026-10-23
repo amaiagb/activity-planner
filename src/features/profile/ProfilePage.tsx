@@ -9,6 +9,7 @@ import { ProfileFields } from './ProfileFields'
 import { MeasurementManager } from './MeasurementManager'
 import { useI18n } from '../../lib/i18n'
 import { UiIcon } from '../../components/UiIcon'
+import { AccentTile } from '../../components/AccentTile'
 import { localizeExerciseCopy } from '../../lib/catalogueTranslations'
 
 type ProfileSection = 'training' | 'personal' | 'measurements' | undefined
@@ -194,13 +195,13 @@ export function ProfilePage() {
     <p className="eyebrow">{t('YOUR SETTINGS')}</p>
     <h1 id="profile-title">{t('Profile')}</h1>
     <Link className="card profile-user-card" to="/profile/personal" aria-label={`${t('Edit personal details')}: ${displayName}`}>
-      <span className="profile-avatar" aria-hidden="true">🐨</span>
+      <AccentTile accent="pink" icon={<span className="profile-avatar" aria-hidden="true">🐨</span>} />
       <div><h2>{displayName}</h2>{summary && <p>{summary}</p>}</div>
       <UiIcon className="profile-settings-arrow" name="chevron-right" />
     </Link>
     <nav className="profile-settings-list" aria-label={t('Profile settings')}>
       {settingsRows.map((row) => <Link className="card profile-settings-row" to={row.to} key={row.to}>
-        <span className="profile-settings-copy"><strong>{t(row.title)}</strong><span>{t(row.description)}</span></span><UiIcon className="profile-settings-arrow" name="chevron-right" />
+        <AccentTile accent={row.title === 'Training' ? 'lime' : 'yellow'} icon={<UiIcon name={row.title === 'Training' ? 'resource' : 'calendar'} />} /><span className="profile-settings-copy"><strong>{t(row.title)}</strong><span>{t(row.description)}</span></span><UiIcon className="profile-settings-arrow" name="chevron-right" />
       </Link>)}
     </nav>
     <section className="app-preferences-card profile-app-preferences" aria-labelledby="app-preferences-title">
