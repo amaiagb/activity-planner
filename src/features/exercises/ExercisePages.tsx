@@ -4,14 +4,18 @@ import { filterExercises, displayTerm, groupExercisesByLetter, instructionSteps 
 import { loadExerciseCatalogue, loadExerciseDetail } from './exerciseData'
 import type { CatalogueExercise, ExerciseMedia } from './exerciseData'
 import { useI18n } from '../../lib/i18n'
+import { UiIcon } from '../../components/UiIcon'
 import { loadExcludedExerciseIds, setExerciseExcluded } from '../../lib/profileData'
 import { useAuth } from '../auth/useAuth'
+import { AccentTile, accentForId } from '../../components/AccentTile'
+import { BODY_REGION_OPTIONS } from '../../lib/bodyRegions'
 
-function PlaceholderMedia({ name, size }: { name: string; size: 'thumbnail' | 'detail' }) {
+function PlaceholderMedia({ id, name, size }: { id?: string; name: string; size: 'thumbnail' | 'detail' }) {
   const { t } = useI18n()
+  const accent = accentForId(id ?? name)
   return (
     <div className={`exercise-placeholder exercise-placeholder-${size}`} role="img" aria-label={`${t('Illustration not yet available for ')}${name}`}>
-      <span aria-hidden="true">{name.trim().charAt(0).toLocaleUpperCase()}</span>
+      <AccentTile accent={accent} pattern={accent === 'pink' ? 'diag' : accent === 'yellow' ? 'lines' : 'dots'} size={size === 'detail' ? 72 : 56} icon={<span aria-hidden="true">{name.trim().charAt(0).toLocaleUpperCase()}</span>} />
       {size === 'detail' && <small>{t('Illustration coming soon')}</small>}
     </div>
   )
@@ -20,7 +24,7 @@ function PlaceholderMedia({ name, size }: { name: string; size: 'thumbnail' | 'd
 export function ExerciseThumbnail({ exercise }: { exercise: CatalogueExercise }) {
   const [failed, setFailed] = useState(false)
   const image = exercise.media.find((item) => item.thumbnail_url)
-  if (!image || failed) return <PlaceholderMedia name={exercise.name} size="thumbnail" />
+  if (!image || failed) return <PlaceholderMedia id={exercise.id} name={exercise.name} size="thumbnail" />
   if (exercise.catalogueSource === 'repdb' && exercise.media.length > 1) return <span className="exercise-motion-thumbnail" aria-label={exercise.name}>{exercise.media.map((item, index) => <img key={item.id} className={`exercise-thumbnail motion-frame motion-frame-${index}`} src={item.thumbnail_url ?? undefined} alt="" loading="lazy" width="72" height="72" onError={() => setFailed(true)} />)}</span>
   return <img className="exercise-thumbnail" src={image.thumbnail_url ?? undefined} alt={image.alt_text} loading="lazy" width="72" height="72" onError={() => setFailed(true)} />
 }
@@ -39,13 +43,21 @@ function ExerciseRow({ exercise, onOpen }: { exercise: CatalogueExercise; onOpen
     <Link className="exercise-row" to={`/exercises/${exercise.id}`} aria-label={`${t('View ')}${exercise.name}`} onClick={(event) => onOpen(event.currentTarget)}>
       <ExerciseThumbnail exercise={exercise} />
       <span className="exercise-row-copy"><strong>{exercise.name}</strong><span>{bodyPart}{equipment ? ` · ${equipment}` : ''}</span></span>
-      <span className="exercise-row-arrow" aria-hidden="true">›</span>
+      <UiIcon className="exercise-row-arrow" name="chevron-right" />
     </Link>
   )
 }
 
 function jumpToLetter(letter: string) {
   document.getElementById(`exercise-group-${letter}`)?.scrollIntoView({ block: 'start', behavior: 'auto' })
+}
+
+function normalizeIndexLetter(letter: string) {
+  return letter.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+function normalizeIndexText(value: string) {
+  return normalizeIndexLetter(value).toLocaleLowerCase()
 }
 
 export function ExercisesPage() {
@@ -73,10 +85,16 @@ export function ExercisesPage() {
   useEffect(() => { void reload() }, [reload])
   useEffect(() => { if (!detailRoute) lastOpenedRow.current?.focus() }, [detailRoute])
 
-  const bodyParts = useMemo(() => [...new Set(exercises.flatMap((item) => item.muscles))].sort(), [exercises])
+  const bodyParts = BODY_REGION_OPTIONS
   const equipmentOptions = useMemo(() => [...new Map(exercises.flatMap((item) => item.equipment).map((item) => [item.slug, item.name])).entries()].sort((a, b) => a[1].localeCompare(b[1])), [exercises])
   const groups = useMemo(() => groupExercisesByLetter(filterExercises(exercises, search, bodyPart, equipment)), [exercises, search, bodyPart, equipment])
-  const letters = groups.map(([letter]) => letter)
+  const normalizedGroups = [...groups.reduce((merged, [letter, entries]) => {
+    const normalized = normalizeIndexLetter(letter)
+    merged.set(normalized, [...(merged.get(normalized) ?? []), ...entries])
+    return merged
+  }, new Map<string, CatalogueExercise[]>()).entries()]
+  normalizedGroups.forEach(([, entries]) => entries.sort((a, b) => normalizeIndexText(a.name).localeCompare(normalizeIndexText(b.name))))
+  const letters = normalizedGroups.map(([letter]) => letter)
   const hasFilters = Boolean(search || bodyPart || equipment)
 
   function clearFilters() {
@@ -92,18 +110,18 @@ export function ExercisesPage() {
           <p className="eyebrow">{t('MOVEMENT LIBRARY')}</p>
           <h1 id="exercises-title">{t('Exercises')}</h1>
           <label className="field-label" htmlFor="exercise-search">{t('Search exercises')}</label>
-          <input id="exercise-search" className="exercise-search" type="search" placeholder={t('Name, muscle, equipment…')} value={search} onChange={(event) => setSearch(event.target.value)} />
+          <label className="exercise-search-field"><UiIcon name="search" /><input id="exercise-search" className="exercise-search" type="search" placeholder={t('Name, muscle, equipment…')} value={search} onChange={(event) => setSearch(event.target.value)} /></label>
           <div className="exercise-filters">
-            <label><span className="sr-only">{t('Filter by body part')}</span><select aria-label={t('Filter by body part')} value={bodyPart} onChange={(event) => setBodyPart(event.target.value)}><option value="">{t('Any body part')}</option>{bodyParts.map((part) => <option key={part} value={part}>{t(displayTerm(part))}</option>)}</select></label>
+            <label><span className="sr-only">{t('Filter by body part')}</span><select aria-label={t('Filter by body part')} value={bodyPart} onChange={(event) => setBodyPart(event.target.value)}><option value="">{t('Any body part')}</option>{bodyParts.map((part) => <option key={part.slug} value={part.slug}>{t(part.label)}</option>)}</select></label>
             <label><span className="sr-only">{t('Filter by equipment')}</span><select aria-label={t('Filter by equipment')} value={equipment} onChange={(event) => setEquipment(event.target.value)}><option value="">{t('Any equipment')}</option>{equipmentOptions.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></label>
           </div>
           {hasFilters && <button className="text-button exercise-clear-filters" type="button" onClick={clearFilters}>{t('Clear search and filters')}</button>}
           {loading ? <p className="exercise-state-message" role="status">{t('Loading exercises…')}</p> : error ? <div className="exercise-state-message"><p className="form-error" role="alert">{t('Could not load the exercise catalogue.')}</p><button className="button button-secondary" type="button" onClick={() => void reload()}>{t('Try again')}</button></div> : groups.length === 0 ? <div className="card exercise-empty"><h2>{t(hasFilters ? 'No exercises found' : 'No active exercises')}</h2><p>{t(hasFilters ? 'No exercises match these filters.' : 'The exercise catalogue is empty.')}</p>{hasFilters && <button className="button button-secondary" type="button" onClick={clearFilters}>{t('Clear filters')}</button>}</div> : <>
             <p className="exercise-result-count" role="status">{groups.reduce((total, [, entries]) => total + entries.length, 0)} {t('exercises')}</p>
-            <div className="exercise-groups">
-              {groups.map(([letter, entries]) => <section className="exercise-group" key={letter} id={`exercise-group-${letter}`} aria-labelledby={`exercise-letter-${letter}`}><h2 id={`exercise-letter-${letter}`} tabIndex={-1}>{letter}</h2><ul>{entries.map((exercise) => <li key={exercise.id}><ExerciseRow exercise={exercise} onOpen={(element) => { lastOpenedRow.current = element }} /></li>)}</ul></section>)}
-            </div>
             <nav className="exercise-index" aria-label={t('Jump to exercise name letter')}>{letters.map((letter) => <button key={letter} type="button" aria-label={`${t('Jump to ')}${letter}`} aria-controls={`exercise-group-${letter}`} onClick={() => jumpToLetter(letter)}>{letter}</button>)}</nav>
+            <div className="exercise-groups">
+              {normalizedGroups.map(([letter, entries]) => <section className="exercise-group" key={letter} id={`exercise-group-${letter}`} aria-labelledby={`exercise-letter-${letter}`}><h2 id={`exercise-letter-${letter}`} tabIndex={-1}>{letter}</h2><ul>{entries.map((exercise) => <li key={exercise.id}><ExerciseRow exercise={exercise} onOpen={(element) => { lastOpenedRow.current = element }} /></li>)}</ul></section>)}
+            </div>
           </>}
           <p className="repdb-attribution">Exercise data by <a href="https://repdb.co" target="_blank" rel="noreferrer">RepDB (repdb.co)</a></p>
         </section>
@@ -120,7 +138,7 @@ export function ExercisesPage() {
           if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
           else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
         }
-      }}><section className="exercise-detail-dialog" role="dialog" aria-modal="true" aria-label={t('Exercise tutorial')}><Outlet /></section></div>}
+      }}><section className="exercise-detail-dialog" aria-label={t('Exercise tutorial')}><Outlet /></section></div>}
     </>
   )
 }
@@ -129,10 +147,10 @@ function TutorialMedia({ exercise, media }: { exercise: CatalogueExercise; media
   const { t } = useI18n()
   const [failed, setFailed] = useState<string[]>([])
   const visual = media.find((item) => item.media_url && !failed.includes(item.id))
-  if (!visual) return <PlaceholderMedia name={exercise.name} size="detail" />
+  if (!visual) return <PlaceholderMedia id={exercise.id} name={exercise.name} size="detail" />
   if (exercise.catalogueSource === 'repdb' && media.length > 1) {
     const available = media.filter((item) => item.media_url && !failed.includes(item.id))
-    if (!available.length) return <PlaceholderMedia name={exercise.name} size="detail" />
+    if (!available.length) return <PlaceholderMedia id={exercise.id} name={exercise.name} size="detail" />
     return <div className="exercise-motion-detail">{available.map((item, index) => <img key={item.id} className={`motion-frame motion-frame-${index}`} src={item.media_url ?? undefined} alt={item.alt_text} onError={() => setFailed((current) => [...current, item.id])} />)}</div>
   }
   if (visual.media_kind === 'video' || visual.media_kind === 'animation') {
@@ -200,16 +218,16 @@ export function ExerciseDetailPage() {
   }
 
   return <>
-    <header className="exercise-detail-header"><button ref={backButton} className="button button-secondary" type="button" aria-label={t(returnTo ? 'Back to workout' : 'Back to exercises')} onClick={closeDetail}>← <span>{t(returnTo ? 'Back to workout' : 'Exercises')}</span></button>{exercise && <p className="eyebrow">{t(displayTerm(exercise.category))}</p>}</header>
+    <header className="exercise-detail-header"><button ref={backButton} className="button button-secondary" type="button" aria-label={t(returnTo ? 'Back to workout' : 'Back to exercises')} onClick={closeDetail}><UiIcon name="chevron-left" /> <span>{t(returnTo ? 'Back to workout' : 'Exercises')}</span></button>{exercise && <span className="exercise-detail-category">{t(displayTerm(exercise.category))}</span>}</header>
     {loading ? <p role="status">{t('Loading exercise…')}</p> : error ? <div><p className="form-error" role="alert">{t('Could not load this exercise.')}</p><button className="button button-secondary" type="button" onClick={() => setRetryCount((value) => value + 1)}>{t('Try again')}</button></div> : !exercise ? <section><h1>{t('Exercise unavailable')}</h1><p>{t('This exercise is inactive or no longer exists.')}</p></section> : <article className="exercise-detail-content">
       <h1>{exercise.name}</h1>
       <div className="exercise-hero-media"><TutorialMedia key={exercise.id} exercise={exercise} media={exercise.media} /></div>
       {exercise.description && <p className="exercise-description">{exercise.description}</p>}
       {exercise.catalogueSource === 'repdb' && exercise.sourceData?.tips_es?.length ? <aside className="exercise-tips"><h2>{t('Tips')}</h2><ul>{(language === 'es' ? exercise.sourceData.tips_es : exercise.sourceData.tips_en).map((tip, index) => <li key={`${index}-${tip}`}>{tip}</li>)}</ul></aside> : null}
-      <section className="exercise-instructions-section" aria-labelledby="exercise-instructions-title"><h2 id="exercise-instructions-title">{t('Instructions')}</h2>{instructionSteps(exercise.instructions).length ? <ol>{instructionSteps(exercise.instructions).map((step, index) => <li key={`${index}-${step}`}>{step}</li>)}</ol> : <p>{t('Written instructions are not available yet.')}</p>}</section>
+      <section className="exercise-instructions-section" aria-labelledby="exercise-instructions-title"><h2 id="exercise-instructions-title">{t('Instructions')}</h2>{instructionSteps(exercise.instructions).length ? <ol className="exercise-instructions">{instructionSteps(exercise.instructions).map((step, index) => <li key={`${index}-${step}`}>{step}</li>)}</ol> : <p>{t('Written instructions are not available yet.')}</p>}</section>
       <section className="exercise-detail-facts" aria-label={t('Exercise details')}>
-        {exercise.muscles.length > 0 && <div><h2>{t('Muscles worked')}</h2><p>{exercise.muscles.map((muscle) => t(displayTerm(muscle))).join(', ')}</p></div>}
-        {exercise.equipment.length > 0 && <div><h2>{t('Equipment')}</h2><p>{equipmentSummary(exercise.equipment, t)}</p></div>}
+        {exercise.muscles.length > 0 && <div><h2>{t('Muscles worked')}</h2><p className="exercise-detail-tags exercise-muscle-tags">{exercise.muscles.map((muscle) => <span key={muscle}>{t(displayTerm(muscle))}</span>)}</p></div>}
+        {exercise.equipment.length > 0 && <div><h2>{t('Equipment')}</h2><p className="exercise-detail-tags exercise-equipment-tags">{exercise.equipment.flatMap((group) => group).map((item) => <span key={item.slug}>{item.name}</span>)}</p></div>}
         <div><h2>{t('Movement details')}</h2><p>{[exercise.movement_pattern && t(displayTerm(exercise.movement_pattern)), exercise.difficulty && `${t(displayTerm(exercise.difficulty))} ${t('level')}`, exercise.impact_level && `${t(displayTerm(exercise.impact_level))} ${t('impact')}`, t(exercise.is_outdoor ? 'Outdoor' : 'Indoor')].filter(Boolean).join(' · ')}</p></div>
       </section>
       {session && <section className="exercise-exclusion-control" aria-label={t('Plan inclusion')}>
@@ -218,7 +236,7 @@ export function ExerciseDetailPage() {
         {exclusionError && excludedExerciseIds === null && <p className="form-error" role="alert">{t('Could not update exercise exclusions.')}</p>}
         {excludedExerciseIds !== null && <>
           <p className="field-help">{t('This preference applies when you create future plans.')}</p>
-          <button className={excludedExerciseIds.includes(exercise.id) ? 'button button-secondary' : 'button button-primary'} type="button" disabled={savingExclusion} onClick={() => void toggleExerciseExclusion()}>
+          <button className="button button-secondary" type="button" disabled={savingExclusion} onClick={() => void toggleExerciseExclusion()}>
             {savingExclusion ? t('Saving…') : t(excludedExerciseIds.includes(exercise.id) ? 'Include in plans' : 'Exclude from plans')}
           </button>
           {exclusionError && <p className="form-error" role="alert">{t('Could not update exercise exclusions.')}</p>}

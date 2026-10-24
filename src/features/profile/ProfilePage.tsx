@@ -8,7 +8,10 @@ import { useAuth } from '../auth/useAuth'
 import { ProfileFields } from './ProfileFields'
 import { MeasurementManager } from './MeasurementManager'
 import { useI18n } from '../../lib/i18n'
+import { UiIcon } from '../../components/UiIcon'
+import { AccentTile } from '../../components/AccentTile'
 import { localizeExerciseCopy } from '../../lib/catalogueTranslations'
+import { Modal } from '../../components/Modal'
 
 type ProfileSection = 'training' | 'personal' | 'measurements' | undefined
 
@@ -145,7 +148,7 @@ export function ProfilePage() {
   if (section) {
     const titles = { training: 'Training', personal: 'Personal details', measurements: 'Measurements' } as const
     return <section className="page-content profile-page" aria-labelledby="profile-section-title">
-      <Link className="profile-back-link" to="/profile">← {t('Back to profile')}</Link>
+      <Link className="profile-back-link" to="/profile"><UiIcon name="chevron-left" /> {t('Back to profile')}</Link>
       <h1 ref={sectionHeadingRef} id="profile-section-title" tabIndex={-1}>{t(titles[section])}</h1>
       {section === 'measurements' ? <MeasurementManager userId={session.user.id} measurements={data.measurements} onChanged={refresh} onDirtyChange={setMeasurementDirty} blocker={blocker} /> : <form className="card form-card profile-form" onSubmit={(event) => { event.preventDefault(); void saveSection() }}>
         <ProfileFields section={section} values={values} data={data} onChange={setValues} />
@@ -169,16 +172,11 @@ export function ProfilePage() {
         <p>{t('This permanently removes your account and its saved profile, measurements, plans, and workout history.')}</p>
         <button className="text-button danger-text" type="button" disabled={deletingAccount} onClick={() => void removeAccount()}>{deletingAccount ? t('Deleting account…') : t('Delete account permanently')}</button>
       </section>}
-      {blocker.state === 'blocked' && section !== 'measurements' && <div className="dialog-backdrop" role="presentation"><section className="card confirm-dialog unsaved-dialog" role="alertdialog" aria-modal="true" aria-labelledby="unsaved-title" aria-describedby="unsaved-description" onKeyDown={(event) => {
-        if (event.key !== 'Tab') return
-        const controls = [...event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled])')]
-        if (event.shiftKey && document.activeElement === controls[0]) { event.preventDefault(); controls.at(-1)?.focus() }
-        else if (!event.shiftKey && document.activeElement === controls.at(-1)) { event.preventDefault(); controls[0]?.focus() }
-      }}>
-        <h2 id="unsaved-title">{t('Unsaved changes')}</h2><p id="unsaved-description">{t('Save your changes before leaving this screen?')}</p>
+      {blocker.state === 'blocked' && section !== 'measurements' && <Modal title={t('Unsaved changes')} onClose={() => blocker.reset()} className="confirm-dialog unsaved-dialog">
+        <p>{t('Save your changes before leaving this screen?')}</p>
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="button-row"><button ref={saveAndLeaveRef} className="button button-primary" type="button" disabled={saving} onClick={() => void saveSection()}>{t('Save and leave')}</button><button className="button button-secondary" type="button" disabled={saving} onClick={() => { setValues(savedValues); blocker.proceed() }}>{t('Discard changes and leave')}</button><button className="text-button" type="button" onClick={() => blocker.reset()}>{t('Continue editing')}</button></div>
-      </section></div>}
+      </Modal>}
     </section>
   }
 
@@ -193,13 +191,13 @@ export function ProfilePage() {
     <p className="eyebrow">{t('YOUR SETTINGS')}</p>
     <h1 id="profile-title">{t('Profile')}</h1>
     <Link className="card profile-user-card" to="/profile/personal" aria-label={`${t('Edit personal details')}: ${displayName}`}>
-      <span className="profile-avatar" aria-hidden="true">🐨</span>
+      <AccentTile accent="pink" icon={<span className="profile-avatar" aria-hidden="true">🐨</span>} />
       <div><h2>{displayName}</h2>{summary && <p>{summary}</p>}</div>
-      <span className="profile-settings-arrow" aria-hidden="true">›</span>
+      <UiIcon className="profile-settings-arrow" name="chevron-right" />
     </Link>
     <nav className="profile-settings-list" aria-label={t('Profile settings')}>
       {settingsRows.map((row) => <Link className="card profile-settings-row" to={row.to} key={row.to}>
-        <span className="profile-settings-copy"><strong>{t(row.title)}</strong><span>{t(row.description)}</span></span><span className="profile-settings-arrow" aria-hidden="true">›</span>
+        <AccentTile accent={row.title === 'Training' ? 'lime' : 'yellow'} icon={<UiIcon name={row.title === 'Training' ? 'resource' : 'calendar'} />} /><span className="profile-settings-copy"><strong>{t(row.title)}</strong><span>{t(row.description)}</span></span><UiIcon className="profile-settings-arrow" name="chevron-right" />
       </Link>)}
     </nav>
     <section className="app-preferences-card profile-app-preferences" aria-labelledby="app-preferences-title">
@@ -212,7 +210,7 @@ export function ProfilePage() {
           const offset = event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : event.key === 'ArrowLeft' || event.key === 'ArrowUp' ? -1 : 0
           if (offset) { event.preventDefault(); const next = (index + offset + options.length) % options.length; const nextButton = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]; nextButton?.focus(); void setTheme(options[next]).catch(() => setError(t('Could not save theme preference.'))) }
           if (event.key === 'Home' || event.key === 'End') { event.preventDefault(); const next = event.key === 'Home' ? 0 : options.length - 1; const nextButton = event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[next]; nextButton?.focus(); void setTheme(options[next]).catch(() => setError(t('Could not save theme preference.'))) }
-        }}><span aria-hidden="true">{value === 'system' ? '◐' : value === 'light' ? '☀' : '☾'}</span><span>{t(value === 'system' ? 'System' : value === 'light' ? 'Light' : 'Dark')}</span></button>)}
+        }}><UiIcon name={value === 'system' ? 'system' : value === 'light' ? 'sun' : 'moon'} /><span>{t(value === 'system' ? 'System' : value === 'light' ? 'Light' : 'Dark')}</span></button>)}
       </div></div>
     </section>
     {error && <p className="form-error" role="alert">{error}</p>}

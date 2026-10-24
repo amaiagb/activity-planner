@@ -3,6 +3,7 @@ import { fitnessLevels, goals } from '../../types/profile'
 import type { ProfileData, ProfileFormValues } from '../../types/profile'
 import { useI18n } from '../../lib/i18n'
 import { localizeEquipmentName } from '../../lib/catalogueTranslations'
+import { CheckOption } from '../../components/CheckOption'
 
 type Props = {
   values: ProfileFormValues
@@ -55,25 +56,16 @@ export function ProfileFields({ values, data, onChange, section = 'all' }: Props
       </fieldset>
 
       <fieldset className="form-section">
-        <legend>{t('Training preferences')}</legend>
+        <legend className="sr-only">{t('Training preferences')}</legend>
         <p className="field-help">{t('Choose any activities you tend to like.')}</p>
         <div className="option-grid">
           {preferenceOptions.map(({ key, label }) => (
-            <label className="check-option" key={key}>
-              <input type="checkbox" checked={values.likes[key]} onChange={(event) => onChange({ ...values, likes: { ...values.likes, [key]: event.target.checked } })} />
-            <span>{t(label)}</span>
-            </label>
+            <CheckOption className="profile-check-option" checked={values.likes[key]} onChange={(checked) => onChange({ ...values, likes: { ...values.likes, [key]: checked } })} key={key}>{t(label)}</CheckOption>
           ))}
         </div>
-        <label className="check-option full-option">
-          <input type="checkbox" checked={values.canGoOutside} onChange={(event) => onChange({ ...values, canGoOutside: event.target.checked })} />
-          <span>{t('I can exercise outdoors')}</span>
-        </label>
+        <CheckOption className="full-option" checked={values.canGoOutside} onChange={(checked) => onChange({ ...values, canGoOutside: checked })}>{t('I can exercise outdoors')}</CheckOption>
         {values.canGoOutside && (
-          <label className="check-option full-option nested-option">
-            <input type="checkbox" checked={values.outsideWeatherDependent} onChange={(event) => onChange({ ...values, outsideWeatherDependent: event.target.checked })} />
-            <span>{t('Outdoor exercise depends on the weather')}</span>
-          </label>
+          <CheckOption className="full-option nested-option" checked={values.outsideWeatherDependent} onChange={(checked) => onChange({ ...values, outsideWeatherDependent: checked })}>{t('Outdoor exercise depends on the weather')}</CheckOption>
         )}
       </fieldset>
 
@@ -82,15 +74,12 @@ export function ProfileFields({ values, data, onChange, section = 'all' }: Props
         <p className="field-help">{t('Choose the equipment you can use. No equipment is a valid option.')}</p>
         <div className="option-grid">
           {data.equipment.map((item) => (
-            <label className="check-option" key={item.id}>
-              <input type="checkbox" checked={values.equipmentIds.includes(item.id)} onChange={(event) => {
-                const equipmentIds = event.target.checked
+            <CheckOption checked={values.equipmentIds.includes(item.id)} onChange={(checked) => {
+                const equipmentIds = checked
                   ? [...values.equipmentIds, item.id]
                   : values.equipmentIds.filter((id) => id !== item.id)
                 onChange({ ...values, equipmentIds })
-              }} />
-              <span>{localizeEquipmentName(item.slug, item.name, language)}</span>
-            </label>
+              }} key={item.id}>{localizeEquipmentName(item.slug, item.name, language)}</CheckOption>
           ))}
         </div>
       </fieldset>

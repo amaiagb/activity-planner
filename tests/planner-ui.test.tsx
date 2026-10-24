@@ -27,7 +27,7 @@ describe('planner pages', () => {
   it('renders the today hero and shortcut links', async () => {
     renderPage('/today')
     expect(await screen.findByRole('heading', { name: 'Time to move' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Create workout' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Create training' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Favorite routines/i })).toHaveAttribute('href', '/templates')
     expect(screen.getByRole('link', { name: /Saved resources/i })).toHaveAttribute('href', '/resources/collection')
     expect(plannerMocks.loadPlannerContext).toHaveBeenCalledWith('authenticated-user')
@@ -35,7 +35,7 @@ describe('planner pages', () => {
   it('renders the routines overview entry points', async () => {
     renderPage('/templates')
     expect(await screen.findByRole('heading', { name: 'Routines' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Create workout' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Create workout' })).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: /View all/ })).toHaveLength(2)
   })
 })

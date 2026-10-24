@@ -1,4 +1,5 @@
 import type { CatalogueExercise } from './exerciseData'
+import { matchesBodyRegion } from '../../lib/bodyRegions'
 
 export function displayTerm(value: string) {
   return value.replaceAll('_', ' ').replaceAll('-', ' ').replace(/\b\w/g, (character) => character.toUpperCase())
@@ -7,7 +8,7 @@ export function displayTerm(value: string) {
 export function filterExercises(exercises: CatalogueExercise[], search: string, bodyPart: string, equipment: string) {
   const needle = search.trim().toLocaleLowerCase()
   return exercises.filter((exercise) => {
-    const matchesBodyPart = !bodyPart || exercise.muscles.includes(bodyPart)
+    const matchesBodyPart = !bodyPart || matchesBodyRegion(exercise.category, exercise.muscles, bodyPart)
     const matchesEquipment = !equipment || exercise.equipment.some((item) => item.slug === equipment)
     const searchContent = [exercise.name, exercise.slug, exercise.description ?? '', exercise.category, exercise.movement_pattern ?? '', ...exercise.muscles, ...exercise.equipment.map((item) => item.name)]
       .join(' ').toLocaleLowerCase()

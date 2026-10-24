@@ -1,8 +1,8 @@
-import { exerciseBySlug } from '../../planner/catalogue'
 import type { PlannerInput, PlannedWorkout, WorkoutHistory } from '../../planner'
 import { supabase } from '../../lib/supabase'
 import { getOrInitializeUserTimeZone, localDateInTimeZone } from '../../lib/userTimeZone'
 import type { FitnessLevel } from '../../types/profile'
+import { matchesBodyRegion } from '../../lib/bodyRegions'
 
 export type ExerciseGuide = {
   id: string
@@ -17,12 +17,28 @@ export type PlannerContext = {
   exercises: Record<string, ExerciseGuide>
   databaseExerciseIds: Record<string, string>
   equipmentLabels: string[]
+  databaseExercises: DatabaseExercise[]
 }
 
 type JsonRecord = Record<string, unknown>
 type DatabaseExercise = {
-  id: string; slug: string; name: string; instructions: string | null; is_outdoor: boolean
+  id: string; slug: string; name: string; instructions: string | null; is_outdoor: boolean; is_active: boolean
+  category: string; movement_pattern: string | null; difficulty: 'beginner' | 'intermediate' | 'advanced' | null
+  impact_level: 'low' | 'moderate' | 'high' | null; default_sets: number | null; default_reps: string | null; default_duration_seconds: number | null
+  exercise_muscles: Array<{ muscle_group: string }>
   exercise_equipment: Array<{ requirement_group: number; equipment: { slug: string; name: string } | null }>
+}
+
+const legacyExerciseAliases: Record<string, string[]> = {
+  thoracic_rotation: ['seated-spinal-twist'],
+  hip_90_90: ['cow-face-pose'],
+  world_greatest_stretch: ['low-lunge-to-half-split'],
+  hamstring_stretch: ['seated-forward-fold'],
+  hip_flexor_stretch: ['kneeling-hip-flexor-stretch'],
+  child_pose: ['childs-pose'],
+  shoulder_mobility: ['cross-body-shoulder-stretch'],
+  knee_push_up: ['knee-push-ups'],
+  single_leg_rdl: ['single-leg-romanian-deadlift'],
 }
 
 let exerciseCatalogueRequest: Promise<DatabaseExercise[]> | null = null
@@ -39,7 +55,7 @@ function throwOnError(result: { error: { message: string } | null }) {
 function loadExerciseCatalogue(db: ReturnType<typeof client>) {
   if (!exerciseCatalogueRequest) {
     exerciseCatalogueRequest = Promise.resolve(db.from('exercises')
-      .select('id,slug,name,instructions,is_outdoor,exercise_equipment(requirement_group,equipment:equipment(slug,name))')
+      .select('id,slug,name,instructions,is_outdoor,is_active,category,movement_pattern,difficulty,impact_level,default_sets,default_reps,default_duration_seconds,exercise_muscles(muscle_group),exercise_equipment(requirement_group,equipment:equipment(slug,name))')
       .eq('is_active', true)
       .then(({ data, error }) => {
         if (error) throw new Error(error.message)
@@ -128,38 +144,105 @@ export async function loadPlannerContext(userId: string): Promise<PlannerContext
         canGoOutside: preferences.data?.can_go_outside ?? false,
         weatherDependent: preferences.data?.outside_is_weather_dependent ?? false,
       },
-      excludedExerciseIds: exclusionSlugs.flatMap((slug) => exerciseBySlug.get(slug)?.id ?? []),
+      excludedExerciseIds: exclusionSlugs.flatMap((slug) => dbExerciseIds[slug] ? [dbExerciseIds[slug]] : []),
       fitnessLevel: fitnessLevel as FitnessLevel,
       history,
     },
     exercises: guides,
     databaseExerciseIds: dbExerciseIds,
     equipmentLabels: availableEquipment.map((item) => item.name),
+    databaseExercises,
   }
 }
 
-export async function startWorkout(userId: string, workout: PlannedWorkout, databaseExerciseIds: Record<string, string>) {
-  const db = client()
-  // Resolve the exercise IDs again at start time. The planner context is cached
-  // for the page lifetime, while catalogue migrations can replace rows/IDs.
-  // Starting with stale IDs makes the exercise_sessions insert fail after the
-  // workout session has already been created.
-  const slugs = [...new Set(workout.exercises.map((exercise) => exercise.slug))]
-  const catalogue = slugs.length
-    ? await db.from('exercises').select('id,slug').in('slug', slugs).eq('is_active', true)
-    : { data: [], error: null }
-  throwOnError(catalogue)
-  const currentIds = Object.fromEntries((catalogue.data ?? []).map((exercise) => [exercise.slug, exercise.id]))
-  const resolvedIds = { ...databaseExerciseIds, ...currentIds }
-  const missing = slugs.filter((slug) => !resolvedIds[slug])
-  if (missing.length) throw new Error(`Exercise catalogue is missing: ${missing.join(', ')}`)
+function databaseEquipmentGroups(exercise: DatabaseExercise) {
+  return [...(exercise.exercise_equipment ?? []).reduce((groups, item) => {
+    const group = groups.get(item.requirement_group) ?? new Set<string>()
+    if (item.equipment?.slug) group.add(item.equipment.slug)
+    groups.set(item.requirement_group, group)
+    return groups
+  }, new Map<number, Set<string>>()).values()].map((group) => [...group])
+}
 
+function databaseCategory(value: string): PlannedWorkout['category'] {
+  if (value === 'cardio' || value === 'walking' || value === 'outdoor') return value === 'outdoor' ? 'walking' : 'cardio'
+  if (value === 'mobility' || value === 'stretching') return 'mobility'
+  return 'strength'
+}
+
+function normalizeEquipmentSlug(value: string) {
+  if (value === 'dumbbells') return 'dumbbell'
+  if (value === 'kettlebells') return 'kettlebell'
+  if (value === 'resistance_bands') return 'resistance_band'
+  if (value === 'stationary_bikes') return 'stationary_bike'
+  return value
+}
+
+function shuffle<T>(items: T[]) {
+  const result = [...items]
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    ;[result[index], result[swapIndex]] = [result[swapIndex], result[index]]
+  }
+  return result
+}
+
+export function generateDatabaseWorkout(date: string, context: PlannerContext, request: { durationMinutes: number; outdoor: boolean; muscleGroups?: string[]; muscleGroup?: string; equipment?: string[] }): PlannedWorkout | null {
+  const selectedEquipment = (request.equipment ?? []).map(normalizeEquipmentSlug)
+  const equipmentFilter = new Set(selectedEquipment.filter((item) => item !== 'no_equipment' && item !== 'bodyweight'))
+  const bodyweightOnly = equipmentFilter.size === 0
+  const excluded = new Set(context.input.excludedExerciseIds)
+  const candidates = context.databaseExercises.filter((exercise) => {
+    if (!exercise.is_active || excluded.has(exercise.id)) return false
+    if (request.outdoor !== exercise.is_outdoor) return false
+    const selectedRegions = request.muscleGroups?.length ? request.muscleGroups : request.muscleGroup ? [request.muscleGroup] : []
+    if (!request.outdoor && selectedRegions.length && !selectedRegions.some((region) => matchesBodyRegion(exercise.category, (exercise.exercise_muscles ?? []).map((item) => item.muscle_group), region))) return false
+    const groups = databaseEquipmentGroups(exercise).map((group) => group.map(normalizeEquipmentSlug))
+    if (!groups.length) return bodyweightOnly
+    return groups.every((group) => bodyweightOnly
+      ? group.some((item) => item === 'bodyweight' || item === 'no_equipment')
+      : group.some((item) => equipmentFilter.has(item)))
+  })
+  if (!candidates.length) return null
+  // Three exercises with three sets only fill a short session. Build the
+  // session from an approximate four-minute block per exercise so the chosen
+  // duration remains meaningful once work, sets and rests are included.
+  const count = request.outdoor ? 1 : Math.min(12, Math.max(1, Math.ceil(request.durationMinutes / 4)))
+  const selected = shuffle(candidates).slice(0, count)
+  const category = request.outdoor ? 'walking' : databaseCategory(selected[0].category)
+  const exercises = selected.map((exercise) => ({
+    id: exercise.id,
+    slug: exercise.slug,
+    name: exercise.name,
+    prescribedSets: exercise.default_reps ? (exercise.default_sets ?? 3) : null,
+    prescribedReps: exercise.default_reps,
+    prescribedDurationSeconds: exercise.default_reps ? null : Math.max(exercise.default_duration_seconds ?? 0, 45),
+    restSeconds: 60,
+  }))
+  return {
+    id: `${date}:database_${selected.map((exercise) => exercise.id).join('_')}_${request.durationMinutes}`,
+    date,
+    templateSlug: `database_${category}_${request.durationMinutes}`,
+    name: category === 'walking' ? 'Easy walk' : category === 'mobility' ? 'Mobility session' : category === 'cardio' ? 'Cardio session' : 'Strength session',
+    category,
+    durationMinutes: request.durationMinutes,
+    exercises,
+    equipment: selectedEquipment,
+    status: 'planned',
+    isOutdoor: request.outdoor,
+    intensity: selected.some((exercise) => exercise.impact_level === 'high') ? 'high' : selected.some((exercise) => exercise.impact_level === 'moderate') ? 'moderate' : 'low',
+    movementPatterns: [...new Set(selected.flatMap((exercise) => exercise.movement_pattern ? [exercise.movement_pattern] : []))],
+    muscleGroups: [...new Set(selected.flatMap((exercise) => (exercise.exercise_muscles ?? []).map((item) => item.muscle_group)))],
+  }
+}
+
+export async function startWorkout(userId: string, workout: PlannedWorkout) {
+  const db = client()
   const session = await db.from('workout_sessions').insert({ planned_workout_id: workout.id, user_id: userId, planned_duration_minutes: workout.durationMinutes }).select('id,started_at').single()
   throwOnError(session)
   if (!session.data) throw new Error('Could not start the workout session.')
   const exerciseRows = workout.exercises.map((exercise, index) => {
-    const exerciseId = resolvedIds[exercise.slug]
-    return { workout_session_id: session.data.id, planned_workout_id: workout.id, user_id: userId, exercise_id: exerciseId, position: index + 1 }
+    return { workout_session_id: session.data.id, planned_workout_id: workout.id, user_id: userId, exercise_id: exercise.id, position: index + 1 }
   })
   if (exerciseRows.length) {
     const savedExercises = await db.from('exercise_sessions').insert(exerciseRows)
@@ -178,7 +261,7 @@ export async function loadActiveSession(userId: string, plannedWorkoutId: string
   return result.data
 }
 
-export async function setExerciseStatus(userId: string, exerciseSessionId: string, status: 'done' | 'skipped') {
+export async function setExerciseStatus(userId: string, exerciseSessionId: string, status: 'planned' | 'done' | 'skipped') {
   const result = await client().from('exercise_sessions').update({ status }).eq('user_id', userId).eq('id', exerciseSessionId)
   throwOnError(result)
 }
@@ -341,8 +424,21 @@ export async function createStandaloneWorkout(userId: string, workout: PlannedWo
 }
 
 export async function loadStandaloneWorkout(userId: string, workoutId: string): Promise<PlannedWorkout | null> {
-  const result = await client().from('planned_workouts').select('workout_json').eq('user_id', userId).eq('id', workoutId).maybeSingle(); throwOnError(result)
-  return result.data?.workout_json ? result.data.workout_json as unknown as PlannedWorkout : null
+  const db = client()
+  const result = await db.from('planned_workouts').select('workout_json').eq('user_id', userId).eq('id', workoutId).maybeSingle(); throwOnError(result)
+  const workout = result.data?.workout_json ? result.data.workout_json as unknown as PlannedWorkout : null
+  if (!workout) return null
+  const slugs = [...new Set(workout.exercises.map((exercise) => exercise.slug))]
+  const lookupSlugs = [...new Set(slugs.flatMap((slug) => [slug, slug.replaceAll('_', '-'), ...(legacyExerciseAliases[slug] ?? [])]))]
+  const catalogue = lookupSlugs.length ? await db.from('exercises').select('id,slug').in('slug', lookupSlugs) : { data: [], error: null }
+  throwOnError(catalogue)
+  const bySlug = new Map((catalogue.data ?? []).map((exercise) => [exercise.slug, exercise]))
+  const exercises = workout.exercises.map((exercise) => {
+    const match = [exercise.slug.replaceAll('_', '-'), ...(legacyExerciseAliases[exercise.slug] ?? [])]
+      .map((slug) => bySlug.get(slug)).find(Boolean) ?? bySlug.get(exercise.slug)
+    return match ? { ...exercise, id: match.id, slug: match.slug } : exercise
+  })
+  return { ...workout, exercises }
 }
 
 export async function skipPlannedWorkout(userId: string, workout: PlannedWorkout) {

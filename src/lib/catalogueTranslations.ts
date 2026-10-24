@@ -56,8 +56,9 @@ const esExercises: Record<string, ExerciseCopy> = {
 }
 
 const esEquipment: Record<string, string> = {
-  bodyweight: 'Peso corporal (sin equipamiento)', dumbbells: 'Mancuernas', kettlebell: 'Pesa rusa', resistance_band: 'Banda elástica',
+  bodyweight: 'Sin equipamiento', dumbbells: 'Mancuernas', kettlebell: 'Pesa rusa', resistance_band: 'Banda elástica',
   bench: 'Banco', chair: 'Silla o escalón firme', mat: 'Esterilla', stationary_bike: 'Bicicleta estática', jump_rope: 'Cuerda para saltar',
+  stability_ball: 'Pelota de estabilidad', no_equipment: 'Sin equipamiento', loop_band: 'Banda circular',
 }
 
 export function localizeExerciseCopy(slug: string, language: Language) {
