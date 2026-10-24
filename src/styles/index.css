@@ -200,6 +200,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .button-quiet { background: transparent; color: var(--color-muted); }
 .form-notice, .form-error { margin: 18px 0 0; border-radius: 12px; padding: 12px 14px; line-height: 1.55; overflow-wrap: anywhere; }
 .form-notice { background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface)); color: var(--color-ink); }
+.form-help { margin: 10px 0 0; color: var(--color-muted); font-size: .86rem; line-height: 1.45; }
 .form-error { background: color-mix(in srgb, var(--color-danger) 13%, var(--color-surface)); color: var(--color-danger); }
 .form-notice code { overflow-wrap: anywhere; }
 .profile-form { display: grid; gap: 26px; }
@@ -254,7 +255,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .input-with-suffix { position: relative; max-width: 240px; }
 .input-with-suffix input { padding-right: 78px; }
 .input-with-suffix span { position: absolute; top: 50%; right: 12px; color: var(--color-muted); font-size: 0.82rem; transform: translateY(-50%); pointer-events: none; }
-.exclusion-disclosure { border-top: 1px solid var(--color-border); padding-top: 20px; }
+.exclusion-disclosure { padding-top: 0; }
 .exclusion-disclosure > summary { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; font-weight: 800; }
 .exclusion-count { color: var(--color-muted); font-size: .86rem; font-weight: 600; }
 .exclusion-catalogue-link { display: inline-flex; width: fit-content; align-items: center; text-decoration: none; }
@@ -275,6 +276,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .app-preferences-card .field-label:not(:first-of-type) { margin-top: 6px; }
 .measurement-form { display: grid; gap: 12px; margin: 18px 0; }
 .measurement-form h3 { margin: 0 0 6px; }
+.measurement-add-button { min-height: 44px; }
 .button-row { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
 .measurement-list { display: grid; gap: 12px; margin: 18px 0 0; padding: 0; list-style: none; }
 .measurement-record { padding: 20px; }
@@ -388,6 +390,13 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .template-detail-exercise-list li { display: flex; min-height: 86px; align-items: center; gap: 12px; border-bottom: 1px solid var(--color-border); }
 .template-train-button { width: 100%; margin-top: 20px; }
 .template-dialog { width: min(100%, 540px); max-height: min(88vh, 780px); overflow: auto; display: grid; gap: 14px; padding: 26px; }
+.workout-summary-section { margin-top: 22px; }
+.workout-summary-section h3 { margin: 0 0 8px; }
+.workout-summary-exercises { display: grid; gap: 0; margin: 0 0 20px; padding: 0; list-style: none; border-top: 1px solid var(--color-border); }
+.workout-summary-exercises li { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--color-border); padding: 10px 0; }
+.workout-summary-exercises .exercise-state { color: var(--color-accent-strong); font-size: .8rem; font-weight: 700; }
+.workout-summary-exercises .exercise-state.is-skipped { color: var(--color-muted); }
+.template-dialog-form { display: grid; gap: 14px; }
 .generator-panel { display: grid; gap: 14px; margin-bottom: 24px; }
 .today-page .generator-panel { margin: 0; }
 .today-page .generator-panel .button-row { display: grid; gap: 8px; }
@@ -682,11 +691,11 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .exercise-row-controls { display: flex; flex: 0 0 auto; align-items: center; gap: 3px; }
 .exercise-status-button, .exercise-skip-button { display: grid; width: 44px; height: 44px; place-items: center; border: 2px solid var(--color-ink); border-radius: 50%; background: transparent; color: var(--color-primary-ink); font-weight: 800; cursor: pointer; }
 .exercise-status-button.is-done { background: var(--color-accent); color: var(--color-ink); }
-.exercise-skip-button { width: 36px; height: 36px; border: 0; border-radius: 12px; color: var(--color-muted); font-size: .9rem; }
-.exercise-skip-button.is-skipped { background: var(--color-border); color: var(--color-ink); }
+.exercise-skip-button { border-radius: 12px; color: var(--color-muted); font-size: .9rem; }
+.exercise-skip-button.is-skipped { border-color: var(--accent-yellow); background: var(--yellow-soft); color: var(--color-ink); }
 .exercise-row-main { min-width: 0; flex: 1; }
 .exercise-name-button { display: grid; width: 100%; gap: 4px; border: 0; background: transparent; padding: 6px 0; color: var(--color-ink); text-align: left; cursor: pointer; }
-.exercise-name-button strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exercise-name-button strong { display: block; max-height: 2.5em; overflow: hidden; line-height: 1.25; text-overflow: clip; white-space: normal; }
 .exercise-name-button span { color: var(--color-muted); font-size: .8rem; }
 .exercise-name-button em { display: inline-block; margin-left: 7px; border-radius: 999px; background: var(--color-accent); padding: 2px 7px; color: var(--color-ink); font-size: .65rem; font-style: normal; font-weight: 800; text-transform: uppercase; }
 .exercise-finished .exercise-name-button strong { color: var(--color-muted); }
@@ -694,6 +703,7 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .exercise-finished .exercise-status-button.is-done { color: var(--color-ink); }
 .exercise-finished .exercise-skip-button.is-skipped + .exercise-row-main strong { text-decoration: line-through; }
 .exercise-execution-row .exercise-state { margin-left: auto; border-radius: 999px; background: var(--color-border); padding: 4px 7px; color: var(--color-muted); font-size: .65rem; font-weight: 800; text-transform: uppercase; }
+.exercise-execution-row .exercise-state.is-skipped { background: var(--yellow-soft); color: var(--color-ink); }
 .exercise-execution-row .exercise-instructions { margin: 0 0 8px; }
 .workout-finish-button { width: 100%; margin-top: 20px; }
 .workout-finish-overlay, .workout-exercise-backdrop { z-index: 40; }

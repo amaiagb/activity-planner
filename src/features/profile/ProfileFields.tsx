@@ -56,7 +56,7 @@ export function ProfileFields({ values, data, onChange, section = 'all' }: Props
       </fieldset>
 
       <fieldset className="form-section">
-        <legend>{t('Training preferences')}</legend>
+        <legend className="sr-only">{t('Training preferences')}</legend>
         <p className="field-help">{t('Choose any activities you tend to like.')}</p>
         <div className="option-grid">
           {preferenceOptions.map(({ key, label }) => (

@@ -62,6 +62,7 @@ export type PlannedWorkout = {
   category: WorkoutCategory
   durationMinutes: number
   exercises: PlannedExercise[]
+  equipment?: EquipmentSlug[]
   status: WorkoutStatus
   isOutdoor: boolean
   intensity: ExerciseIntensity

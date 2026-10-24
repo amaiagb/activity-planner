@@ -106,10 +106,10 @@ export function MeasurementManager({ userId, measurements, onChanged, onDirtyCha
     <section className="measurement-section" aria-labelledby="measurements-title">
       <div className="section-heading-row">
         <div>
-          <h2 id="measurements-title">{t('Measurement history')}</h2>
+          <h2 className="sr-only" id="measurements-title">{t('Measurement history')}</h2>
           <p className="field-help">{t('Each entry is saved by date. New measurements do not replace older entries.')}</p>
         </div>
-        {!form && <button className="button button-secondary" type="button" onClick={startNew}>{t('Add measurement')}</button>}
+        {!form && <button className="text-button measurement-add-button" type="button" onClick={startNew}>{t('Add measurement')}</button>}
       </div>
       {error && <p className="form-error" role="alert">{error}</p>}
       {form && (

@@ -2,12 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import type { PlannedWorkout } from "../../planner";
-import { generateTodayWorkout } from "../../planner";
 import { useAuth } from "../auth/useAuth";
 import {
   abandonWorkoutSession,
   completeWorkout,
   createStandaloneWorkout,
+  generateDatabaseWorkout,
   deleteTemplate,
   deleteResource,
   loadActiveSession,
@@ -15,6 +15,7 @@ import {
   loadSavedResources,
   loadSavedTemplates,
   saveResource,
+  saveTemplate,
   setExerciseStatus,
   toggleResourceFavorite,
   toggleTemplateFavorite,
@@ -95,6 +96,7 @@ export function TrainingPage() {
     ])
       .then(([nextContext, nextTemplates, nextResources]) => {
         setContext(nextContext);
+        setDuration(String(nextContext.input.availability.durationMinutes));
         setTemplates(nextTemplates);
         setResources(nextResources);
       })
@@ -111,7 +113,7 @@ export function TrainingPage() {
     setBusy(true);
     setError(null);
     try {
-      const workout = generateTodayWorkout(localToday(), context.input, {
+      const workout = generateDatabaseWorkout(localToday(), context, {
         durationMinutes: Number(duration),
         outdoor,
         ...(outdoor ? {} : { equipment, muscleGroup }),
@@ -285,6 +287,11 @@ export function TrainingPage() {
         )}
         {showGenerator && context && (
           <Modal title={t("Create training")} onClose={() => setShowGenerator(false)} className="generator-panel">
+            {error && (
+              <p className="form-error" role="alert">
+                {t(error)}
+              </p>
+            )}
             <label className="field-label" htmlFor="training-duration">
               {t("Available time")}
             </label>
@@ -458,6 +465,11 @@ export function TrainingPage() {
       {showGenerator && context && (
         <section className="card form-card generator-panel">
           <h2>{t("Create workout")}</h2>
+          {error && (
+            <p className="form-error" role="alert">
+              {t(error)}
+            </p>
+          )}
           <label className="field-label" htmlFor="training-duration">
             {t("Available time")}
           </label>
@@ -1467,6 +1479,9 @@ export function WorkoutPage() {
   } | null>(null);
   const [rpe, setRpe] = useState("");
   const [note, setNote] = useState("");
+  const [templateOpen, setTemplateOpen] = useState(false);
+  const [templateName, setTemplateName] = useState("");
+  const [savingTemplate, setSavingTemplate] = useState(false);
 
   const reload = useCallback(async () => {
     if (!session || !id) return;
@@ -1498,10 +1513,14 @@ export function WorkoutPage() {
     setStarting(true);
     setError(null);
     try {
-      await startWorkout(session.user.id, workout, context.databaseExerciseIds);
+      await startWorkout(session.user.id, workout);
       await reload();
-    } catch {
-      setError("Could not start this workout.");
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not start this workout.",
+      );
     } finally {
       setStarting(false);
     }
@@ -1571,6 +1590,31 @@ export function WorkoutPage() {
     }
   }
 
+  async function saveCompletedTemplate() {
+    if (!session || !workout || !templateName.trim()) return;
+    setSavingTemplate(true);
+    setError(null);
+    try {
+      await saveTemplate(session.user.id, {
+        name: templateName,
+        description: "",
+        durationMinutes: workout.durationMinutes,
+        exercises: workout.exercises.map((exercise) => ({
+          exerciseId: exercise.id,
+          sets: exercise.prescribedSets ?? 3,
+          reps: exercise.prescribedReps ?? "",
+          durationSeconds: exercise.prescribedDurationSeconds,
+        })),
+      });
+      setTemplateOpen(false);
+      navigate("/templates");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not save the template.");
+    } finally {
+      setSavingTemplate(false);
+    }
+  }
+
   if (loading)
     return (
       <section className="page-content">
@@ -1598,28 +1642,48 @@ export function WorkoutPage() {
       </section>
     );
   if (alreadyComplete)
-    return (
-      <section className="page-content planner-page">
-        <p className="eyebrow">{t("SESSION SAVED")}</p>
-        <h1>{t("Workout complete")}</h1>
-        <article className="card form-card">
-          <h2>{t(workout.name)}</h2>
-          <p>
-            {t("Planned duration:")} {workout.durationMinutes} {t("min")}
-          </p>
-          {active?.actual_duration_minutes != null && (
-            <p>
-              {t("Actual duration:")} {active.actual_duration_minutes}{" "}
-              {t("min")}
-            </p>
-          )}
-          {active?.note && <p>{active.note}</p>}
-          <Link className="button button-primary" to="/today">
-            {t("Train")}
-          </Link>
-        </article>
-      </section>
-    );
+    {
+      const exerciseRows = workout.exercises.map((exercise) => ({
+        exercise,
+        session: active?.exercise_sessions.find((row) => row.exercise_id === exercise.id),
+      }));
+      const exerciseEquipment = [...new Set(exerciseRows.flatMap(({ exercise }) => {
+        const databaseExercise = context.databaseExercises.find((item) => item.id === exercise.id);
+        return (databaseExercise?.exercise_equipment ?? []).flatMap((item) => item.equipment?.name ? [item.equipment.name] : []);
+      }))];
+      const selectedEquipment = workout.equipment?.length ? [...new Set(workout.equipment.flatMap((slug) => context.databaseExercises.flatMap((item) => (item.exercise_equipment ?? []).flatMap((entry) => {
+        const equipmentSlug = entry.equipment?.slug;
+        const matches = equipmentSlug === slug || (slug === "dumbbell" && equipmentSlug === "dumbbells") || (slug === "resistance_band" && equipmentSlug === "resistance_bands");
+        return matches && entry.equipment?.name ? [entry.equipment.name] : [];
+      })) ))] : exerciseEquipment;
+      return (
+        <section className="page-content planner-page workout-summary-page">
+          <p className="eyebrow">{t("SESSION SAVED")}</p>
+          <h1>{t("Workout complete")}</h1>
+          <article className="card form-card workout-summary-card">
+            <h2>{t(workout.name)}</h2>
+            <p>{t("Planned duration:")} {workout.durationMinutes} {t("min")}</p>
+            {active?.actual_duration_minutes != null && <p>{t("Actual duration:")} {active.actual_duration_minutes} {t("min")}</p>}
+            {selectedEquipment.length > 0 && <p><strong>{t("Equipment used:")}</strong> {selectedEquipment.join(", ")}</p>}
+            <div className="workout-summary-section">
+              <h3>{t("Exercises performed")}</h3>
+              <ul className="workout-summary-exercises">
+                {exerciseRows.map(({ exercise, session }) => <li key={exercise.id}><span>{exercise.name}</span><span className={session?.status === "skipped" ? "exercise-state is-skipped" : "exercise-state"}>{t(session?.status === "skipped" ? "Skipped" : session?.status === "done" ? "Done" : "Planned")}</span></li>)}
+              </ul>
+            </div>
+            {active?.note && <p>{active.note}</p>}
+            <button className="button button-primary" type="button" onClick={() => { setTemplateName(workout.name); setTemplateOpen(true); }}>{t("Add to templates")}</button>
+          </article>
+          {templateOpen && <Modal title={t("Save as template")} onClose={() => setTemplateOpen(false)}>
+            <form className="template-dialog-form" onSubmit={(event) => { event.preventDefault(); void saveCompletedTemplate(); }}>
+              <label className="field-label" htmlFor="completed-template-name">{t("Template name")}</label>
+              <input id="completed-template-name" value={templateName} onChange={(event) => setTemplateName(event.target.value)} maxLength={80} required autoFocus />
+              <div className="button-row"><button className="button button-primary" type="submit" disabled={savingTemplate || !templateName.trim()}>{savingTemplate ? t("Saving…") : t("Save template")}</button><button className="button button-secondary" type="button" onClick={() => setTemplateOpen(false)}>{t("Cancel")}</button></div>
+            </form>
+          </Modal>}
+        </section>
+      );
+    }
 
   const progressTotal =
     active?.exercise_sessions.length ?? workout.exercises.length;
@@ -1776,7 +1840,7 @@ export function WorkoutPage() {
                     )}
                   </div>
                   {row?.status === "skipped" && (
-                    <span className="exercise-state">{t("Skipped")}</span>
+                    <span className={`exercise-state${row?.status === "skipped" ? " is-skipped" : ""}`}>{t("Skipped")}</span>
                   )}
                 </li>
               );
@@ -1792,6 +1856,12 @@ export function WorkoutPage() {
               {t("Complete workout")}
             </button>
           )}
+          {active.status === "in_progress" &&
+            !allExercisesHandled && (
+              <p className="form-help" role="status">
+                {t("Mark or skip all exercises to complete.")}
+              </p>
+            )}
           {active.status === "in_progress" &&
             allExercisesHandled &&
             doneCount === 0 && (

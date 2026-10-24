@@ -152,6 +152,12 @@ const translations: Record<string, string> = Object.assign(
     "Change today's workout": "Cambiar entrenamiento de hoy",
     "Create a workout for today": "Crear un entrenamiento para hoy",
     "Easy walk": "Caminata ligera",
+    "Strength session": "Sesión de fuerza",
+    "Cardio session": "Sesión de cardio",
+    "Mobility session": "Sesión de movilidad",
+    Legs: "Piernas",
+    Push: "Empuje",
+    Pull: "Tirón",
     "Can you exercise outdoors today?": "¿Puedes entrenar al aire libre hoy?",
     "Yes, outdoors": "Sí, al aire libre",
     "No, indoors": "No, en interior",
@@ -364,6 +370,11 @@ const translations: Record<string, string> = Object.assign(
     "Workout complete": "Entrenamiento completado",
     "Planned duration:": "Duración planificada:",
     "Actual duration:": "Duración real:",
+    "Equipment used:": "Equipamiento utilizado:",
+    "Exercises performed": "Ejercicios realizados",
+    "Add to templates": "Añadir a plantillas",
+    "Save as template": "Guardar como plantilla",
+    "Template name": "Nombre de la plantilla",
     "Effort:": "Esfuerzo:",
     "Back to your week": "Volver a tu semana",
     "movements. You can mark each one done or skip it; no logging is required.":
@@ -391,6 +402,8 @@ const translations: Record<string, string> = Object.assign(
     "No exercise completed": "No has completado ningún ejercicio",
     "Mark at least one exercise as done to complete a training activity.":
       "Marca al menos un ejercicio como hecho para completar una actividad de entrenamiento.",
+    "Mark or skip all exercises to complete.":
+      "Marca o salta todos los ejercicios para completar.",
     "End session as skipped": "Finalizar como omitido",
     "End this session without completing an exercise?":
       "¿Quieres finalizar esta sesión sin completar ningún ejercicio?",
