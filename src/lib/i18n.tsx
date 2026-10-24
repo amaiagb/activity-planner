@@ -189,6 +189,7 @@ const translations: Record<string, string> = Object.assign(
     "No workout could be planned": "No se pudo planificar un entrenamiento",
     "THIS WEEK": "ESTA SEMANA",
     "THIS MONTH": "ESTE MES",
+    "Active days this month": "Días activos este mes",
     "CURRENT STREAK": "RACHA ACTUAL",
     "BEST STREAK": "MEJOR RACHA",
     "training day": "día de entrenamiento",

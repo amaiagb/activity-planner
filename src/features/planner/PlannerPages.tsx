@@ -1057,6 +1057,7 @@ function CollectionToolbar({
             className={`ui-icon${sort === "recent" && ascending ? " is-ascending" : ""}`}
           />
         </button>
+        <span className="collection-sort-label">{t(sort === "recent" ? "Recently added" : "Name A–Z")}</span>
         {extra}
       </div>
     </div>
@@ -1127,13 +1128,13 @@ export function TemplateCollectionPage() {
           <h1>{t("All templates")}</h1>
         </div>
         <button
-          className="button button-primary"
+          className="text-button collection-create-button"
           type="button"
           aria-label={t("New template")}
           title={t("New template")}
           onClick={() => navigate("/templates/new")}
         >
-          <UiIcon name="plus" />
+          <UiIcon name="plus" /> {t("New template")}
         </button>
       </div>
       <CollectionToolbar
@@ -1276,7 +1277,7 @@ export function ResourceCollectionPage() {
       <div className="resource-collection-heading">
         <h1>{t("All resources")}</h1>
         <button
-          className="button button-primary resource-collection-add"
+          className="text-button resource-collection-add"
           type="button"
           aria-label={t("Add resource")}
           title={t("Add resource")}
@@ -1285,7 +1286,7 @@ export function ResourceCollectionPage() {
             setResourceModalOpen(true);
           }}
         >
-          <UiIcon name="plus" />
+          <UiIcon name="plus" /> {t("Add resource")}
         </button>
       </div>
       <CollectionToolbar
