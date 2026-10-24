@@ -402,6 +402,7 @@ const translations: Record<string, string> = Object.assign(
     Now: "Ahora",
     "Tap ": "Toca ",
     " when you finish each exercise. If you will not do it, tap ": " al terminar cada ejercicio. Si no lo vas a hacer, toca ",
+    ".": ".",
     Undo: "Deshacer",
     "View exercise": "Ver ejercicio",
     "Pause animation": "Pausar animación",
