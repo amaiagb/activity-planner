@@ -8,6 +8,7 @@ import { UiIcon } from '../../components/UiIcon'
 import { loadExcludedExerciseIds, setExerciseExcluded } from '../../lib/profileData'
 import { useAuth } from '../auth/useAuth'
 import { AccentTile, accentForId } from '../../components/AccentTile'
+import { BODY_REGION_OPTIONS } from '../../lib/bodyRegions'
 
 function PlaceholderMedia({ id, name, size }: { id?: string; name: string; size: 'thumbnail' | 'detail' }) {
   const { t } = useI18n()
@@ -84,7 +85,7 @@ export function ExercisesPage() {
   useEffect(() => { void reload() }, [reload])
   useEffect(() => { if (!detailRoute) lastOpenedRow.current?.focus() }, [detailRoute])
 
-  const bodyParts = useMemo(() => [...new Set(exercises.flatMap((item) => item.muscles))].sort(), [exercises])
+  const bodyParts = BODY_REGION_OPTIONS
   const equipmentOptions = useMemo(() => [...new Map(exercises.flatMap((item) => item.equipment).map((item) => [item.slug, item.name])).entries()].sort((a, b) => a[1].localeCompare(b[1])), [exercises])
   const groups = useMemo(() => groupExercisesByLetter(filterExercises(exercises, search, bodyPart, equipment)), [exercises, search, bodyPart, equipment])
   const normalizedGroups = [...groups.reduce((merged, [letter, entries]) => {
@@ -111,7 +112,7 @@ export function ExercisesPage() {
           <label className="field-label" htmlFor="exercise-search">{t('Search exercises')}</label>
           <label className="exercise-search-field"><UiIcon name="search" /><input id="exercise-search" className="exercise-search" type="search" placeholder={t('Name, muscle, equipment…')} value={search} onChange={(event) => setSearch(event.target.value)} /></label>
           <div className="exercise-filters">
-            <label><span className="sr-only">{t('Filter by body part')}</span><select aria-label={t('Filter by body part')} value={bodyPart} onChange={(event) => setBodyPart(event.target.value)}><option value="">{t('Any body part')}</option>{bodyParts.map((part) => <option key={part} value={part}>{t(displayTerm(part))}</option>)}</select></label>
+            <label><span className="sr-only">{t('Filter by body part')}</span><select aria-label={t('Filter by body part')} value={bodyPart} onChange={(event) => setBodyPart(event.target.value)}><option value="">{t('Any body part')}</option>{bodyParts.map((part) => <option key={part.slug} value={part.slug}>{t(part.label)}</option>)}</select></label>
             <label><span className="sr-only">{t('Filter by equipment')}</span><select aria-label={t('Filter by equipment')} value={equipment} onChange={(event) => setEquipment(event.target.value)}><option value="">{t('Any equipment')}</option>{equipmentOptions.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></label>
           </div>
           {hasFilters && <button className="text-button exercise-clear-filters" type="button" onClick={clearFilters}>{t('Clear search and filters')}</button>}

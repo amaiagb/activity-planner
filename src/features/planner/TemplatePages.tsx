@@ -11,6 +11,7 @@ import { AccentTile } from '../../components/AccentTile'
 import { CheckOption } from '../../components/CheckOption'
 import { createWorkoutFromTemplate, loadSavedTemplates, saveTemplate } from './plannerData'
 import type { SavedTemplate } from './plannerData'
+import { BODY_REGION_OPTIONS } from '../../lib/bodyRegions'
 
 export function NewTemplatePage() {
   const { t, language } = useI18n()
@@ -90,13 +91,13 @@ function ExercisePickerModal({ exercises, loading, selectedIds, onToggle, onClos
   const [search, setSearch] = useState('')
   const [bodyPart, setBodyPart] = useState('')
   const [equipment, setEquipment] = useState('')
-  const parts = useMemo(() => [...new Set(exercises.flatMap((item) => item.muscles))].sort(), [exercises])
+  const parts = BODY_REGION_OPTIONS
   const equipmentOptions = useMemo(() => [...new Map(exercises.flatMap((item) => item.equipment).map((item) => [item.slug, item.name])).entries()].sort((a, b) => a[1].localeCompare(b[1])), [exercises])
   const filtered = useMemo(() => filterExercises(exercises, search, bodyPart, equipment), [exercises, search, bodyPart, equipment])
   return <div className="modal-backdrop exercise-picker-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}><section className="card exercise-picker-dialog" aria-labelledby="exercise-picker-title">
     <header className="exercise-picker-header"><div><h2 id="exercise-picker-title">{t('Select exercises')}</h2><p>{selectedIds.length} {t('selected')}</p></div><button className="icon-button" type="button" aria-label={t('Close')} onClick={onClose}><UiIcon name="close" /></button></header>
     <label className="sr-only" htmlFor="template-exercise-search">{t('Search exercises')}</label><label className="exercise-search-field"><UiIcon name="search" /><input id="template-exercise-search" className="exercise-search" type="search" placeholder={t('Name, muscle, equipment…')} value={search} onChange={(event) => setSearch(event.target.value)} /></label>
-    <div className="exercise-filters"><label><span className="sr-only">{t('Filter by body part')}</span><select value={bodyPart} onChange={(event) => setBodyPart(event.target.value)}><option value="">{t('Any body part')}</option>{parts.map((part) => <option key={part} value={part}>{t(displayTerm(part))}</option>)}</select></label><label><span className="sr-only">{t('Filter by equipment')}</span><select value={equipment} onChange={(event) => setEquipment(event.target.value)}><option value="">{t('Any equipment')}</option>{equipmentOptions.map(([slug, label]) => <option key={slug} value={slug}>{label}</option>)}</select></label></div>
+    <div className="exercise-filters"><label><span className="sr-only">{t('Filter by body part')}</span><select value={bodyPart} onChange={(event) => setBodyPart(event.target.value)}><option value="">{t('Any body part')}</option>{parts.map((part) => <option key={part.slug} value={part.slug}>{t(part.label)}</option>)}</select></label><label><span className="sr-only">{t('Filter by equipment')}</span><select value={equipment} onChange={(event) => setEquipment(event.target.value)}><option value="">{t('Any equipment')}</option>{equipmentOptions.map(([slug, label]) => <option key={slug} value={slug}>{label}</option>)}</select></label></div>
     <div className="exercise-picker-list">{loading ? <p role="status">{t('Loading exercises…')}</p> : filtered.map((exercise) => <CheckOption className={`exercise-picker-row${selectedIds.includes(exercise.id) ? ' is-selected' : ''}`} key={exercise.id} checked={selectedIds.includes(exercise.id)} onChange={() => onToggle(exercise)}><ExerciseThumbnail exercise={exercise} /><span className="exercise-row-copy"><strong>{exercise.name}</strong><span>{exercise.muscles.map((muscle) => t(displayTerm(muscle))).join(', ') || t(displayTerm(exercise.category))}{exercise.equipment.length ? ` · ${exercise.equipment.map((item) => item.name).join(', ')}` : ''}</span></span></CheckOption>)}</div>
     <footer className="exercise-picker-footer"><span>{selectedIds.length} {t('selected')}</span><button className="button button-primary" type="button" onClick={onClose}>{t('Add selected')}</button></footer>
   </section></div>

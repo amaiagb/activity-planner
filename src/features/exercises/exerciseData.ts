@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabase'
-import { localizeExercise } from '../../lib/catalogueTranslations'
+import { localizeEquipmentName, localizeExercise } from '../../lib/catalogueTranslations'
 import type { Language } from '../../lib/i18n'
 import repDbCatalogue from '../../../repdb/exercises_cleaned.json'
 
@@ -121,7 +121,7 @@ function mapRepDbExercise(row: RepDbExercise, language: Language): CatalogueExer
   const name = language === 'es' ? row.name_es : row.name_en
   const description = language === 'es' ? row.description_es : row.description_en
   const instructions = language === 'es' ? row.instructions_es : row.instructions_en
-  const equipmentName = repDbEquipmentNames[row.equipment] ?? row.equipment
+  const equipmentName = localizeEquipmentName(row.equipment, repDbEquipmentNames[row.equipment] ?? row.equipment, language)
   const variants = row.images.flat ? Object.entries(row.images.flat) : []
   const media: ExerciseMedia[] = variants.map(([variant, path], index) => ({
     id: `${row.id}-flat-${variant}`, media_kind: 'image', storage_path: path, thumbnail_path: null,

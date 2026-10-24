@@ -39,6 +39,9 @@ import { AccentTile } from "../../components/AccentTile";
 import { CheckOption } from "../../components/CheckOption";
 import { loadExerciseDetail } from "../exercises/exerciseData";
 import type { CatalogueExercise } from "../exercises/exerciseData";
+import { BODY_REGION_OPTIONS } from "../../lib/bodyRegions";
+import { localizeEquipmentName } from "../../lib/catalogueTranslations";
+import { EquipmentIcon } from "../../components/EquipmentIcon";
 
 function localToday() {
   const date = new Date();
@@ -63,6 +66,13 @@ function displayToday(value: string, language: string, timeZone?: string) {
   }).format(new Date(`${value}T12:00:00Z`));
 }
 
+function BodyRegionOptions({ selected, onChange, t }: { selected: string[]; onChange: (values: string[]) => void; t: (value: string) => string }) {
+  const upper = BODY_REGION_OPTIONS.filter((region) => ['arms', 'chest', 'shoulders', 'back'].includes(region.slug))
+  const other = BODY_REGION_OPTIONS.filter((region) => !upper.some((item) => item.slug === region.slug))
+  const column = (regions: Array<{ slug: string; label: string }>) => <div className="body-region-column">{regions.map((region) => <CheckOption className="checkbox-row" key={region.slug} checked={selected.includes(region.slug)} onChange={(checked) => onChange(checked ? [...selected, region.slug] : selected.filter((value) => value !== region.slug))}>{t(region.label)}</CheckOption>)}</div>
+  return <div className="body-region-grid">{column(upper)}{column(other)}</div>
+}
+
 export function TrainingPage() {
   const { t, language } = useI18n();
   const { session } = useAuth();
@@ -76,7 +86,7 @@ export function TrainingPage() {
   const [duration, setDuration] = useState("30");
   const [outdoor, setOutdoor] = useState(false);
   const [equipment, setEquipment] = useState<string[]>([]);
-  const [muscleGroup, setMuscleGroup] = useState("");
+  const [muscleGroups, setMuscleGroups] = useState<string[]>([]);
   const [templates, setTemplates] = useState<SavedTemplate[]>([]);
   const [resources, setResources] = useState<SavedResource[]>([]);
   const [resourceModalOpen, setResourceModalOpen] = useState(false);
@@ -116,7 +126,7 @@ export function TrainingPage() {
       const workout = generateDatabaseWorkout(localToday(), context, {
         durationMinutes: Number(duration),
         outdoor,
-        ...(outdoor ? {} : { equipment, muscleGroup }),
+        ...(outdoor ? {} : { equipment, muscleGroups }),
       });
       if (!workout)
         throw new Error(
@@ -318,23 +328,13 @@ export function TrainingPage() {
             {!outdoor && (
               <>
                 <label className="field-label" htmlFor="training-muscle">
-                  {t("Muscle group")}{" "}
+                  {t("Body area")}{" "}
                   <span className="optional-note">{t("(optional)")}</span>
                 </label>
-                <select
-                  id="training-muscle"
-                  value={muscleGroup}
-                  onChange={(event) => setMuscleGroup(event.target.value)}
-                >
-                  <option value="">{t("Any muscle group")}</option>
-                  {["legs", "push", "pull", "core", "cardio", "mobility"].map(
-                    (muscle) => (
-                      <option key={muscle} value={muscle}>
-                        {t(titleCase(muscle))}
-                      </option>
-                    ),
-                  )}
-                </select>
+                <fieldset className="body-region-options" aria-label={t("Body area")}>
+                  <legend className="sr-only">{t("Body area")}</legend>
+                  <BodyRegionOptions selected={muscleGroups} onChange={setMuscleGroups} t={t} />
+                </fieldset>
                 <fieldset className="today-equipment-options">
                   <legend>{t("Equipment")}</legend>
                   {context.input.equipment.length ? (
@@ -350,7 +350,8 @@ export function TrainingPage() {
                           )
                         }
                       >
-                        {context.equipmentLabels[index] ?? item}
+                        <EquipmentIcon slug={item} />
+                        <span>{localizeEquipmentName(item, context.equipmentLabels[index] ?? item, language)}</span>
                       </CheckOption>
                     ))
                   ) : (
@@ -496,23 +497,13 @@ export function TrainingPage() {
           {!outdoor && (
             <>
               <label className="field-label" htmlFor="training-muscle">
-                {t("Muscle group")}{" "}
+                {t("Body area")}{" "}
                 <span className="optional-note">{t("(optional)")}</span>
               </label>
-              <select
-                id="training-muscle"
-                value={muscleGroup}
-                onChange={(event) => setMuscleGroup(event.target.value)}
-              >
-                <option value="">{t("Any muscle group")}</option>
-                {["legs", "push", "pull", "core", "cardio", "mobility"].map(
-                  (muscle) => (
-                    <option key={muscle} value={muscle}>
-                      {t(titleCase(muscle))}
-                    </option>
-                  ),
-                )}
-              </select>
+              <fieldset className="body-region-options" aria-label={t("Body area")}>
+                <legend className="sr-only">{t("Body area")}</legend>
+                <BodyRegionOptions selected={muscleGroups} onChange={setMuscleGroups} t={t} />
+              </fieldset>
               <fieldset className="today-equipment-options">
                 <legend>{t("Equipment")}</legend>
                 {context.input.equipment.length ? (
@@ -529,7 +520,8 @@ export function TrainingPage() {
                         )
                       }
                     >
-                      {context.equipmentLabels[index] ?? item}
+                      <EquipmentIcon slug={item} />
+                      <span>{localizeEquipmentName(item, context.equipmentLabels[index] ?? item, language)}</span>
                     </CheckOption>
                   ))
                 ) : (
@@ -1649,12 +1641,12 @@ export function WorkoutPage() {
       }));
       const exerciseEquipment = [...new Set(exerciseRows.flatMap(({ exercise }) => {
         const databaseExercise = context.databaseExercises.find((item) => item.id === exercise.id);
-        return (databaseExercise?.exercise_equipment ?? []).flatMap((item) => item.equipment?.name ? [item.equipment.name] : []);
+        return (databaseExercise?.exercise_equipment ?? []).flatMap((item) => item.equipment?.name ? [localizeEquipmentName(item.equipment.slug, item.equipment.name, language)] : []);
       }))];
       const selectedEquipment = workout.equipment?.length ? [...new Set(workout.equipment.flatMap((slug) => context.databaseExercises.flatMap((item) => (item.exercise_equipment ?? []).flatMap((entry) => {
         const equipmentSlug = entry.equipment?.slug;
         const matches = equipmentSlug === slug || (slug === "dumbbell" && equipmentSlug === "dumbbells") || (slug === "resistance_band" && equipmentSlug === "resistance_bands");
-        return matches && entry.equipment?.name ? [entry.equipment.name] : [];
+        return matches && entry.equipment?.name ? [localizeEquipmentName(entry.equipment.slug, entry.equipment.name, language)] : [];
       })) ))] : exerciseEquipment;
       return (
         <section className="page-content planner-page workout-summary-page">
@@ -2207,3 +2199,4 @@ export function ResourceDetailPage() {
 // Compatibility exports for existing consumers while the weekly view is retired.
 export const TodayPage = TrainingPage;
 export const WeekPage = TrainingPage;
+

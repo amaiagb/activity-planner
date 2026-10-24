@@ -2,6 +2,7 @@ import type { PlannerInput, PlannedWorkout, WorkoutHistory } from '../../planner
 import { supabase } from '../../lib/supabase'
 import { getOrInitializeUserTimeZone, localDateInTimeZone } from '../../lib/userTimeZone'
 import type { FitnessLevel } from '../../types/profile'
+import { matchesBodyRegion } from '../../lib/bodyRegions'
 
 export type ExerciseGuide = {
   id: string
@@ -186,7 +187,7 @@ function shuffle<T>(items: T[]) {
   return result
 }
 
-export function generateDatabaseWorkout(date: string, context: PlannerContext, request: { durationMinutes: number; outdoor: boolean; muscleGroup?: string; equipment?: string[] }): PlannedWorkout | null {
+export function generateDatabaseWorkout(date: string, context: PlannerContext, request: { durationMinutes: number; outdoor: boolean; muscleGroups?: string[]; muscleGroup?: string; equipment?: string[] }): PlannedWorkout | null {
   const selectedEquipment = (request.equipment ?? []).map(normalizeEquipmentSlug)
   const equipmentFilter = new Set(selectedEquipment.filter((item) => item !== 'no_equipment' && item !== 'bodyweight'))
   const bodyweightOnly = equipmentFilter.size === 0
@@ -194,8 +195,8 @@ export function generateDatabaseWorkout(date: string, context: PlannerContext, r
   const candidates = context.databaseExercises.filter((exercise) => {
     if (!exercise.is_active || excluded.has(exercise.id)) return false
     if (request.outdoor !== exercise.is_outdoor) return false
-    const category = databaseCategory(exercise.category)
-    if (!request.outdoor && request.muscleGroup && request.muscleGroup !== category && !(exercise.exercise_muscles ?? []).some((item) => item.muscle_group.includes(request.muscleGroup!))) return false
+    const selectedRegions = request.muscleGroups?.length ? request.muscleGroups : request.muscleGroup ? [request.muscleGroup] : []
+    if (!request.outdoor && selectedRegions.length && !selectedRegions.some((region) => matchesBodyRegion(exercise.category, (exercise.exercise_muscles ?? []).map((item) => item.muscle_group), region))) return false
     const groups = databaseEquipmentGroups(exercise).map((group) => group.map(normalizeEquipmentSlug))
     if (!groups.length) return bodyweightOnly
     return groups.every((group) => bodyweightOnly
