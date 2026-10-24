@@ -7,12 +7,14 @@ import { useI18n } from '../../lib/i18n'
 import { UiIcon } from '../../components/UiIcon'
 import { loadExcludedExerciseIds, setExerciseExcluded } from '../../lib/profileData'
 import { useAuth } from '../auth/useAuth'
+import { AccentTile, accentForId } from '../../components/AccentTile'
 
-function PlaceholderMedia({ name, size }: { name: string; size: 'thumbnail' | 'detail' }) {
+function PlaceholderMedia({ id, name, size }: { id?: string; name: string; size: 'thumbnail' | 'detail' }) {
   const { t } = useI18n()
+  const accent = accentForId(id ?? name)
   return (
     <div className={`exercise-placeholder exercise-placeholder-${size}`} role="img" aria-label={`${t('Illustration not yet available for ')}${name}`}>
-      <span aria-hidden="true">{name.trim().charAt(0).toLocaleUpperCase()}</span>
+      <AccentTile accent={accent} pattern={accent === 'pink' ? 'diag' : accent === 'yellow' ? 'lines' : 'dots'} size={size === 'detail' ? 72 : 56} icon={<span aria-hidden="true">{name.trim().charAt(0).toLocaleUpperCase()}</span>} />
       {size === 'detail' && <small>{t('Illustration coming soon')}</small>}
     </div>
   )
@@ -21,7 +23,7 @@ function PlaceholderMedia({ name, size }: { name: string; size: 'thumbnail' | 'd
 export function ExerciseThumbnail({ exercise }: { exercise: CatalogueExercise }) {
   const [failed, setFailed] = useState(false)
   const image = exercise.media.find((item) => item.thumbnail_url)
-  if (!image || failed) return <PlaceholderMedia name={exercise.name} size="thumbnail" />
+  if (!image || failed) return <PlaceholderMedia id={exercise.id} name={exercise.name} size="thumbnail" />
   if (exercise.catalogueSource === 'repdb' && exercise.media.length > 1) return <span className="exercise-motion-thumbnail" aria-label={exercise.name}>{exercise.media.map((item, index) => <img key={item.id} className={`exercise-thumbnail motion-frame motion-frame-${index}`} src={item.thumbnail_url ?? undefined} alt="" loading="lazy" width="72" height="72" onError={() => setFailed(true)} />)}</span>
   return <img className="exercise-thumbnail" src={image.thumbnail_url ?? undefined} alt={image.alt_text} loading="lazy" width="72" height="72" onError={() => setFailed(true)} />
 }
@@ -47,6 +49,14 @@ function ExerciseRow({ exercise, onOpen }: { exercise: CatalogueExercise; onOpen
 
 function jumpToLetter(letter: string) {
   document.getElementById(`exercise-group-${letter}`)?.scrollIntoView({ block: 'start', behavior: 'auto' })
+}
+
+function normalizeIndexLetter(letter: string) {
+  return letter.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+function normalizeIndexText(value: string) {
+  return normalizeIndexLetter(value).toLocaleLowerCase()
 }
 
 export function ExercisesPage() {
@@ -77,7 +87,13 @@ export function ExercisesPage() {
   const bodyParts = useMemo(() => [...new Set(exercises.flatMap((item) => item.muscles))].sort(), [exercises])
   const equipmentOptions = useMemo(() => [...new Map(exercises.flatMap((item) => item.equipment).map((item) => [item.slug, item.name])).entries()].sort((a, b) => a[1].localeCompare(b[1])), [exercises])
   const groups = useMemo(() => groupExercisesByLetter(filterExercises(exercises, search, bodyPart, equipment)), [exercises, search, bodyPart, equipment])
-  const letters = groups.map(([letter]) => letter)
+  const normalizedGroups = [...groups.reduce((merged, [letter, entries]) => {
+    const normalized = normalizeIndexLetter(letter)
+    merged.set(normalized, [...(merged.get(normalized) ?? []), ...entries])
+    return merged
+  }, new Map<string, CatalogueExercise[]>()).entries()]
+  normalizedGroups.forEach(([, entries]) => entries.sort((a, b) => normalizeIndexText(a.name).localeCompare(normalizeIndexText(b.name))))
+  const letters = normalizedGroups.map(([letter]) => letter)
   const hasFilters = Boolean(search || bodyPart || equipment)
 
   function clearFilters() {
@@ -101,10 +117,10 @@ export function ExercisesPage() {
           {hasFilters && <button className="text-button exercise-clear-filters" type="button" onClick={clearFilters}>{t('Clear search and filters')}</button>}
           {loading ? <p className="exercise-state-message" role="status">{t('Loading exercises…')}</p> : error ? <div className="exercise-state-message"><p className="form-error" role="alert">{t('Could not load the exercise catalogue.')}</p><button className="button button-secondary" type="button" onClick={() => void reload()}>{t('Try again')}</button></div> : groups.length === 0 ? <div className="card exercise-empty"><h2>{t(hasFilters ? 'No exercises found' : 'No active exercises')}</h2><p>{t(hasFilters ? 'No exercises match these filters.' : 'The exercise catalogue is empty.')}</p>{hasFilters && <button className="button button-secondary" type="button" onClick={clearFilters}>{t('Clear filters')}</button>}</div> : <>
             <p className="exercise-result-count" role="status">{groups.reduce((total, [, entries]) => total + entries.length, 0)} {t('exercises')}</p>
-            <div className="exercise-groups">
-              {groups.map(([letter, entries]) => <section className="exercise-group" key={letter} id={`exercise-group-${letter}`} aria-labelledby={`exercise-letter-${letter}`}><h2 id={`exercise-letter-${letter}`} tabIndex={-1}>{letter}</h2><ul>{entries.map((exercise) => <li key={exercise.id}><ExerciseRow exercise={exercise} onOpen={(element) => { lastOpenedRow.current = element }} /></li>)}</ul></section>)}
-            </div>
             <nav className="exercise-index" aria-label={t('Jump to exercise name letter')}>{letters.map((letter) => <button key={letter} type="button" aria-label={`${t('Jump to ')}${letter}`} aria-controls={`exercise-group-${letter}`} onClick={() => jumpToLetter(letter)}>{letter}</button>)}</nav>
+            <div className="exercise-groups">
+              {normalizedGroups.map(([letter, entries]) => <section className="exercise-group" key={letter} id={`exercise-group-${letter}`} aria-labelledby={`exercise-letter-${letter}`}><h2 id={`exercise-letter-${letter}`} tabIndex={-1}>{letter}</h2><ul>{entries.map((exercise) => <li key={exercise.id}><ExerciseRow exercise={exercise} onOpen={(element) => { lastOpenedRow.current = element }} /></li>)}</ul></section>)}
+            </div>
           </>}
           <p className="repdb-attribution">Exercise data by <a href="https://repdb.co" target="_blank" rel="noreferrer">RepDB (repdb.co)</a></p>
         </section>
@@ -130,10 +146,10 @@ function TutorialMedia({ exercise, media }: { exercise: CatalogueExercise; media
   const { t } = useI18n()
   const [failed, setFailed] = useState<string[]>([])
   const visual = media.find((item) => item.media_url && !failed.includes(item.id))
-  if (!visual) return <PlaceholderMedia name={exercise.name} size="detail" />
+  if (!visual) return <PlaceholderMedia id={exercise.id} name={exercise.name} size="detail" />
   if (exercise.catalogueSource === 'repdb' && media.length > 1) {
     const available = media.filter((item) => item.media_url && !failed.includes(item.id))
-    if (!available.length) return <PlaceholderMedia name={exercise.name} size="detail" />
+    if (!available.length) return <PlaceholderMedia id={exercise.id} name={exercise.name} size="detail" />
     return <div className="exercise-motion-detail">{available.map((item, index) => <img key={item.id} className={`motion-frame motion-frame-${index}`} src={item.media_url ?? undefined} alt={item.alt_text} onError={() => setFailed((current) => [...current, item.id])} />)}</div>
   }
   if (visual.media_kind === 'video' || visual.media_kind === 'animation') {
