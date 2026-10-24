@@ -1,4 +1,4 @@
-export type UiIconName = 'brand' | 'play' | 'star' | 'resource' | 'profile' | 'chevron-right' | 'chevron-left' | 'plus' | 'more' | 'check' | 'skip' | 'close' | 'search' | 'sort' | 'calendar' | 'trophy' | 'alphabetical' | 'system' | 'sun' | 'moon'
+export type UiIconName = 'brand' | 'play' | 'star' | 'resource' | 'profile' | 'chevron-right' | 'chevron-left' | 'plus' | 'more' | 'check' | 'skip' | 'minus' | 'close' | 'search' | 'sort' | 'calendar' | 'trophy' | 'alphabetical' | 'system' | 'sun' | 'moon' | 'dumbbell' | 'walk' | 'info'
 
 export function UiIcon({ name, className = '', filled = false }: { name: UiIconName; className?: string; filled?: boolean }) {
   const common = { className: `ui-icon${className ? ` ${className}` : ''}`, viewBox: '0 0 24 24', fill: filled ? 'currentColor' : 'none', stroke: 'currentColor', strokeWidth: 2.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true as const }
@@ -11,6 +11,7 @@ export function UiIcon({ name, className = '', filled = false }: { name: UiIconN
   if (name === 'more') return <svg {...common}><circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" /><circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" /></svg>
   if (name === 'check') return <svg {...common}><path d="m5 12 4 4L19 6" /></svg>
   if (name === 'skip') return <svg {...common}><path d="M6 5v14M10 5l8 7-8 7z" /></svg>
+  if (name === 'minus') return <svg {...common}><path d="M6 12h12" /></svg>
   if (name === 'close') return <svg {...common}><path d="m6 6 12 12M18 6 6 18" /></svg>
   if (name === 'search') return <svg {...common}><circle cx="10.5" cy="10.5" r="6" /><path d="m15 15 4 4" /></svg>
   if (name === 'sort') return <svg {...common}><path d="M7 5v14M4 8l3-3 3 3M17 19V5m-3 11 3 3 3-3" /></svg>
@@ -20,6 +21,9 @@ export function UiIcon({ name, className = '', filled = false }: { name: UiIconN
   if (name === 'system') return <svg {...common}><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M12 4v16M4 12h16" /></svg>
   if (name === 'sun') return <svg {...common}><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
   if (name === 'moon') return <svg {...common}><path d="M20 15.5A8 8 0 0 1 8.5 4 8.5 8.5 0 1 0 20 15.5Z" /></svg>
+  if (name === 'dumbbell') return <svg {...common}><path d="M3 9v6M6 7v10M9 10h6M18 7v10M21 9v6M6 9h3M15 9h3M6 15h3M15 15h3" /></svg>
+  if (name === 'walk') return <svg {...common}><circle cx="13" cy="5" r="2.5" /><path d="m13 8-2 7 4 3m-4-5-5 3m7-8 5 3m-3 2 1 6m-5-6-4 6" /></svg>
+  if (name === 'info') return <svg {...common}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
   if (name === 'chevron-left') return <svg {...common}><path d="m15 6-6 6 6 6" /></svg>
   return <svg {...common}><path d="m9 6 6 6-6 6" /></svg>
 }

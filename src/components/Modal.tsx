@@ -6,6 +6,7 @@ type ModalProps = {
   open?: boolean
   title?: string
   accent?: Accent
+  pattern?: 'dots' | 'diag' | 'lines'
   variant?: 'dialog' | 'sheet'
   onClose?: () => void
   children: ReactNode
@@ -15,7 +16,7 @@ type ModalProps = {
   labelledBy?: string
 }
 
-export function Modal({ open = true, title, accent = 'lime', variant = 'dialog', onClose, children, footer, className = '', hideHeader = false, labelledBy }: ModalProps) {
+export function Modal({ open = true, title, accent = 'lime', pattern, variant = 'dialog', onClose, children, footer, className = '', hideHeader = false, labelledBy }: ModalProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
   const restoreRef = useRef<HTMLElement | null>(null)
 
@@ -44,7 +45,7 @@ export function Modal({ open = true, title, accent = 'lime', variant = 'dialog',
   if (!open) return null
   return <div className={`modal-backdrop ${variant === 'sheet' ? 'modal-sheet-backdrop' : ''}`} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose?.() }}>
     <section className={`modal card ${className}`} aria-labelledby={labelledBy ?? (title ? 'modal-title' : undefined)} inert={false}>
-      {!hideHeader && <header className="modal-header"><div className="modal-title-wrap">{title && <AccentTile accent={accent} icon={<span />} size={40} />}<h2 id={labelledBy ?? 'modal-title'}>{title}</h2></div>{onClose && <button ref={closeRef} className="icon-button modal-close" type="button" aria-label="Close" onClick={onClose}><UiIcon name="close" /></button>}</header>}
+      {!hideHeader && <header className="modal-header"><div className="modal-title-wrap">{title && <AccentTile accent={accent} pattern={pattern} icon={<span />} size={40} />}<h2 id={labelledBy ?? 'modal-title'}>{title}</h2></div>{onClose && <button ref={closeRef} className="icon-button modal-close" type="button" aria-label="Close" onClick={onClose}><UiIcon name="close" /></button>}</header>}
       <div className="modal-body">{children}</div>
       {footer && <footer className="modal-footer">{footer}</footer>}
     </section>

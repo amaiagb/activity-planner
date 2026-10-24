@@ -261,7 +261,7 @@ export async function loadActiveSession(userId: string, plannedWorkoutId: string
   return result.data
 }
 
-export async function setExerciseStatus(userId: string, exerciseSessionId: string, status: 'done' | 'skipped') {
+export async function setExerciseStatus(userId: string, exerciseSessionId: string, status: 'planned' | 'done' | 'skipped') {
   const result = await client().from('exercise_sessions').update({ status }).eq('user_id', userId).eq('id', exerciseSessionId)
   throwOnError(result)
 }

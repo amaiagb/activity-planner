@@ -66,11 +66,33 @@ function displayToday(value: string, language: string, timeZone?: string) {
   }).format(new Date(`${value}T12:00:00Z`));
 }
 
+function SelectionOption({ selected, onChange, children, className = '' }: { selected: boolean; onChange: () => void; children: ReactNode; className?: string }) {
+  return <button className={`selection-option${selected ? ' is-selected' : ''}${className ? ` ${className}` : ''}`} type="button" aria-pressed={selected} onClick={onChange}>{children}{selected && <span className="selection-option-check"><UiIcon name="check" /></span>}</button>
+}
+
+function clampTrainingDuration(value: number) {
+  return Math.min(60, Math.max(5, Math.round(value / 5) * 5))
+}
+
+function DurationGrid({ value, habitual, onChange, t }: { value: number; habitual: number; onChange: (value: number) => void; t: (value: string) => string }) {
+  return <div className="training-duration-grid" role="radiogroup" aria-label={t('Available time')} onKeyDown={(event) => {
+    const current = Number((event.target as HTMLElement).getAttribute('data-duration'))
+    if (!current) return
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') { event.preventDefault(); onChange(Math.min(60, current + 5)) }
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') { event.preventDefault(); onChange(Math.max(5, current - 5)) }
+  }}>{Array.from({ length: 12 }, (_, index) => (index + 1) * 5).map((minutes) => <button key={minutes} className="training-duration-option" type="button" role="radio" aria-checked={minutes === value} aria-label={`${minutes} ${t('minutes')}${minutes === habitual ? `, ${t('usual')}` : ''}`} tabIndex={minutes === value ? 0 : -1} data-duration={minutes} onClick={() => onChange(minutes)}>{minutes}{minutes === habitual && <i className="training-duration-habitual" aria-hidden="true" />}</button>)}</div>
+}
+
 function BodyRegionOptions({ selected, onChange, t }: { selected: string[]; onChange: (values: string[]) => void; t: (value: string) => string }) {
   const upper = BODY_REGION_OPTIONS.filter((region) => ['arms', 'chest', 'shoulders', 'back'].includes(region.slug))
   const other = BODY_REGION_OPTIONS.filter((region) => !upper.some((item) => item.slug === region.slug))
-  const column = (regions: Array<{ slug: string; label: string }>) => <div className="body-region-column">{regions.map((region) => <CheckOption className="checkbox-row" key={region.slug} checked={selected.includes(region.slug)} onChange={(checked) => onChange(checked ? [...selected, region.slug] : selected.filter((value) => value !== region.slug))}>{t(region.label)}</CheckOption>)}</div>
-  return <div className="body-region-grid">{column(upper)}{column(other)}</div>
+  const option = (region: { slug: string; label: string }, column: 'upper' | 'other') => <SelectionOption className={`body-region-option body-region-${column}${region.slug === 'full_body' ? ' body-region-wide' : ''}`} key={region.slug} selected={selected.includes(region.slug)} onChange={() => onChange(selected.includes(region.slug) ? selected.filter((value) => value !== region.slug) : [...selected, region.slug])}>{t(region.label)}</SelectionOption>
+  return <div className="body-region-grid">{upper.map((region) => option(region, 'upper'))}{other.map((region) => option(region, 'other'))}</div>
+}
+
+function trainingSummary(duration: number, zones: number, equipment: number, t: (value: string) => string) {
+  if (!zones && !equipment) return `${duration} ${t('min')} · ${t('any body area and equipment')}`
+  return `${duration} ${t('min')} · ${zones} ${t(zones === 1 ? 'body area singular' : 'body areas')} · ${equipment} ${t(equipment === 1 ? 'equipment singular' : 'equipment plural')}`
 }
 
 export function TrainingPage() {
@@ -106,7 +128,7 @@ export function TrainingPage() {
     ])
       .then(([nextContext, nextTemplates, nextResources]) => {
         setContext(nextContext);
-        setDuration(String(nextContext.input.availability.durationMinutes));
+        setDuration(String(clampTrainingDuration(nextContext.input.availability.durationMinutes)));
         setTemplates(nextTemplates);
         setResources(nextResources);
       })
@@ -296,63 +318,36 @@ export function TrainingPage() {
           </p>
         )}
         {showGenerator && context && (
-          <Modal title={t("Create training")} onClose={() => setShowGenerator(false)} className="generator-panel">
+          <Modal title={t("Create training")} pattern="dots" onClose={() => setShowGenerator(false)} className="generator-panel create-training-modal" footer={<><p className="create-training-summary">{trainingSummary(Number(duration), muscleGroups.length, equipment.length, t)}</p><button className="button button-primary create-training-cta" type="button" disabled={busy} onClick={() => void createGenerated()}>{busy ? t("Creating workout…") : t("Create training")}</button></>}>
             {error && (
               <p className="form-error" role="alert">
                 {t(error)}
               </p>
             )}
-            <label className="field-label" htmlFor="training-duration">
-              {t("Available time")}
-            </label>
-            <select
-              id="training-duration"
-              value={duration}
-              onChange={(event) => setDuration(event.target.value)}
-            >
-              {Array.from({ length: 48 }, (_, index) => (index + 1) * 5).map(
-                (value) => (
-                  <option key={value} value={value}>
-                    {value} {t("min")}
-                  </option>
-                ),
-              )}
-            </select>
-            <CheckOption
-              className="full-option"
-              checked={outdoor}
-              onChange={setOutdoor}
-            >
-              {t("Outdoor walk")}
-            </CheckOption>
+            <div className="create-training-section-heading"><span>{t("Available time")} · <b>{duration} {t("min")}</b></span><span className="create-training-habitual"><i />{t("your usual")}</span></div>
+            <DurationGrid value={Number(duration)} habitual={clampTrainingDuration(context.input.availability.durationMinutes)} onChange={(value) => setDuration(String(value))} t={t} />
+            <SelectionOption className="outdoor-walk-option" selected={outdoor} onChange={() => setOutdoor((current) => !current)}><UiIcon name="walk" /><span>{t("Outdoor walk")}</span></SelectionOption>
             {!outdoor && (
               <>
-                <label className="field-label" htmlFor="training-muscle">
-                  {t("Body area")}{" "}
-                  <span className="optional-note">{t("(optional)")}</span>
-                </label>
+                <div className="create-training-section-heading"><span>{t("Body area")} <em>{t("(optional)")}</em></span>{muscleGroups.length > 0 && <button className="create-training-clear" type="button" onClick={() => setMuscleGroups([])}>{t("Clear")}</button>}</div>
                 <fieldset className="body-region-options" aria-label={t("Body area")}>
                   <legend className="sr-only">{t("Body area")}</legend>
                   <BodyRegionOptions selected={muscleGroups} onChange={setMuscleGroups} t={t} />
                 </fieldset>
-                <fieldset className="today-equipment-options">
-                  <legend>{t("Equipment")}</legend>
-                  {context.input.equipment.length ? (
+                <div className="create-training-section-heading"><span>{t("Equipment")} <em>{t("(optional)")}</em></span>{equipment.length > 0 && <button className="create-training-clear" type="button" onClick={() => setEquipment([])}>{t("Clear")}</button>}</div>
+                <fieldset className="today-equipment-options" aria-label={t("Equipment")}>
+                  <legend className="sr-only">{t("Equipment")}</legend>
+                  <div className="equipment-options-grid">{context.input.equipment.length ? (
                     context.input.equipment.map((item, index) => (
-                      <CheckOption
+                      <SelectionOption
+                        className="equipment-option"
                         key={item}
-                        checked={equipment.includes(item)}
-                        onChange={(checked) =>
-                          setEquipment((current) =>
-                            checked
-                              ? [...current, item]
-                              : current.filter((value) => value !== item),
-                          )
-                        }
+                        selected={equipment.includes(item)}
+                        onChange={() => setEquipment((current) => current.includes(item) ? current.filter((value) => value !== item) : [...current, item])}
                       >
                         <EquipmentIcon slug={item} />
                         <span>{localizeEquipmentName(item, context.equipmentLabels[index] ?? item, language)}</span>
-                      </CheckOption>
+                      </SelectionOption>
                     ))
                   ) : (
                     <p>
@@ -360,20 +355,10 @@ export function TrainingPage() {
                         "No equipment is saved in your profile; bodyweight workouts are still available.",
                       )}
                     </p>
-                  )}
+                  )}</div>
                 </fieldset>
               </>
             )}
-            <div className="button-row generator-actions">
-              <button
-                className="button button-primary"
-                type="button"
-                disabled={busy}
-                onClick={() => void createGenerated()}
-              >
-                {busy ? t("Creating workout…") : t("Create training")}
-              </button>
-            </div>
           </Modal>
         )}
         <section className="today-shortcuts" aria-labelledby="shortcuts-title">
@@ -437,15 +422,7 @@ export function TrainingPage() {
           {t(error)}
         </p>
       )}
-      {templatesOnly ? (
-        <button
-          className="button button-primary templates-create-cta"
-          type="button"
-          onClick={() => setShowGenerator((value) => !value)}
-        >
-          {t("Create workout")}
-        </button>
-      ) : (
+      {!templatesOnly && (
         <div className="training-quick-actions">
           <button
             className="button button-primary"
@@ -1474,6 +1451,11 @@ export function WorkoutPage() {
   const [templateOpen, setTemplateOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [savingTemplate, setSavingTemplate] = useState(false);
+  const [expandedExercisePosition, setExpandedExercisePosition] = useState<number | null>(null);
+  const [helpDismissed, setHelpDismissed] = useState(false);
+  const [focusTarget, setFocusTarget] = useState<number | "finish" | null>(null);
+  const doneButtonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
+  const finishButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const reload = useCallback(async () => {
     if (!session || !id) return;
@@ -1519,12 +1501,17 @@ export function WorkoutPage() {
   }
   async function markExercise(
     exerciseSessionId: string,
-    status: "done" | "skipped",
+    status: "planned" | "done" | "skipped",
   ) {
     if (!session) return;
+    const currentPosition = active?.exercise_sessions.find((item) => item.id === exerciseSessionId)?.position;
+    const nextPosition = active?.exercise_sessions.find((item) => item.position !== currentPosition && item.status === "planned")?.position ?? null;
+    setHelpDismissed(true);
     try {
       await setExerciseStatus(session.user.id, exerciseSessionId, status);
       await reload();
+      setExpandedExercisePosition(nextPosition);
+      setFocusTarget(nextPosition ?? "finish");
     } catch {
       setError("Could not save this exercise.");
     }
@@ -1538,6 +1525,23 @@ export function WorkoutPage() {
   const allExercisesHandled =
     Boolean(active?.exercise_sessions.length) &&
     handledCount === active?.exercise_sessions.length;
+  useEffect(() => {
+    if (!active) return;
+    if (active.exercise_sessions.some((item) => item.status !== "planned")) setHelpDismissed(true);
+    setExpandedExercisePosition((current) => {
+      if (current !== null && active.exercise_sessions.some((item) => item.position === current && item.status === "planned")) return current;
+      return active.exercise_sessions.find((item) => item.status === "planned")?.position ?? null;
+    });
+  }, [active]);
+  useEffect(() => {
+    if (focusTarget === null) return;
+    const frame = requestAnimationFrame(() => {
+      if (focusTarget === "finish") finishButtonRef.current?.focus();
+      else doneButtonRefs.current[focusTarget]?.focus();
+      setFocusTarget(null);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [active, expandedExercisePosition, focusTarget]);
   async function finish() {
     if (!session || !active || !workout) return;
     setFinishing(true);
@@ -1705,6 +1709,9 @@ export function WorkoutPage() {
       <p className="progress-copy" role="status">
         {handledCount} {t("of")} {progressTotal}
       </p>
+      {active && !helpDismissed && handledCount === 0 && (
+        <aside className="workout-help" role="note"><UiIcon name="info" /><span>{t("Tap ")}<strong>{t("Done")}</strong>{t(" when you finish each exercise. If you will not do it, tap ")}<strong>{t("Skip")}</strong>{t(".")}</span></aside>
+      )}
       {!active ? (
         <article className="card form-card workout-start-card">
           <p>
@@ -1731,115 +1738,29 @@ export function WorkoutPage() {
         <>
           <ol className="execution-list">
             {workout.exercises.map((exercise, index) => {
-              const row = active.exercise_sessions.find(
-                (item) => item.position === index + 1,
-              );
+              const row = active.exercise_sessions.find((item) => item.position === index + 1);
               const guide = guides[exercise.slug];
               const copy = localizeExerciseCopy(exercise.slug, language);
               const displayName = copy?.name ?? guide?.name ?? exercise.name;
-              const finished =
-                row?.status === "done" || row?.status === "skipped";
-              const isNow =
-                !finished &&
-                index ===
-                  active.exercise_sessions.findIndex(
-                    (item) => item.status === "planned",
-                  );
-              return (
-                <li
-                  className={`exercise-execution-row ${finished ? "exercise-finished" : ""}`}
-                  key={`${exercise.id}-${index}`}
-                >
-                  <div className="exercise-row-controls">
-                    {row && (
-                      <button
-                        className={`exercise-status-button${row.status === "done" ? " is-done" : ""}`}
-                        type="button"
-                        aria-pressed={row.status === "done"}
-                        aria-label={`${t("Done")}: ${displayName}`}
-                        onClick={() =>
-                          void markExercise(
-                            row.id,
-                            row.status === "done" ? "skipped" : "done",
-                          )
-                        }
-                      >
-                        {row.status === "done" ? <UiIcon name="check" /> : null}
-                      </button>
-                    )}
-                    {row && (
-                      <button
-                        className={`exercise-skip-button${row.status === "skipped" ? " is-skipped" : ""}`}
-                        type="button"
-                        aria-pressed={row.status === "skipped"}
-                        aria-label={`${t("Skip")}: ${displayName}`}
-                        onClick={() =>
-                          void markExercise(
-                            row.id,
-                            row.status === "skipped" ? "done" : "skipped",
-                          )
-                        }
-                      >
-                        <UiIcon name="skip" />
-                      </button>
-                    )}
-                  </div>
-                  <div className="exercise-row-main">
-                    <button
-                      className="exercise-name-button"
-                      type="button"
-                      onClick={() =>
-                        setExerciseModal(
-                          context.databaseExerciseIds[exercise.slug]
-                            ? {
-                                id: context.databaseExerciseIds[exercise.slug],
-                                name: displayName,
-                              }
-                            : null,
-                        )
-                      }
-                    >
-                      <strong>{displayName}</strong>
-                      <span>
-                        {prescription(
-                          exercise.prescribedSets,
-                          exercise.prescribedReps,
-                          exercise.prescribedDurationSeconds,
-                          t,
-                        )}
-                        {isNow && <em>{t("Now")}</em>}
-                      </span>
-                    </button>
-                    {context.databaseExerciseIds[exercise.slug] ? (
-                      <button
-                        className="text-button exercise-view-link"
-                        type="button"
-                        onClick={() =>
-                          setExerciseModal({
-                            id: context.databaseExerciseIds[exercise.slug],
-                            name: displayName,
-                          })
-                        }
-                      >
-                        {t("View exercise")}
-                      </button>
-                    ) : (
-                      (copy?.instructions ?? guide?.instructions) && (
-                        <p className="exercise-inline-instructions">
-                          {copy?.instructions ?? guide?.instructions}
-                        </p>
-                      )
-                    )}
-                  </div>
-                  {row?.status === "skipped" && (
-                    <span className={`exercise-state${row?.status === "skipped" ? " is-skipped" : ""}`}>{t("Skipped")}</span>
-                  )}
-                </li>
-              );
+              const status = row?.status ?? "planned";
+              const finished = status === "done" || status === "skipped";
+              const isNow = status === "planned" && expandedExercisePosition === row?.position;
+              const exerciseId = context.databaseExerciseIds[exercise.slug];
+              return <li className={`exercise-execution-row${isNow ? " is-current" : ""}${finished ? " exercise-finished" : ""}`} key={`${exercise.id}-${index}`}>
+                <div className={`exercise-state-circle exercise-state-${status}`} aria-hidden="true">{status === "done" ? <UiIcon name="check" /> : status === "skipped" ? <UiIcon name="minus" /> : null}</div>
+                <span className="sr-only">{t(status === "done" ? "Done" : status === "skipped" ? "Skipped" : "Planned")}</span>
+                <button className="exercise-name-button" type="button" disabled={finished} aria-expanded={!finished ? isNow : undefined} onClick={() => { if (!finished) setExpandedExercisePosition(row?.position ?? index + 1); }}>
+                  <strong>{displayName}</strong>
+                  <span>{prescription(exercise.prescribedSets, exercise.prescribedReps, exercise.prescribedDurationSeconds, t)}{isNow && <em>{t("Now")}</em>}{status === "skipped" && <em className="exercise-skipped-tag">{t("Skipped")}</em>}</span>
+                </button>
+                {status === "planned" ? <button className="exercise-info-button" type="button" aria-label={`${t("View exercise")}: ${displayName}`} onClick={() => setExerciseModal(exerciseId ? { id: exerciseId, name: displayName } : null)}><UiIcon name="info" /></button> : <button className="exercise-undo-button" type="button" aria-label={`${t("Undo")}: ${displayName}`} onClick={() => row && void markExercise(row.id, "planned")} >{t("Undo")}</button>}
+                {isNow && row && <div className="exercise-expanded-actions"><button ref={(element) => { doneButtonRefs.current[row.position] = element; }} className="exercise-expanded-done" type="button" aria-label={`${t("Mark as done")}: ${displayName}`} onClick={() => void markExercise(row.id, "done")}><UiIcon name="check" />{t("Done")}</button><button className="exercise-expanded-skip" type="button" aria-label={`${t("Skip")}: ${displayName}`} onClick={() => void markExercise(row.id, "skipped")}>{t("Skip")}</button></div>}
+              </li>;
             })}
           </ol>
           {active.status === "in_progress" && (
             <button
+              ref={finishButtonRef}
               className="button button-primary workout-finish-button"
               type="button"
               disabled={!allExercisesHandled}
