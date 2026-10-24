@@ -387,6 +387,13 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .template-train-button { width: 100%; margin-top: 20px; }
 .template-dialog { width: min(100%, 540px); max-height: min(88vh, 780px); overflow: auto; display: grid; gap: 14px; padding: 26px; }
 .generator-panel { display: grid; gap: 14px; margin-bottom: 24px; }
+.today-page .generator-panel { margin: 0; }
+.today-page .generator-panel .button-row { display: grid; gap: 8px; }
+.today-page .generator-panel .generator-actions { margin-top: 10px; }
+.today-page .generator-panel .button-primary { width: 100%; }
+.today-page .generator-panel label[for="training-muscle"] { margin-top: 8px; }
+.today-page .generator-panel .today-equipment-options { margin-top: 8px; }
+.today-page .generator-panel .today-equipment-options legend { margin-bottom: 7px; color: var(--color-ink); font-size: .9rem; font-weight: 700; }
 .template-form { display: grid; gap: 14px; }
 .template-selected-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .template-selected-heading h2 { margin: 0; }

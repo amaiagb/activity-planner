@@ -480,6 +480,7 @@ const translations: Record<string, string> = Object.assign(
     "(optional, 1–5)": "(opcional, 1–5)",
     Streak: "Racha",
     "Time to move": "Hoy toca moverse",
+    "Create training": "Crear entreno",
     "Create a workout and get started. Two taps.":
       "Crea tu entreno y empieza. Dos toques.",
     Shortcuts: "Atajos",
@@ -490,6 +491,7 @@ const translations: Record<string, string> = Object.assign(
     "Open your routines": "Ver tus rutinas",
     "Open your saved resources": "Ver tus recursos guardados",
     "Streak on fire": "Racha on fire",
+    "Keep the streak going": "Sigue la racha",
     "Don’t lose your streak!": "¡No pierdas la racha!",
     "Start a streak today": "Empieza una racha hoy",
     "Streak unavailable": "Racha no disponible",

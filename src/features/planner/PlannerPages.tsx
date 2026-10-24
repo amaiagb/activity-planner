@@ -223,7 +223,9 @@ export function TrainingPage() {
   const activityDates = new Set(history?.activityDates ?? []);
   const streakClaim = history?.currentStreak
     ? activityDates.has(today)
-      ? "Streak on fire"
+      ? history.currentStreak >= 3
+        ? "Streak on fire"
+        : "Keep the streak going"
       : "Don’t lose your streak!"
     : "Start a streak today";
   const streakBars = Array.from({ length: 7 }, (_, index) =>
@@ -259,7 +261,7 @@ export function TrainingPage() {
               <span
                 key={date}
                 className={`streak-bar${activityDates.has(date) ? " is-active" : ""}${date === today && !activityDates.has(date) ? " is-today" : ""}`}
-                aria-hidden="true"
+                aria-label={`${displayToday(date, language, history?.timeZone)}: ${t(activityDates.has(date) ? "Completed activity" : date === today ? "Today" : "No completed activity")}`}
               />
             ))}
           </span>
@@ -273,7 +275,7 @@ export function TrainingPage() {
             onClick={() => setShowGenerator((value) => !value)}
           >
             <UiIcon name="play" />
-            {t("Create workout")}
+            {t("Create training")}
           </button>
         </section>
         {error && (
@@ -282,8 +284,7 @@ export function TrainingPage() {
           </p>
         )}
         {showGenerator && context && (
-          <section className="card form-card generator-panel">
-            <h2>{t("Create workout")}</h2>
+          <Modal title={t("Create training")} onClose={() => setShowGenerator(false)} className="generator-panel">
             <label className="field-label" htmlFor="training-duration">
               {t("Available time")}
             </label>
@@ -355,25 +356,17 @@ export function TrainingPage() {
                 </fieldset>
               </>
             )}
-            <div className="button-row">
+            <div className="button-row generator-actions">
               <button
                 className="button button-primary"
                 type="button"
                 disabled={busy}
                 onClick={() => void createGenerated()}
               >
-                {busy ? t("Creating workout…") : t("Create workout")}
-              </button>
-              <button
-                className="button button-secondary"
-                type="button"
-                disabled={busy}
-                onClick={() => setShowGenerator(false)}
-              >
-                {t("Cancel")}
+                {busy ? t("Creating workout…") : t("Create training")}
               </button>
             </div>
-          </section>
+          </Modal>
         )}
         <section className="today-shortcuts" aria-labelledby="shortcuts-title">
           <h2 id="shortcuts-title">{t("Shortcuts")}</h2>
