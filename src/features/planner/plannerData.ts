@@ -256,13 +256,23 @@ export async function startWorkout(userId: string, workout: PlannedWorkout) {
 
 export async function loadActiveSession(userId: string, plannedWorkoutId: string) {
   const db = client()
-  const result = await db.from('workout_sessions').select('id,status,started_at,completed_at,actual_duration_minutes,perceived_exertion,note,exercise_sessions(id,position,status,sets_completed,reps_completed,duration_seconds,exercise_id)').eq('user_id', userId).eq('planned_workout_id', plannedWorkoutId).order('started_at', { ascending: false }).limit(1).maybeSingle()
+  const result = await db.from('workout_sessions').select('id,status,started_at,completed_at,completed_sets,actual_duration_minutes,perceived_exertion,note,exercise_sessions(id,position,status,sets_completed,reps_completed,duration_seconds,exercise_id)').eq('user_id', userId).eq('planned_workout_id', plannedWorkoutId).order('started_at', { ascending: false }).limit(1).maybeSingle()
   throwOnError(result)
   return result.data
 }
 
 export async function setExerciseStatus(userId: string, exerciseSessionId: string, status: 'planned' | 'done' | 'skipped') {
-  const result = await client().from('exercise_sessions').update({ status }).eq('user_id', userId).eq('id', exerciseSessionId)
+  const db = client()
+  const current = await db.from('exercise_sessions').select('status').eq('user_id', userId).eq('id', exerciseSessionId).maybeSingle()
+  throwOnError(current)
+  const currentStatus = current.data?.status as 'planned' | 'done' | 'skipped' | undefined
+  if (!currentStatus || currentStatus === status || (currentStatus === 'done' && status !== 'done') || (status === 'skipped' && currentStatus !== 'planned')) return
+  const result = await db.from('exercise_sessions').update({ status }).eq('user_id', userId).eq('id', exerciseSessionId).eq('status', currentStatus)
+  throwOnError(result)
+}
+
+export async function setCompletedSets(userId: string, sessionId: string, completedSets: number) {
+  const result = await client().from('workout_sessions').update({ completed_sets: completedSets }).eq('user_id', userId).eq('id', sessionId).eq('status', 'in_progress')
   throwOnError(result)
 }
 

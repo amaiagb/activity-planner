@@ -17,11 +17,14 @@ import {
   saveResource,
   saveTemplate,
   setExerciseStatus,
+  setCompletedSets,
   toggleResourceFavorite,
   toggleTemplateFavorite,
   startWorkout,
   loadStandaloneWorkout,
 } from "./plannerData";
+import { applySeriesAction, canFinishWorkout, hydrateWorkoutSeries, plannedSetsFromExercises, resolvedCount } from "./workoutSeries";
+import type { WorkoutSeriesState } from "./workoutSeries";
 import type {
   PlannerContext,
   SavedResource,
@@ -1423,6 +1426,7 @@ type ActiveSession = {
   status: "in_progress" | "completed" | "skipped";
   started_at: string;
   completed_at: string | null;
+  completed_sets: number;
   actual_duration_minutes: number | null;
   perceived_exertion: number | null;
   note: string | null;
@@ -1437,6 +1441,7 @@ export function WorkoutPage() {
   const [context, setContext] = useState<PlannerContext | null>(null);
   const [workout, setWorkout] = useState<PlannedWorkout | null>(null);
   const [active, setActive] = useState<ActiveSession | null>(null);
+  const [series, setSeries] = useState<WorkoutSeriesState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
@@ -1452,7 +1457,6 @@ export function WorkoutPage() {
   const [templateName, setTemplateName] = useState("");
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [expandedExercisePosition, setExpandedExercisePosition] = useState<number | null>(null);
-  const [helpDismissed, setHelpDismissed] = useState(false);
   const [focusTarget, setFocusTarget] = useState<number | "finish" | null>(null);
   const doneButtonRefs = useRef<Record<number, HTMLButtonElement | null>>({});
   const finishButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -1466,7 +1470,9 @@ export function WorkoutPage() {
     ]);
     setContext(nextContext);
     setWorkout(nextWorkout);
-    setActive(nextSession as unknown as ActiveSession | null);
+    const nextActive = nextSession as unknown as ActiveSession | null;
+    setActive(nextActive);
+    setSeries((current) => current || (nextActive && nextWorkout ? hydrateWorkoutSeries(nextActive.completed_sets ?? 0, plannedSetsFromExercises(nextWorkout.exercises), nextActive.exercise_sessions) : null));
   }, [session, id]);
   useEffect(() => {
     let alive = true;
@@ -1488,6 +1494,7 @@ export function WorkoutPage() {
     setError(null);
     try {
       await startWorkout(session.user.id, workout);
+      setSeries(null);
       await reload();
     } catch (cause) {
       setError(
@@ -1499,40 +1506,39 @@ export function WorkoutPage() {
       setStarting(false);
     }
   }
-  async function markExercise(
-    exerciseSessionId: string,
-    status: "planned" | "done" | "skipped",
-  ) {
-    if (!session) return;
-    const currentPosition = active?.exercise_sessions.find((item) => item.id === exerciseSessionId)?.position;
-    const nextPosition = active?.exercise_sessions.find((item) => item.position !== currentPosition && item.status === "planned")?.position ?? null;
-    setHelpDismissed(true);
+  async function markExercise(exerciseSessionId: string, action: "done" | "skipped" | "undo") {
+    if (!session || !active || !series || finishing) return;
+    const result = applySeriesAction(series, { type: action, exerciseSessionId }, active.exercise_sessions);
+    const nextPosition = result.state.notice?.type === "series"
+      ? active.exercise_sessions.find((item) => result.state.current[item.id] === "planned")?.position ?? null
+      : active.exercise_sessions.find((item) => item.id !== exerciseSessionId && result.state.current[item.id] === "planned")?.position ?? null;
+    setFinishing(true);
+    setError(null);
     try {
-      await setExerciseStatus(session.user.id, exerciseSessionId, status);
-      await reload();
+      setSeries(result.state);
+      for (const operation of result.operations) {
+        if (operation.type === "exercise_status") await setExerciseStatus(session.user.id, operation.exerciseSessionId, operation.status);
+        else await setCompletedSets(session.user.id, active.id, operation.value);
+      }
+      setActive((current) => current ? { ...current, completed_sets: result.state.completedSets, exercise_sessions: current.exercise_sessions.map((item) => ({ ...item, status: result.state.persisted[item.id] })) } : current);
       setExpandedExercisePosition(nextPosition);
       setFocusTarget(nextPosition ?? "finish");
     } catch {
       setError("Could not save this exercise.");
+      setSeries(series);
+    } finally {
+      setFinishing(false);
     }
   }
-  const doneCount =
-    active?.exercise_sessions.filter((item) => item.status === "done").length ??
-    0;
-  const handledCount =
-    active?.exercise_sessions.filter((item) => item.status !== "planned")
-      .length ?? 0;
-  const allExercisesHandled =
-    Boolean(active?.exercise_sessions.length) &&
-    handledCount === active?.exercise_sessions.length;
+  const handledCount = series ? resolvedCount(series) : 0;
+  const canFinish = series ? canFinishWorkout(series) : false;
   useEffect(() => {
     if (!active) return;
-    if (active.exercise_sessions.some((item) => item.status !== "planned")) setHelpDismissed(true);
     setExpandedExercisePosition((current) => {
-      if (current !== null && active.exercise_sessions.some((item) => item.position === current && item.status === "planned")) return current;
-      return active.exercise_sessions.find((item) => item.status === "planned")?.position ?? null;
+      if (current !== null && active.exercise_sessions.some((item) => item.position === current && series?.current[item.id] === "planned")) return current;
+      return active.exercise_sessions.find((item) => series?.current[item.id] === "planned")?.position ?? null;
     });
-  }, [active]);
+  }, [active, series]);
   useEffect(() => {
     if (focusTarget === null) return;
     const frame = requestAnimationFrame(() => {
@@ -1659,6 +1665,7 @@ export function WorkoutPage() {
           <article className="card form-card workout-summary-card">
             <h2>{t(workout.name)}</h2>
             <p>{t("Planned duration:")} {workout.durationMinutes} {t("min")}</p>
+            {active && active.completed_sets > 0 && <p>{t("Series completed:")} {active.completed_sets}</p>}
             {active?.actual_duration_minutes != null && <p>{t("Actual duration:")} {active.actual_duration_minutes} {t("min")}</p>}
             {selectedEquipment.length > 0 && <p><strong>{t("Equipment used:")}</strong> {selectedEquipment.join(", ")}</p>}
             <div className="workout-summary-section">
@@ -1683,6 +1690,7 @@ export function WorkoutPage() {
 
   const progressTotal =
     active?.exercise_sessions.length ?? workout.exercises.length;
+  const seriesTotal = series?.visibleSeriesCount ?? plannedSetsFromExercises(workout.exercises);
   return (
     <section
       className="page-content planner-page workout-page"
@@ -1692,6 +1700,14 @@ export function WorkoutPage() {
         <UiIcon name="chevron-left" /> {t("Today")}
       </Link>
       <h1 id="workout-title">{t("Workout title")}</h1>
+      {active && series && <div className="workout-series-row"><strong>{t("Series")}</strong><ol className="workout-series-indicators" aria-label={t("Workout series")}>{Array.from({ length: seriesTotal }, (_, index) => {
+        const completed = index < series.completedSets;
+        const current = !series.finalized && index === series.completedSets;
+        const stateLabel = completed ? t("completed") : current ? t("in progress") : t("upcoming");
+        return <li key={index} className={completed ? "is-completed" : current ? "is-current" : "is-future"} aria-current={current ? "step" : undefined} aria-label={`${t("Series")} ${index + 1}, ${stateLabel}`}>{completed ? <UiIcon name="check" /> : index + 1}</li>;
+      })}</ol></div>}
+      {series?.notice?.type === "series" && <div className="workout-series-notice" role="status">{t("Series {completed} completed. Start series {next}.").replace("{completed}", String(series.notice.completed)).replace("{next}", String(series.notice.next))}</div>}
+      {series?.notice?.type === "workout" && <div className="workout-series-notice" role="status">{t("Workout complete! {completed} of {planned} series.").replace("{completed}", String(series.notice.completed)).replace("{planned}", String(series.notice.planned))}</div>}
       <div
         className="workout-progress"
         role="progressbar"
@@ -1709,9 +1725,6 @@ export function WorkoutPage() {
       <p className="progress-copy" role="status">
         {handledCount} {t("of")} {progressTotal}
       </p>
-      {active && !helpDismissed && handledCount === 0 && (
-        <aside className="workout-help" role="note"><UiIcon name="info" /><span>{t("Tap ")}<strong>{t("Done")}</strong>{t(" when you finish each exercise. If you will not do it, tap ")}<strong>{t("Skip")}</strong>{t(".")}</span></aside>
-      )}
       {!active ? (
         <article className="card form-card workout-start-card">
           <p>
@@ -1742,19 +1755,19 @@ export function WorkoutPage() {
               const guide = guides[exercise.slug];
               const copy = localizeExerciseCopy(exercise.slug, language);
               const displayName = copy?.name ?? guide?.name ?? exercise.name;
-              const status = row?.status ?? "planned";
-              const finished = status === "done" || status === "skipped";
+              const status = row ? (series?.current[row.id] ?? row.status) : "planned";
+              const finished = series?.finalized || status === "done" || status === "skipped";
               const isNow = status === "planned" && expandedExercisePosition === row?.position;
               const exerciseId = context.databaseExerciseIds[exercise.slug];
               return <li className={`exercise-execution-row${isNow ? " is-current" : ""}${finished ? " exercise-finished" : ""}`} key={`${exercise.id}-${index}`}>
                 <div className={`exercise-state-circle exercise-state-${status}`} aria-hidden="true">{status === "done" ? <UiIcon name="check" /> : status === "skipped" ? <UiIcon name="minus" /> : null}</div>
                 <span className="sr-only">{t(status === "done" ? "Done" : status === "skipped" ? "Skipped" : "Planned")}</span>
-                <button className="exercise-name-button" type="button" disabled={finished} aria-expanded={!finished ? isNow : undefined} onClick={() => { if (!finished) setExpandedExercisePosition(row?.position ?? index + 1); }}>
+                <button className="exercise-name-button" type="button" disabled={finished} aria-expanded={!finished ? isNow : undefined} onClick={() => { if (!finished) { setSeries((current) => current ? { ...current, notice: null } : current); setExpandedExercisePosition(row?.position ?? index + 1); } }}>
                   <strong>{displayName}</strong>
                   <span>{prescription(exercise.prescribedSets, exercise.prescribedReps, exercise.prescribedDurationSeconds, t)}{isNow && <em>{t("Now")}</em>}{status === "skipped" && <em className="exercise-skipped-tag">{t("Skipped")}</em>}</span>
                 </button>
-                {status === "planned" ? <button className="exercise-info-button" type="button" aria-label={`${t("View exercise")}: ${displayName}`} onClick={() => setExerciseModal(exerciseId ? { id: exerciseId, name: displayName } : null)}><UiIcon name="info" /></button> : <button className="exercise-undo-button" type="button" aria-label={`${t("Undo")}: ${displayName}`} onClick={() => row && void markExercise(row.id, "planned")} >{t("Undo")}</button>}
-                {isNow && row && <div className="exercise-expanded-actions"><button ref={(element) => { doneButtonRefs.current[row.position] = element; }} className="exercise-expanded-done" type="button" aria-label={`${t("Mark as done")}: ${displayName}`} onClick={() => void markExercise(row.id, "done")}><UiIcon name="check" />{t("Done")}</button><button className="exercise-expanded-skip" type="button" aria-label={`${t("Skip")}: ${displayName}`} onClick={() => void markExercise(row.id, "skipped")}>{t("Skip")}</button></div>}
+                {!series?.finalized && (status === "planned" ? <button className="exercise-info-button" type="button" disabled={finishing} aria-label={`${t("View exercise")}: ${displayName}`} onClick={() => setExerciseModal(exerciseId ? { id: exerciseId, name: displayName } : null)}><UiIcon name="info" /></button> : <button className="exercise-undo-button" type="button" disabled={finishing} aria-label={`${t("Undo")}: ${displayName}`} onClick={() => row && void markExercise(row.id, "undo")} >{t("Undo")}</button>)}
+                {!series?.finalized && isNow && row && <div className="exercise-expanded-actions"><button ref={(element) => { doneButtonRefs.current[row.position] = element; }} className="exercise-expanded-done" type="button" disabled={finishing} aria-label={`${t("Mark as done")}: ${displayName}`} onClick={() => void markExercise(row.id, "done")}><UiIcon name="check" />{t("Done")}</button><button className="exercise-expanded-skip" type="button" disabled={finishing} aria-label={`${t("Skip")}: ${displayName}`} onClick={() => void markExercise(row.id, "skipped")}>{t("Skip")}</button></div>}
               </li>;
             })}
           </ol>
@@ -1763,25 +1776,16 @@ export function WorkoutPage() {
               ref={finishButtonRef}
               className="button button-primary workout-finish-button"
               type="button"
-              disabled={!allExercisesHandled}
+              disabled={!canFinish || finishing}
               onClick={() => setFinishOpen(true)}
             >
-              {t("Complete workout")}
+              {t("Finish workout")}
             </button>
           )}
           {active.status === "in_progress" &&
-            !allExercisesHandled && (
+            !canFinish && (
               <p className="form-help" role="status">
-                {t("Mark or skip all exercises to complete.")}
-              </p>
-            )}
-          {active.status === "in_progress" &&
-            allExercisesHandled &&
-            doneCount === 0 && (
-              <p className="form-error" role="alert">
-                {t(
-                  "Mark at least one exercise as done to complete a training activity.",
-                )}
+                {t("Mark an exercise as done to finish.")}
               </p>
             )}
         </>
@@ -2019,14 +2023,13 @@ function instructionStepsForWorkout(value: string | null) {
 }
 
 function prescription(
-  sets: number | null,
+  _sets: number | null,
   reps: string | null,
   duration: number | null,
   t: (value: string) => string,
 ) {
   const parts = [
-    sets ? `${sets} ${t("sets")}` : null,
-    reps,
+    reps ? `${reps} ${t("repetitions")}` : null,
     duration ? `${duration} ${t("sec")}` : null,
   ].filter(Boolean);
   return parts.length ? parts.join(" · ") : t("Move at a comfortable pace");

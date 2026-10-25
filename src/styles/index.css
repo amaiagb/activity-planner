@@ -727,6 +727,14 @@ input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color
 .workout-page { max-width: 440px; }
 .workout-back-link { display: inline-flex; min-height: 44px; align-items: center; color: var(--color-ink); font-weight: 700; text-decoration: none; }
 .workout-page > h1 { max-width: 8ch; margin: 8px 0 18px; font-size: clamp(28px, 9vw, 34px); line-height: .98; }
+.workout-series-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; }
+.workout-series-row > strong { color: var(--color-muted); font-size: .8125rem; letter-spacing: .08em; text-transform: uppercase; }
+.workout-series-indicators { display: flex; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.workout-series-indicators li { display: grid; width: 40px; height: 40px; place-items: center; border: 2.5px solid var(--color-border); border-radius: 50%; color: var(--color-muted); font-size: 1rem; font-weight: 700; }
+.workout-series-indicators li.is-completed { border-color: var(--color-ink); background: var(--color-accent); color: var(--color-ink); }
+.workout-series-indicators li.is-current { border-color: var(--color-ink); color: var(--color-ink); }
+.workout-series-indicators .ui-icon { width: 18px; height: 18px; }
+.workout-series-notice { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; border-radius: 14px; background: var(--color-accent); padding: 12px 14px; color: var(--color-ink); font-size: .875rem; font-weight: 700; }
 .workout-progress { position: sticky; z-index: 3; top: 0; height: 10px; overflow: hidden; border-radius: 6px; background: var(--color-border); }
 .workout-progress > span { display: block; height: 100%; border: 1.5px solid var(--color-primary-ink); border-radius: inherit; background: var(--color-accent); transition: width .2s ease; }
 .workout-page > .progress-copy { margin: 7px 0 12px; padding: 0; background: transparent; text-align: right; }
